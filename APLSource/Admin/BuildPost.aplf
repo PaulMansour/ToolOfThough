@@ -1,0 +1,10 @@
+ BuildPost←{
+    ⍝ ⍵ ←→  Markdown
+    ⍝   ←→  HTML element
+     e←##.MD2HTML.Run ⍵
+     h←#.Rumba.HTML
+     d←h.NewHTMLElement'div'
+     d.class←'post'
+     d.Content,←e
+     d
+ }

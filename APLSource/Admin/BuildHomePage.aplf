@@ -1,0 +1,11 @@
+ BuildHomePage←{
+     h←#.Rumba.HTML
+     add←h.Add
+     d←h.NewHTMLDocument 0
+     _←d add'h1' 'Tool of Thought'
+     _←d add'h2' 'APL for the Practical Man'
+
+     p←BuildPost ##.Posts.First_Post
+     _←d add p
+     h.Compose d
+ }

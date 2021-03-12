@@ -1,7 +1,7 @@
  Run←{
-   ⍝ ⍵ ←→ Markdown
-   ⍝ ← ←→ HTML
-
-
-
+     ⍝ ⍵ ←→ Markdown v/v
+     ⍝ ← ←→ HTML
+     b←~⍵∊⊂''     ⍝ Blank rows
+     p←b⊆⍵        ⍝ Partition
+     Handle¨p     ⍝ Handle each
  }

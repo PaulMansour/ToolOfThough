@@ -1,0 +1,5 @@
+ CodeBlock←{
+     new←#.Rumba.HTML.NewHTMLElement
+     h←new 'pre
+
+ }
