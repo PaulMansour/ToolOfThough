@@ -1,0 +1,8 @@
+ BuildPostsPage←{
+     h←#.Rumba.HTML
+     d←BuildTemplate'Posts' 'Home/Posts' ⍝  #.Rumba.WebAdmin.BuildHomePage
+     m←d h.GetElementByType'main'
+     c←##.MarkDown.Parse'[Third Post](/Posts/Third_Post)' '' '[Second Post](/Posts/Second_Post])' '' '[First Post](/Posts/Posts/First_Post)'
+     m.Content←c
+     h.Compose d
+ }

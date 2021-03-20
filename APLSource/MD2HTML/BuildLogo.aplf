@@ -1,0 +1,33 @@
+ BuildLogo←{
+     l←⍺
+     h←#.Rumba.HTML
+     Add←h.Add
+     s←l Add'span'(,'T')
+     s.class←'logoletterleft logolettergreen'
+     s←l Add'span'(,'o')
+     s.class←'logoletterright logoletterblue'
+     s←l Add'span'(,'o')
+     s.class←'logoletterleft logoletterred'
+     s←l Add'span'(,'l')
+     s.class←'logoletterright logoletteryellow'
+     s←l Add'span'(,'O')
+     s.class←'logoletterleft logolettergreen'
+     s←l Add'span'(,'f')
+     s.class←'logoletterright logoletterblue'
+     s←l Add'span'(,'T')
+     s.class←'logoletterleft logoletterred'
+     s←l Add'span'(,'h')
+     s.class←'logoletterright logoletteryellow'
+     s←l Add'span'(,'o')
+     s.class←'logoletterleft logolettergreen'
+     s←l Add'span'(,'u')
+     s.class←'logoletterright logoletterblue'
+     s←l Add'span'(,'g')
+     s.class←'logoletterleft logoletterred'
+     s←l Add'span'(,'h')
+     s.class←'logoletterright logoletteryellow'
+     s←l Add'span'(,'t')
+     s.class←'logoletterleft logolettergreen'
+     _←l Add'p' 'APL for the Practical Man'
+     l
+ }

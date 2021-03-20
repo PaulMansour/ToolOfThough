@@ -1,0 +1,14 @@
+ BuildCSS←{
+     c←#.Rumba.CSS
+     p←c.variables 0
+     s←c.init p            ⍝ #.Rumba.CSS.variables
+     s,←c.header p
+     s,←c.logo p
+     s,←c.mainmenu p
+     s,←c.breadcrumbs p
+     s,←c.footer p
+     s,←ArticleCSS p
+     s,←TableCSS p
+     ⍝ s,←CodeCSS p
+     ∊c.Compose¨s
+ }

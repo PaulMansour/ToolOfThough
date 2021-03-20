@@ -1,0 +1,9 @@
+ BuildHomePage←{
+     ⍝ Build the home page (index.html)
+     h←#.Rumba.HTML
+     d←BuildTemplate'Home'(,'/') ⍝       #.Rumba.WebAdmin.BuildHomePage
+     m←d h.GetElementByType'main'
+     p←BuildPost¨##.Posts.(Third_Post Second_Post First_Post)
+     m.Content←p       ⍝ Array of content???? I must do this somewhere already!!!!!
+     h.Compose d
+ }

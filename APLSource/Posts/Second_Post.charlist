@@ -1,0 +1,14 @@
+# Second Post
+
+#### March 12, 2021
+
+This is the second post. Here is an interesting line of code
+from the inimitable ngn over at the APL Orchard:
+
+~~~
+r[x⍳k],←v
+~~~
+
+This bears further study for three reasons. I am always befuddled by modified assignent. I am 
+furhter befuddled when the fuction is not scalar. I am further befuddled by the indexing, and then even further by the fact there are repeated indices
+and the function is catenate. Ok that's four reasons.

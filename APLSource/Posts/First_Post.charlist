@@ -1,6 +1,6 @@
-# First Post
+# [First Post](/Posts/First_Post)
 
-### Posted 2/26/2021
+#### January 24, 2021
 
 This is the first post. First paragraph
 is spread across multiple lines.
@@ -8,7 +8,25 @@ Let's see how to add some APL code:
 
 ~~~
 f←{+\\⍺+⍳⍵} 
+⍝ Blank line ↓↓↓
+
+⍝ Blank line ↑↑↑
 g←{⌽⍋⍵}
 ~~~
 
-How do the symbols look?
+How do the symbols look? This is some inline code: `{(+⌿⍵)÷≢⍵}` How does it look?
+How about multiple lines of text with inline code like this `a←+/∧\\b`. Does it look ok? 
+
+This is a table:
+
+|Left|Center|Right|Code|
+|:===|:===:|===:|`:====|
+|Paul|1|$123.40|∧\\⍵|
+|Bob|123456|$100,000.45|⍱\\⍵|
+|Alexandra|2|$789.00|+/∧\\⍵|
+
+We need a way to specify 
+
+
+This is the last paragraph.
+

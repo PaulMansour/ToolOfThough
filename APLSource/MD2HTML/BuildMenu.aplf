@@ -1,0 +1,8 @@
+ BuildMenu←{
+     v←⊂'Home' '/'
+     v,←⊂'Posts' '/posts'
+     v,←⊂'Projects' '/projects'
+     v,←⊂'Links' '/links'
+     v,←⊂'About' '/about'
+     v
+ }

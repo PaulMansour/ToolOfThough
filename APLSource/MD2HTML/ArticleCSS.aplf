@@ -1,0 +1,75 @@
+ ArticleCSS←{
+     s←⊂{s←⊂'article'
+         s,←⊂'border-radius' '1.67rem'
+         s,←⊂'margin' '2rem'
+         s,←⊂'padding' '2rem'
+         ⍝ s,←⊂'display' 'inline-block'
+         s,←⊂'min-width' '35rem'
+         s,←⊂'max-width' '70rem'
+         ⍝ s,←⊂'float' 'left'
+         ⍝ s,←⊂'clear' 'left'
+         s,←⊂'background-color'⍵.VeryLightGray
+         s}⍵
+
+     s,←⊂{s←⊂'article>p'
+
+         s,←⊂'padding' '1rem 0 0 0'
+         s}⍵
+
+
+     s,←⊂{s←⊂'code'
+         ⍝ s,←⊂'margin' '2rem 0 2rem 0'
+         ⍝ s,←⊂'padding' '0 3rem'
+         s,←⊂'font-family' 'APL385 Unicode'
+         s,←⊂'font-size' '1.25em'
+         ⍝ s,←⊂'display' 'block'
+         ⍝ s,←⊂'font-weight' 'bold'
+         s}⍵
+
+     s,←⊂{s←⊂'.code'
+         s,←⊂'font-family' 'APL385 Unicode'
+         s,←⊂'font-size' '1.25em'
+         s}⍵
+
+
+
+     s,←⊂{s←⊂'pre'
+         s,←⊂'margin' '0'
+         s,←⊂'padding' '0'
+         s
+     }⍵
+
+     s,←⊂{s←⊂'pre>code'
+         s,←⊂'margin' '2rem 0 2rem 0'
+         ⍝ s,←⊂'padding' '0 3rem'
+         ⍝ s,←⊂'font-family' 'APL385 Unicode'
+         ⍝ s,←⊂'font-size' '1.25em'
+         s,←⊂'display' 'block'
+         ⍝ s,←⊂'font-weight' 'bold'
+         s}⍵
+
+
+
+
+
+      ⍝   s,←⊂'padding' '0'
+⍝
+⍝ s,←⊂'font-family' 'APL385 Unicode'
+⍝         ⍝ s,←⊂'font-size' '1.5em'
+⍝         ⍝ s,←⊂'font-weight' 'bold'
+         ⍝ s}⍵
+
+     s,←⊂{s←⊂'main'
+         s,←⊂'background-color'⍵.Gray
+         ⍝ s,←⊂'padding-bottom' '1em'
+         s}⍵
+
+     s,←⊂{s←⊂'h4'
+         s,←⊂'font-size' '.8em'
+         s}⍵
+
+
+
+
+     s
+ }

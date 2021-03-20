@@ -1,0 +1,20 @@
+ Table←{
+     H←#.Rumba.HTML
+     add←H.Add
+     v←(⍵≠'|')⊆¨⍵
+     f←1⊃v
+     b←'`'=⊃¨f
+     j←{2⊥1⌽⍵}¨':'=b↓¨1⊃v
+     c←'left' 'right' 'center'[j-1]
+     t←add'table'
+     th←t add'thead'
+     tr←th add'tr'
+     ch←tr∘add¨{'th'⍵}¨⊃v
+     ch.class←c
+     tb←t add'tbody'
+     br←{tb add'tr'}¨2↓v
+     m←2↓v
+     td←br{⍺ add¨{'td'(InLine ⍵)}¨⍵}¨m
+     td.class←⊂c,¨'' ' code'[b]
+     t
+ }

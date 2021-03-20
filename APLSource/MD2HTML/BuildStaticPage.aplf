@@ -1,0 +1,10 @@
+ BuildStaticPage←{
+     ⍝ ⍵ ←→ Markdown
+     ⍝ ← ←→ Complete HTML page
+     h←#.Rumba.HTML
+     d←BuildTemplate'Posts' 'Home/Posts' ⍝  #.Rumba.WebAdmin.BuildHomePage
+     m←d h.GetElementByType'main'
+     c←##.MarkDown.Parse ⍵
+     m.Content←c                         ⍝ "Add" Does not like an array of content ?????!!!!!!
+     h.Compose d
+ }

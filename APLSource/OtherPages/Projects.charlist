@@ -1,0 +1,23 @@
+# Projects
+
+## [Dado](http://www.github.com/the-carlisle-group/Dado)
+
+Dado is an acronymn for Dyalog APL Development Operations. It is used by the 
+Carlisle Group for project and dependency management, releasing new versions, etc.
+
+## [Hom](http://www.github.com/the-carlisle-group/TwoStep) 
+HTML contruction and composing, markdown to HTML conversion, CSS.  
+
+## [Rumba](http://www.github.com/the-carlisle-group/Rumba)
+
+Rumba is a web server.  Alias R
+
+## [XL2APL](http://www.github.com/the-carlisle-group/XL2APL)
+
+Reads Excel files in .xlsx format (XML) into APL. 
+                                                  
+## [Tool of Thought](http://www.github.com/paulmansour/toolofthought)
+
+The project that contains this site. This project depended on TwoStep.
+
+
