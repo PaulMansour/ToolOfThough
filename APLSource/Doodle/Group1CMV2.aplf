@@ -1,0 +1,13 @@
+ Group1CMV2←{
+     ⍝ Vintage Code for Char
+     i←⍵⍳⍵
+     g←⍋i             ⍝ Sort
+     s←i[g]           ⍝...
+     f←s≠¯1⌽s         ⍝ of each item in a sorted vec
+     f[⍳×⍴f]←1        ⍝ In case all indentical
+     pf←{⎕ML←0 ⋄ ⍺⊂⍵} ⍝ Partition function
+     p←f pf g         ⍝ Partition
+     u←f⌿s            ⍝ Uniques
+     u←↓⍵[u;]
+     u,[0.5]p         ⍝
+ }

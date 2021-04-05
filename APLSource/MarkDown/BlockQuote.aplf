@@ -1,0 +1,8 @@
+ BlockQuote←{
+     H←#.Rumba.HTML
+     add←H.Add
+     c←Parse 2↓¨⍵
+     q←add'blockquote'
+     q.Content←c
+     q
+ }

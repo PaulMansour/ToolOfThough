@@ -1,0 +1,71 @@
+DRAFT
+
+# [Modified Index Assignment with Catenate](/posts/modified-index-assignment-with-catenate)
+
+#### March 12, 2021
+
+Over on the APL Orhard xpqz writes:
+
+> Can anyone suggest a clever way of achieving the following "left join":
+> 
+> Given two vectors, the first a vector of char vecs, the second a vector of two-element vectors, group the second based on the first component, returning the second components per group, inserting the empty vectors for groups not present.
+> e.g
+> 
+> ~~~
+>       X←'one' 'two' 'three' 'four'
+>       Y←('one' 1)('one' 2)('three' 1)('four' 2)('four' 3)
+>       R←⎕←X f Y
+> ┌───┬┬─┬───┐
+> │1 2││1│2 3│
+> └───┴┴─┴───┘
+>       R≡(1 2)(,⍬)(,1)(2 3)
+> 1
+> ~~~
+
+Adam then answered:
+
+~~~
+(⊃¨{⊂1↓⊢/¨⍵}⌸⊢)(X,⍥⊂¨0),Y
+~~~
+
+
+And then ngn came up with:
+
+~~~
+K V←↓⍉↑Y
+R←⍬⍨¨X
+R[X⍳K],←V
+~~~
+
+There was no further discussion of performance.
+
+I found this last bit of code extremely intriguing. It's very elegant. 
+But it uses modified assignment which I always find midly confusing.
+It is further complicated in that the modified assignment is index assignment.
+And then the function involved
+is catenate, not a scalar function. It all combines for a very simply expression
+that is doing a whole lot a work, that stops me in my tracks. 
+
+~~~
+a←+1
+~~~
+
+~~~
+a←a+1 
+~~~
+
+~~~
+a[i]+←1
+a[i]←a[i]+1
+~~~
+
+a,←1
+a←a,1
+
+a[i],←1
+a[i]←a[i],1  //will it work, length error?
+
+
+r[x⍳k],←v
+~~~
+ 

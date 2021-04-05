@@ -6,6 +6,6 @@
      git←t∘⎕SE.Dado.RunGitCommand
      _←git'add --all'
      _←git'commit -m "Publish"'
-     _←git'push origin main'
+     _←git'push origin main --force'
      'Done'
  }

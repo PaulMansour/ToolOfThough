@@ -1,0 +1,6 @@
+ LeftJoin1←{
+     a←⍺
+     k v←⍵
+     u c←v{⍺ ⍵}⌸k
+     (c,⊂⍬)[u⍳a]
+ }

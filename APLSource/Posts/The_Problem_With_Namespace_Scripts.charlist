@@ -1,0 +1,109 @@
+# [The Problem with Namespace Scripts](/posts/the-problem-with-namespace-scripts)
+
+#### April 6, 2021
+
+In my list of [Dyalog APL Don'ts](/donts) I have ***Don't use namespace scripts***.
+Why? Namespace scripts are strange beasts. Like classes, they are a combination of 
+code and stuff that gets executed and who knows what else. It's even hard to talk
+about namespace scripts - you would thinks they would be scripts that define
+a namespace, but they define a namespace script, not a namespace. Maybe they are not
+really scripts at all.
+
+However, I would like to use namespace scripts to have a 
+[text file that represents an arbitrary namepace](/posts/building-namespace-scripts)
+or even an entire workspace.
+Unfortunately, this does not quite work for a number of reasons.
+
+Consider the following script:
+
+~~~
+:Namespace Parent
+      ParentFoo←{
+          Child1.Child1Foo ⍵
+      }
+    :Namespace Child1
+          Child1Foo←{
+              GrandChild.GrandChildFoo ⍵
+          }
+        :Namespace GrandChild
+              GrandChildFoo←{
+                  +/⍵
+              }
+        :EndNamespace
+    :EndNamespace
+    :Namespace Child2 
+          Child2Foo←{
+              GrandChild.GrandChildFoo ⍵
+          }
+    :EndNamespace
+:EndNamespace
+~~~
+
+Here we have a namespace, with two child namespaces, one of which has a child itself.
+All well and good. When this is fixed, however, references are injected 
+all over the place:
+
+~~~
+      Parent.GrandChild
+#.Parent.Child1.GrandChild
+      Parent.Child1.Child2
+#.Parent.Child2 
+~~~
+
+By inspection we can see that every namespace has a reference to it injected 
+into every sibling and direct ancestor (grandparent, great grandparent, etc.) 
+
+And indeed, the Dyalog documentation somewhat incompletely, and I think incorrectly,
+and definitely unclearly, states this as:
+
+> The names of Classes defined within a Namespace Script which are parents, children,
+> or siblings are visible both to one another and to code and expressions defined 
+> in the same script, regardless of the namespace hierarchy within it.
+> Names of Classes which are nieces or nephews and their descendants 
+> are however not visible.
+
+Classes rather than plain namespace scripts were probably the motivating factor
+to this design (See ***Don't use a naked `⎕NEW`***, another [APL Don't](/donts).)
+Regardless, the interpreter should not be injecting
+references to things when fixing. 
+
+I cannot imagine that anyone relies on this behavior, but a simple non-breaking fix 
+would be to allow some additional values as the left argument of `⎕FIX`, which already
+allows 0, 1 or 2. 
+
+I would propose that a value of 3 would fix the namespace as 1 does now,
+with the exception that is does no reference injection. Even more useful,
+and perhaps in addition or instead, a value of 4 would fix everthing, do no
+reference injection, and then ***disassociate the code from the script***. 
+In other words, after fixing the namespace script, the workspace contains 
+regular namespaces, not a namespace script.
+
+In addition, we should be able to specifiy the root, currently illegal,
+so an entire worksapce may be represented in a single file:
+
+~~~
+:Namespace #
+  ⎕IO←0 
+  ⎕ML←1
+    :Namespace Rumba
+        ...
+    :End
+    :Namespace XL2APL
+        ...
+    :EndNamespace
+:EndNamespace
+~~~
+
+A few other issues arise as well. 
+There are at least two conditions where a function that happily exists in a namespace
+is unhappy to be in a namespace script. First, if the function has unmatched quotes.
+Second, if the function has `:Implements Constructor`, but **not** `:Access Public`.
+The interpreter is happy to fix these functions all by themselves, but not within
+a namespace script. Thus the rules for fixing functions within a script are different
+and tighter than fixing normal functions in the workspace.
+
+With these enhancements and fixes to `⎕FIX`, namespace scripts can fulfill their proper purpose.
+
+
+
+             

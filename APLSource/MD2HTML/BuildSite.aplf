@@ -1,17 +1,26 @@
  BuildSite←{
+     _←⎕NUNTIE ⎕NNUMS
      d←##.AcreConfig.DistFolder
      _←3 ⎕NDELETE d
      _←3 ⎕MKDIR d,'posts'
-     write←{⍵ ⎕NPUT d,⍺}
-     _←'default.css'write BuildCSS 0
-     _←'index.html'write BuildHomePage 0
-     _←'posts.html'write BuildPostsPage 0
-     _←'projects.html'write BuildStaticPage ##.OtherPages.Projects
-     _←'about.html'write BuildStaticPage ##.OtherPages.About
-     _←'links.html'write BuildStaticPage ##.OtherPages.Links
-     n←'Third_Post' 'Second_Post' 'First_Post'
-     p←BuildPostPage¨##.Posts⍎¨n
-     fn←{d,'Posts/',⍵,'.html'}¨n
-     _←p ⎕NPUT¨fn
+     write←{⍵ ⎕NPUT d,⍺,'.html'}
+     _←'default.css'{⍵ ⎕NPUT d,⍺}BuildCSS 0
+     _←'CNAME'{⍵ ⎕NPUT d,⍺}'www.toolofthought.com'
+
+     n←{('DRAFT'∘≢¨⊃¨⍵)/⍵}##.Posts.(⍎¨⎕NL ¯2)
+
+     p←Sort BuildPostPage¨n
+     _←(1↓¨p.URL)write¨p.HTML
+     _←'posts'write BuildPostsPage p
+     _←'index'write BuildHomePage p
+     on←##.OtherPages.⎕NL ¯2
+     _←on write¨BuildStaticPage¨##.OtherPages⍎¨on
+
+⍝    _←'projects'write BuildStaticPage ##.OtherPages.Projects
+⍝    _←'about'write BuildStaticPage ##.OtherPages.About
+⍝    _←'links'write BuildStaticPage ##.OtherPages.Links
+⍝    _←'donts'write BuildStaticPage ##.OtherPages.Donts
+⍝
+     ⎕←'#.ToolOfThought.MD2HTML.Run 0'
      ']open ',d,'index.html'
  }

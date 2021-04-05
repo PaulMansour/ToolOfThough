@@ -12,8 +12,7 @@
      l←hd h.Add'link'
      l.rel←'stylesheet'
      l.type←'text/css'
-     ⍝ l.href←'/default.css'
-     l.href←'default.css'
+     l.href←'/default.css'       ⍝ This works over web site
 
 
      l←d h.GetElementById'logo'

@@ -4,7 +4,8 @@
      h←#.Rumba.HTML
      d←BuildTemplate'Home' 'Posts/Post' ⍝       #.Rumba.WebAdmin.BuildHomePage
      m←d h.GetElementByType'main'
-     p←BuildPost ⍵
-     m.Content←,p
-     h.Compose d
+     s←BuildPost ⍵
+     m.Content←,s.Article
+     s.HTML←h.Compose d
+     s
  }

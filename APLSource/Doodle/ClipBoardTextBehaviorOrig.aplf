@@ -1,0 +1,13 @@
+ ClipBoardTextBehaviorOrig←{
+     _←'cb'⎕WC'ClipBoard'
+     t←∊'One' 'Two' 'Three',¨⎕UCS 13
+     cb.Text←t
+     ⎕←'Newline Delimited: ',⍕cb.Text≡t
+     t←⊃'One' 'Two' 'Three'
+     cb.Text←t
+     ⎕←'Matrix: ',⍕cb.Text≡t
+     t←'One' 'Two' 'Three'
+     cb.Text←t
+     ⎕←'Vector of vectors: ',⍕cb.Text≡t
+     0
+ }

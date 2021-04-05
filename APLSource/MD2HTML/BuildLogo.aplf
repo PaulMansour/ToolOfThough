@@ -28,6 +28,6 @@
      s.class←'logoletterright logoletteryellow'
      s←l Add'span'(,'t')
      s.class←'logoletterleft logolettergreen'
-     _←l Add'p' 'APL for the Practical Man'
+     _←l Add'p' '<em>APL</em> for the Practical Man'
      l
  }

@@ -3,48 +3,63 @@
          s,←⊂'border-radius' '1.67rem'
          s,←⊂'margin' '2rem'
          s,←⊂'padding' '2rem'
-         ⍝ s,←⊂'display' 'inline-block'
          s,←⊂'min-width' '35rem'
          s,←⊂'max-width' '70rem'
-         ⍝ s,←⊂'float' 'left'
-         ⍝ s,←⊂'clear' 'left'
-         s,←⊂'background-color'⍵.VeryLightGray
+         s,←⊂'background-color'⍵.White
          s}⍵
 
-     s,←⊂{s←⊂'article>p'
-
-         s,←⊂'padding' '1rem 0 0 0'
+     s,←⊂{s←⊂'main p'
+         s,←⊂'padding-top' '.5em'
+         s,←⊂'padding-bottom' '.25em'
          s}⍵
+
+     s,←⊂{s←⊂'blockquote'
+         s,←⊂'border-left' '.5em solid #ccc'
+         s,←⊂'margin' '2em 6em'
+         s,←⊂'padding' '1em 2em'
+         s,←⊂'background-color'⍵.NinetyPercentWhite
+         ⍝ s,←⊂'border-radius' '1.67rem'
+         s}⍵
+
+
 
 
      s,←⊂{s←⊂'code'
          ⍝ s,←⊂'margin' '2rem 0 2rem 0'
          ⍝ s,←⊂'padding' '0 3rem'
          s,←⊂'font-family' 'APL385 Unicode'
-         s,←⊂'font-size' '1.25em'
+         ⍝ s,←⊂'font-size' '1.2em'
          ⍝ s,←⊂'display' 'block'
          ⍝ s,←⊂'font-weight' 'bold'
          s}⍵
 
      s,←⊂{s←⊂'.code'
          s,←⊂'font-family' 'APL385 Unicode'
-         s,←⊂'font-size' '1.25em'
+         ⍝ s,←⊂'font-size' '1em'
          s}⍵
 
 
-
-     s,←⊂{s←⊂'pre'
-         s,←⊂'margin' '0'
-         s,←⊂'padding' '0'
-         s
-     }⍵
+    ⍝
+⍝     s,←⊂{s←⊂'pre'
+⍝         s,←⊂'margin-left' '4.5rem'
+⍝         s,←⊂'padding' '0'
+⍝         s
+⍝     }⍵
 
      s,←⊂{s←⊂'pre>code'
-         s,←⊂'margin' '2rem 0 2rem 0'
+         ⍝ s,←⊂'margin' '1rem 2rem 1rem 0'
          ⍝ s,←⊂'padding' '0 3rem'
          ⍝ s,←⊂'font-family' 'APL385 Unicode'
          ⍝ s,←⊂'font-size' '1.25em'
          s,←⊂'display' 'block'
+
+         ⍝ s,←⊂'margin' '2em'
+         ⍝ s,←⊂'padding' '1em 2em'
+         s,←⊂'background-color'⍵.NinetyPercentWhite
+         s,←⊂'border-radius' '1.67rem'
+         s,←⊂'margin' '2em 6em'
+         s,←⊂'padding' '2em 2em'
+
          ⍝ s,←⊂'font-weight' 'bold'
          s}⍵
 
@@ -60,7 +75,7 @@
          ⍝ s}⍵
 
      s,←⊂{s←⊂'main'
-         s,←⊂'background-color'⍵.Gray
+         ⍝ s,←⊂'background-color'⍵.VeryDarkGray
          ⍝ s,←⊂'padding-bottom' '1em'
          s}⍵
 
@@ -69,6 +84,45 @@
          s}⍵
 
 
+     s,←⊂{
+         s←⊂'h1'
+         s,←⊂'font-family' 'Helvetica'
+         s,←⊂'font-size' '2em'
+         s,←⊂'color'⍵.Black
+         s,←⊂'margin-bottom' '.25em'
+         s
+     }⍵
+
+     s,←⊂{
+         s←⊂'h2'
+         s,←⊂'font-family' 'Helvetica'
+         s,←⊂'font-size' '1.25em'
+         s,←⊂'margin-top' '2em'
+         ⍝ s,←⊂'margin-bottom' '.1em'
+         s
+     }⍵
+
+     s,←⊂{
+         s←⊂'h1>a'
+         s,←⊂'color'⍵.DarkGray
+         s,←⊂'text-decoration' 'none'
+         s
+     }⍵
+
+     s,←⊂{
+         s←⊂'h2>a'
+         s,←⊂'color'⍵.Black
+         s,←⊂'text-decoration' 'none'
+         s
+     }⍵
+     s,←⊂{
+         s←⊂'p>a'
+         s,←⊂'color' 'blue'   ⍝variables
+         s,←⊂'text-decoration' 'none'
+         s,←⊂'font-style' 'italic'
+         s,←⊂'font-weight' 'bold'
+         s
+     }⍵
 
 
      s

@@ -1,0 +1,18 @@
+:Namespace Top
+
+    ⍝ Bottom←5 
+      TopFoo←{
+          Middle.MiddleFoo ⍵
+      }
+    :Namespace Middle
+          MiddleFoo←{
+              Bottom.BottomFoo ⍵
+          }
+        :Namespace Bottom
+              BottomFoo←{
+                  +/⍵
+              }
+        :EndNamespace
+    :EndNamespace
+:EndNamespace
+

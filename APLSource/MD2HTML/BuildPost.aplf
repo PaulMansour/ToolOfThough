@@ -1,9 +1,15 @@
  BuildPost←{
      ⍝ ⍵ ←→ Markdown v/v
-     ⍝ ← ←→ HTML object
-     h←#.Rumba.HTML
+     ⍝ ← ←→ stuff
+     H←#.Rumba.HTML
+     r←⎕NS''
      c←##.MarkDown.Parse ⍵
-     a←h.NewHTMLElement'article'
-     a.Content←c      ⍝ "Add" Does not like an array of content ?????!!!!!!
-     a
+     t u←{(⍵≠'>')⊆⍵}⊃(⊃c).Content
+     r.URL←9↓¯1↓t
+     r.Title←¯3↓u
+     r.Date←⊃(1⊃c).Content
+     a←H.NewHTMLElement'article'
+     a.Content←c
+     r.Article←a
+     r
  }

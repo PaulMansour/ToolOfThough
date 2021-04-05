@@ -2,6 +2,7 @@
      v←⊂'Home' '/'
      v,←⊂'Posts' '/posts'
      v,←⊂'Projects' '/projects'
+     v,←⊂'Don''ts' '/donts'
      v,←⊂'Links' '/links'
      v,←⊂'About' '/about'
      v

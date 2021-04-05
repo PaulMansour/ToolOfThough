@@ -1,0 +1,6 @@
+ InLineCode←{
+     new←#.Rumba.HTML.NewHTMLElement
+     j←('`(.*?)`'⎕S 0 1)⍵
+     p←(+\(⍳≢⍵)∊0,∊+\¨j)⊆⍵
+     {'`'=⊃⍵:new'code'(¯1↓1↓⍵) ⋄ ⍵}¨p
+ }

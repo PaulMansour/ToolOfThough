@@ -1,0 +1,25 @@
+ CopyBug←{
+   ⍝ Source Folder
+   ⍝ Target Folder
+
+
+     s←'c:\ports\Copy Bug\ToolOfThought\*'
+     t←'c:\ports\Copy Bug\PaulMansour.github.io\'
+     op←('Wildcard' 1)('IfExists' 'Replace')
+     n←t(⎕NCOPY⍠op)s
+
+     fn←'donts.html'
+     sf←(¯1↓s),fn
+     tf←t,fn
+
+     (sd td)←0⊃¨⎕NGET¨sf tf
+     t1←sd≡td
+     t2←sd≡(≢sd)↑td
+
+     t1 t2
+
+
+
+
+
+ }

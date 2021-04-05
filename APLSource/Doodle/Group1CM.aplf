@@ -1,0 +1,11 @@
+ Group1CM←{
+     ⍝ Vintage Code for Char
+     g←⍋⍵             ⍝ Sort
+     s←⍵[g;]          ⍝...
+     f←∨/s≠¯1⊖s       ⍝ of each item in a sorted vec
+     f[⍳×⍴f]←1        ⍝ In case all indentical
+     pf←{⎕ML←0 ⋄ ⍺⊂⍵} ⍝ Partition function
+     p←f pf g         ⍝ Partition
+     u←↓f⌿s           ⍝ Uniques
+     u,[0.5]p         ⍝
+ }

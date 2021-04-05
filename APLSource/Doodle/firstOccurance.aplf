@@ -1,0 +1,7 @@
+ firstOccurance←{
+     g←⍋⍵
+     s←⍵[g]
+     f←s≠¯1⌽s
+     f[⍳×⍴f]←1
+     f[⍋g]
+ }

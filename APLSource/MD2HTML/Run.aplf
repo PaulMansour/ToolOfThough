@@ -1,7 +1,10 @@
  Run←{
-     ⍝ ⍵ ←→ Markdown v/v
-     ⍝ ← ←→ HTML
-     b←~⍵∊⊂''     ⍝ Blank rows
-     p←b⊆⍵        ⍝ Partition
-     Handle¨p     ⍝ Handle each
+     f←¯1↓##.AcreConfig.DistFolder
+     #.Rumba.Core.Start f
+
+
+     ⍝
+⍝     s←#.Rumba.Core.NewServer f
+⍝     s.Name←'ToolOfThought'
+⍝     s #.Rumba.Core.Start''
  }

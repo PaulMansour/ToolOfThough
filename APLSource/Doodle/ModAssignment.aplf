@@ -1,0 +1,59 @@
+ ModAssignment←{
+
+
+
+
+
+
+     a←⍳10
+     a+←1
+
+     b←⍳10
+     b←b+1
+
+     ⎕←a≡b
+
+     a←10⍴0
+     a[3 3]+←1
+
+     b←10⍴0
+     b[3 3]←b[3 3]+1
+
+     c←10⍴0
+     c[3 3]+←1 2
+
+     d←10⍴0
+     _←1 2{d[⍵]←d[⍵]+⍺}¨3 3
+
+     f←+             ⍝ Function f
+     a←10⍴0          ⍝ Array a
+     i←2 3 3 3 2     ⍝ (repeated!) indices i
+     v←1 2 3 4 5     ⍝ correpsoning values to i that are right arg to f
+
+     mia←f{
+
+
+         {a[i]←a[i]⍺⍺ v}
+
+     }
+
+
+     v←⍳10
+     v[3],←99  ⍝ Works
+
+     x←⍳10
+     ⍝ x[3]←x[3],99   ⍝ Not same, as will fail with length error
+     x[3]←⊂(⊃x[3]),99
+
+
+     v[3],←99 95 ⍝ Fails length
+
+
+     v[3],←⊂99 95 ⍝ Works
+
+     v[3 3],←99 95 ⍝ and this is same
+
+     v[3 3]←v[3 3],¨99 95
+
+     'Done'
+ }

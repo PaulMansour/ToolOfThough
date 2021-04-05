@@ -1,8 +1,14 @@
  BuildPostsPage←{
+     ⍝ ⍵ ←→ Post space
      h←#.Rumba.HTML
-     d←BuildTemplate'Posts' 'Home/Posts' ⍝  #.Rumba.WebAdmin.BuildHomePage
+     d←BuildTemplate'Posts' 'Home/Posts'
      m←d h.GetElementByType'main'
-     c←##.MarkDown.Parse'[Third Post](/Posts/Third_Post)' '' '[Second Post](/Posts/Second_Post])' '' '[First Post](/Posts/Posts/First_Post)'
-     m.Content←c
+     _←m h.Add'h1' 'Posts'
+     n←⍵.Title
+     h2←h.NewHTMLElement¨{'h2'}¨n
+     a←h2 h.Add¨{'a'⍵}¨n
+     a.href←⍵.URL
+     h4←h.NewHTMLElement¨{'h4'⍵}¨⍵.Date
+     m.Content,←,⍉↑h2 h4
      h.Compose d
  }

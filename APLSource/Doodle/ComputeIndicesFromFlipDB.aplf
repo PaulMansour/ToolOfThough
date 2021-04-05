@@ -1,0 +1,20 @@
+ ComputeIndicesFromFlipDB←{     ⍝ Compute group indices into ints ⍵
+
+     first←{           ⍝ Flag first occurance
+         f←⍵≠¯1⌽⍵      ⍝ of each item in a sorted vec
+         f[⍳×⍴f]←1     ⍝ In case all indentical
+         f             ⍝
+     }
+
+
+
+     g←⍋⍵             ⍝ Sort
+     s←⍵[g]           ⍝...
+     f←##.Core.first s⍝ Flag first
+     pf←{⎕ML←0 ⋄ ⍺⊂⍵} ⍝ Partition function
+     p←f pf g         ⍝ Partition
+     u←f/s            ⍝ Uniques
+     ⍺←u              ⍝ Default
+     (⍺≡u)∨⍺≡⍬:p u    ⍝ Parts, uniques (⍺≡⍬ for non ranged)
+     ((p,⊂⍬)[u⍳⍺])⍺   ⍝ Corresponding with given uniques
+ }

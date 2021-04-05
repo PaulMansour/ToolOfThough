@@ -1,0 +1,29 @@
+:Namespace Other
+     OtherFoo←{⍺+⍵}
+:EndNamespace 
+
+RandomFoo←{+/⍳⍵}
+
+:Namespace Parent2
+     ParentFoo←{
+          Child1.Child1Foo ⍵
+      }
+    :Namespace Child1
+          Child1Foo←{
+              GrandChild.GrandChildFoo ⍵
+          }
+        :Namespace GrandChild
+              GrandChildFoo←{
+                  +/⍵
+              }
+        :EndNamespace
+    :EndNamespace
+    :Namespace Child2 
+          Child2Foo←{
+              GrandChild.GrandChildFoo ⍵
+          }
+    :EndNamespace
+:EndNamespace
+
+
+
