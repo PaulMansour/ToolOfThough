@@ -1,0 +1,6 @@
+ OnCellMove←{
+     ⎕←⍵
+     g←⊃⍵
+     g.CurCell←g.CurCell
+     1
+ }

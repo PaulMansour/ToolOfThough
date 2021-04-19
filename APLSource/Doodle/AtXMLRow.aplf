@@ -1,0 +1,11 @@
+ AtXMLRow←{
+     ⍝ ⍺ ←→ Parent
+     ⍝ ⍵ ←→ Row from XML
+     ⍝ MOST BASIC THING TO DO
+     s←⎕NS''         ⍝ Make a space
+     s.Type←0⊃⍵      ⍝ Type
+     s.Content←⍬     ⍝ Init the content
+     ⍺=0:s           ⍝ At root
+     ⍺.Content,←s    ⍝ Add to content of parent
+     s
+ }

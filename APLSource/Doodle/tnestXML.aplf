@@ -1,0 +1,9 @@
+ tnestXML←{                  ⍝ Array from TreeView style tree.
+     ⍺←0                     ⍝ No parent
+     d i←⍵                   ⍝ depth and items vectors.
+     0=≢d:⍺                  ⍝ Nothing to do
+     b←d=0                   ⍝
+     p←⍺ AtXMLRow¨b/i        ⍝ Parents
+     ds is←{1↓¨b⊂⍵}¨⍵        ⍝ sub treeviews.
+     p⊣p ∇¨↓⍉↑(ds-1)is       ⍝ joined nested subtrees.
+ }

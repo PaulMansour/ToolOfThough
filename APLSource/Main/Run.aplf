@@ -1,0 +1,4 @@
+ Run←{
+     f←¯1↓##.AcreConfig.DistFolder
+     #.Rumba.Core.Start f
+ }

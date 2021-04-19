@@ -1,9 +1,7 @@
  Code←{
      nl←⊂⎕UCS 13 10
      c←⊃,/nl,¨⍨⍵~⊂'~~~'
-     new←#.Rumba.HTML.NewHTMLElement
-     add←#.Rumba.HTML.Add
-     h←new'pre'
-     _←h new'code'c
+     h←H.New'pre'
+     _←h H.New'code'c
      h
  }

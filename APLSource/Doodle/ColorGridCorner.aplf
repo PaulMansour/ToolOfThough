@@ -1,0 +1,14 @@
+ ColorGridCorner←{
+     ⍝ ⍺ ←→ Grid
+     ⍝ ⍵ ←→ Color
+     g c←⍺ ⍵
+     g.TitleWidth≡0:0
+     g.TitleHeight≡0:0
+     s←⍎'ulC'g.##.⎕WC'Static'
+     s.Posn←g.Posn
+     s.Size←g.TitleHeight,g.TitleWidth
+     s.Attach←4⍴'Top' 'Left'
+     s.BCol←c
+     s.Active←0
+     0
+ }

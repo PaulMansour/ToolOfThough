@@ -1,0 +1,10 @@
+ BuildPostPage←{
+     ⍝ ⍵ ←→ MarkDown
+     ⍝   ←→ Complete HTML Page
+     d←BuildTemplate 0
+     m←⊃d H.ElementsWhere'Type' 'main'
+     s←BuildPost ⍵
+     m.Content←,s.Article
+     s.HTML←H.DOM2HTML d
+     s
+ }

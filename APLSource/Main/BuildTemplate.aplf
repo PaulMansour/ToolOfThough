@@ -1,0 +1,16 @@
+ BuildTemplate←{
+     p←⎕NS''
+     p.Title←'Tool of Thought'
+     p.Subtitle←'APL for the Practical Man'
+     p.Menu←{
+         m←⊂'Home' '/'
+         m,←⊂'Posts' '/posts'
+         m,←⊂'Projects' '/projects'
+         m,←⊂'Don''ts' '/donts'
+         m,←⊂'Links' '/links'
+         m,←⊂'About' '/about'
+         m
+     }0
+     p.Footer←'Copyright 2021 Paul S. Mansour'
+     H.NewSimpleSiteTemplate p
+ }

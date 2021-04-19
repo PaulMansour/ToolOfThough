@@ -1,0 +1,24 @@
+:Namespace MyApp
+
+ :Namespace Package1
+   foo1←{+/⍵}
+ 
+   :Namespace Sub1
+      subfoo1←{⍵}
+   :EndNamespace
+ 
+ :EndNamespace
+ 
+ 
+ :Namespace Package2
+   foo2←{⍺+⍵}
+ :EndNamespace 
+
+ ⍝ Code to inject
+   
+   ⍝  Package2.Package1←Package1
+   Package1.Sub1.Package2←Package2
+
+:EndNamespace 
+
+

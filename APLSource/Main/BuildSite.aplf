@@ -1,0 +1,18 @@
+ BuildSite←{
+     _←⎕NUNTIE ⎕NNUMS
+     d←##.AcreConfig.DistFolder
+     _←3 ⎕NDELETE d
+     _←3 ⎕MKDIR d,'posts'
+     write←{t←(⎕UCS 13)(≠⊆⊢)⍵ ⋄ (⊂t)⎕NPUT d,⍺,'.html'}
+     _←'ThorntonMelon.css'{⍵ ⎕NPUT d,⍺}H.BuildThorntonMelonCSS 0
+     _←'CNAME'{⍵ ⎕NPUT d,⍺}'www.toolofthought.com'
+     n←{('DRAFT'∘≢¨⊃¨⍵)/⍵}##.Posts.(⍎¨⎕NL ¯2)
+     p←Sort BuildPostPage¨n
+     _←(1↓¨p.URL)write¨p.HTML
+     _←'posts'write BuildPostsPage p
+     _←'index'write BuildHomePage p
+     on←##.OtherPages.⎕NL ¯2
+     _←on write¨BuildStaticPage¨##.OtherPages⍎¨on
+     ⎕←'#.ToolOfThought.Main.Run 0'
+     ']open ',d
+ }

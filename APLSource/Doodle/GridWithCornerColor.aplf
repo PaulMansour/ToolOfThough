@@ -1,0 +1,10 @@
+ GridWithCornerColor←{
+     _←'f'⎕WC'form'('Coord' 'Pixel')
+     _←'f.g'⎕WC'Grid'
+     f.g.Attach←4⍴'Top' 'Left'
+     f.g.Values←10 10⍴⍳100
+     f.g.TitleHeight←20
+     f.g.TitleWidth←100
+     _←f.g ColorGridCorner ¯16
+     f
+ }

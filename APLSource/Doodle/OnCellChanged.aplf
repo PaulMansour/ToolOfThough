@@ -1,0 +1,4 @@
+ OnCellChanged←{
+     ⎕←⍵
+     1
+ }

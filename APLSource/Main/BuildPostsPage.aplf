@@ -1,0 +1,12 @@
+ BuildPostsPage←{
+     ⍝ ⍵ ←→ Post space
+     d←BuildTemplate 0
+     m←⊃d H.ElementsWhere'Type' 'main'
+     _←m H.New'h1' 'Posts'
+     n←⍵.Title
+     h2←H.New¨{'h2'}¨n
+     a←h2 H.NewLink¨n{⍺ ⍵}¨⍵.URL
+     h4←H.New¨{'p'⍵}¨⍵.Date
+     m.Content,←,⍉↑h2 h4
+     H.DOM2HTML d
+ }

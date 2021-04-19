@@ -1,0 +1,10 @@
+ travByEach←{
+
+              ⍝ trav
+     accm
+
+     subs ⍵
+     0=≢subs:⍺ accm ⍵
+     accm ∇¨subs ⍵      ⍝ ∇¨⍵⍵ ⍵
+     #.Rumba.HTML.Compose
+ }

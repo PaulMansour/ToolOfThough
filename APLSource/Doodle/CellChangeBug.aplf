@@ -1,0 +1,15 @@
+ CellChangeBug←{
+
+     _←'f'⎕WC'Form'
+     _←'f.g'⎕WC'Grid'('Size' 100 100)('Posn' 0 0)
+     d←4 3
+     f.g.Values←d⍴⊂'abcd'
+     e←'f.g.e'⎕WC'Edit'
+     f.g.Input←e
+     f.g.CellTypes←d⍴0
+     f.g.onCellChange←'OnCellChange'
+     f.g.onCellChanged←'OnCellChanged'
+     f.g.onCellMove←'OnCellMove'
+     f
+
+ }

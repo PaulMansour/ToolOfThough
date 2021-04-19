@@ -1,5 +1,4 @@
  Paragraph←{
      l←1↓⊃,/' ',¨⍵
-     new←#.Rumba.HTML.NewHTMLElement
-     new'p'(InLine l)
+     H.New'p'(InLine l)
  }

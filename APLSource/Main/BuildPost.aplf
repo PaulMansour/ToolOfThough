@@ -1,0 +1,15 @@
+ BuildPost←{
+     ⍝ ⍵ ←→ Markdown v/v
+     ⍝ ← ←→ stuff
+     r←⎕NS''
+     c←##.MarkDown.Parse ⍵
+     t←1⊃c
+     t.Type←'time'
+     a←⊃(⊃c).Content
+     r.URL←a.href
+     r.Title←∊a.Content
+     r.Date←⊃(1⊃c).Content
+     h←H.New'header'(2↑c)
+     r.Article←H.New'article'(h,2↓c)
+     r
+ }

@@ -1,0 +1,9 @@
+ XML2DOM←{
+
+     m←⎕XML HTMLTableExample 0
+
+     d←m[;0]          ⍝ Depth
+     v←↓0 1↓m         ⍝ Values
+     r←tnestXML d v       ⍝    tnest2
+     ⊃r
+ }

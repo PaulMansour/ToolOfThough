@@ -1,15 +1,9 @@
- InLineV2←{
+ InLine_OLD←{
      ⍝ ⍵ ←→ MarkDown line
-     ⍝
+     ⍵
+
      r←⍵
      r←('\[([^\[]+)\]\(([^\)]+)\)'⎕R'<a href="\2">\1</a>')r
-
-
-
-
-
-
-
      r←('(\*\*\*)(.*?)\1'⎕R'<strong><em>\2</em></strong>')r
      r←('(\*\*)(.*?)\1'⎕R'<strong>\2</strong>')r
      r←('(\*)(.*?)\1'⎕R'<em>\2</em>')r

@@ -1,6 +1,5 @@
  Header←{
      l←1↓⊃,/' ',¨⍵
-     new←#.Rumba.HTML.NewHTMLElement
      n←+/∧\'#'=l
-     new('h',⍕n)(InLine l↓⍨n+1)
+     H.New('h',⍕n)(InLine l↓⍨n+1)
  }

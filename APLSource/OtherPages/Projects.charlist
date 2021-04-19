@@ -5,6 +5,11 @@
 Dado is an acronymn for Dyalog APL Development Operations. It is used by the 
 Carlisle Group for project and dependency management, releasing new versions, etc.
 
+## [HTML](http://www.github.com/the-carlisle-group/HTML)
+
+HTML generation, and Markdown to HTML conversion. Go from DOM to HTML and back.
+Used by this site to convert Markdown to HTML.
+
 ## [Rumba](http://www.github.com/the-carlisle-group/Rumba)
 
 A Web server. 

@@ -1,6 +1,6 @@
  BuildTemplate←{
      pn pu←⍵
-     h←#.Rumba.HTML     ⍝ #.Rumba.HTML.NewTemplate
+     h←#.Rumba.HTML      ⍝ #.Rumba.HTML.NewTemplate
      p←⎕NS''
      p.URL←pu
      p.Menu←BuildMenu 0  ⍝ #.Rumba.WebAdmin.BuildMenu

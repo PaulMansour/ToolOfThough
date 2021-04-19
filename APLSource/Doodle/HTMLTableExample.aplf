@@ -1,0 +1,14 @@
+ HTMLTableExample←{
+     ⍝ Building an HTML Table
+     ⍝ ← Complete HTML Doc.
+     h←#.Rumba.HTML
+     c←⎕NS¨3⍴⊂''
+     c.HeaderValue←'ColOne' 'ColTwo' 'ColThree'
+     c.BodyValues←('One' 'Two' 'Three')('Four' 'Five' 'Six')('1' '100' '1,000')
+     c.Class←'tc' 'tc' 'nc'
+     t←h.NewTable c
+     d←h.NewHTMLDocument 0
+     _←d h.Add t
+     _←d h.Add'p'
+     h.Compose d
+ }

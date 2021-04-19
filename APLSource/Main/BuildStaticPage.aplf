@@ -1,0 +1,9 @@
+ BuildStaticPage←{
+     ⍝ ⍵ ←→ Markdown
+     ⍝ ← ←→ Complete HTML page
+     d←BuildTemplate 0
+     m←⊃d H.ElementsWhere'Type' 'main'
+     c←##.MarkDown.Parse ⍵
+     m.Content←c
+     H.DOM2HTML d
+ }

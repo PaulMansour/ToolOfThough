@@ -1,0 +1,4 @@
+ OnCellChange←{
+     ⎕←⍵
+     (4↑⍵),⊂'blah'
+ }

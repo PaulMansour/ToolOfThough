@@ -1,0 +1,23 @@
+ AtXMLNode←{
+   ⍝ ⍵ ←→ Row from XML
+   ⍝ ⍺ ←→ Parent
+     :If 0=≢0⊃⍵      ⍝ Not a new element
+     s←⎕NS''
+     s.Type←''
+     s.Text←1⊃⍵
+     ⍺.Content,←s    ⍝ Add to parent content
+     ⍬  ⍝ Maybe?
+     :ElseIf         ⍝ new element
+     s←⎕NS''         ⍝ Make a space
+     s.Type←0⊃⍵      ⍝ Type
+     s.class←'blah'  ⍝ set attributes from 2⊃⍵
+     s.Content←⍬
+     ⍺.Content,←s
+     0=≢1⊃⍵:         ⍝ Done
+     c←⎕NS''
+     c.Type←''
+     c.Text←1⊃⍵
+     ⍺.Content,←c    ⍝ Add to to the content of parent
+
+     :EndIf
+ }
