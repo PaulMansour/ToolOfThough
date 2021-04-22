@@ -3,7 +3,7 @@
      ⍝ ← ←→ Complete HTML page
      d←BuildTemplate 0
      m←⊃d H.ElementsWhere'Type' 'main'
-     c←##.MarkDown.Parse ⍵
+     c←H.MD2DOM ⍵
      m.Content←c
      H.DOM2HTML d
  }

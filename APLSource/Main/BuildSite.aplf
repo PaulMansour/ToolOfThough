@@ -3,14 +3,26 @@
      d←##.AcreConfig.DistFolder
      _←3 ⎕NDELETE d
      _←3 ⎕MKDIR d,'posts'
+     _←3 ⎕MKDIR d,'reference'
      write←{t←(⎕UCS 13)(≠⊆⊢)⍵ ⋄ (⊂t)⎕NPUT d,⍺,'.html'}
-     _←'ThorntonMelon.css'{⍵ ⎕NPUT d,⍺}H.BuildThorntonMelonCSS 0
+     _←'ThorntonMelon.css'{⍵ ⎕NPUT d,⍺}H.##.CSS.ThorntonMelon 0
      _←'CNAME'{⍵ ⎕NPUT d,⍺}'www.toolofthought.com'
      n←{('DRAFT'∘≢¨⊃¨⍵)/⍵}##.Posts.(⍎¨⎕NL ¯2)
      p←Sort BuildPostPage¨n
      _←(1↓¨p.URL)write¨p.HTML
-     _←'posts'write BuildPostsPage p
+     _←'posts'write'Posts'BuildPostsPage p
      _←'index'write BuildHomePage p
+
+
+     ⍝ For
+     n←##.Reference.(⍎¨⎕NL ¯2)
+     p←BuildPostPage¨n
+     _←(1↓¨p.URL)write¨p.HTML
+     _←'reference'write'Reference'BuildPostsPage p
+
+
+
+
      on←##.OtherPages.⎕NL ¯2
      _←on write¨BuildStaticPage¨##.OtherPages⍎¨on
      ⎕←'#.ToolOfThought.Main.Run 0'

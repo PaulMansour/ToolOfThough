@@ -1,7 +1,0 @@
- NewElement←{
-     e←⎕NS''
-     e.Class←'Element'
-     e.Type←,⍵
-     e.Content←''
-     e
- }

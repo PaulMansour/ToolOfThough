@@ -2,7 +2,7 @@
      ⍝ ⍵ ←→ Markdown v/v
      ⍝ ← ←→ stuff
      r←⎕NS''
-     c←##.MarkDown.Parse ⍵
+     c←H.MD2DOM ⍵
      t←1⊃c
      t.Type←'time'
      a←⊃(⊃c).Content

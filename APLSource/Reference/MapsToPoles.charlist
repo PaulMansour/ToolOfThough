@@ -1,0 +1,16 @@
+# [Maps to Poles](/reference/maps-to-poles)
+
+## April 21, 2021
+
+This table is copied directly from Gary Berquist's 
+**APL Advanced Techniques and Utilities**, page 236:
+
+|Expression|Interpretation           |
+|:==========|:===========================|
+|`R≠¯1↓0,R`  |1-maps to leading 1-poles  |
+|`R=¯1↓1,R`  |0-maps to leading 0-poles  |
+|`R>¯1↓0,R`  |1-maps to first 1 bits     |
+|`R≥¯1↓1,R`  |0-maps to first 0 bits     |
+|`R∨¯1↓0,R`  |extend 1-maps to right by 1|
+|`R∧¯1↓1,R`  |extend 0-maps to right by 1|
+

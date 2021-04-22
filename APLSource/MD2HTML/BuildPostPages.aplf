@@ -1,7 +1,0 @@
- BuildPostPages←{
-     n←'Third_Post' 'Second_Post' 'First_Post'
-
-     p←BuildPostPage¨##.Posts⍎¨n
-
-
- }

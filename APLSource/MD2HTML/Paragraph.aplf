@@ -1,3 +1,0 @@
- Paragraph←{
-     #.Rumba.HTML.NewHTMLElement'p'(¯1↓∊⍵,¨' ')
- }
