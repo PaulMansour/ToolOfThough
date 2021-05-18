@@ -10,7 +10,9 @@
      n←{('DRAFT'∘≢¨⊃¨⍵)/⍵}##.Posts.(⍎¨⎕NL ¯2)
      p←Sort BuildPostPage¨n
      _←(1↓¨p.URL)write¨p.HTML
-     _←'posts'write'Posts'BuildPostsPage p
+     ⍝ _←'posts'write'Posts'BuildPostsPage p
+     _←'posts'write'Posts'BuildDialogBoxPage p
+
      _←'index'write BuildHomePage p
 
 

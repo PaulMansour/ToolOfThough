@@ -1,0 +1,11 @@
+ XMLWhiteSpace←{
+     ⍝ ⍵ ←→ 0 for default
+     ⍝ ⍵ ←→ 1 for preserve
+     c←∊('      3+5' '8'),¨⎕UCS 13
+     m←⊂0 'html' '' 0
+     m,←⊂1 'body' '' 0
+     m,←⊂2 'pre'c 0
+     m←↑m
+     ⍵=0:⎕XML m
+     (⎕XML⍠'Whitespace' 'Preserve')m
+ }

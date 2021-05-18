@@ -1,0 +1,49 @@
+ BuildTableCardPage←{
+     ⍝ Grid, Flex, or columns?
+     t←⎕NS''
+     t.Titles←'State' 'Percent' 'WAC' 'Balance'
+     v←⊂'NY' 'NJ' 'CT' 'CA' 'MT'
+     v,←⊂'12.4' '17.4' '34.2' '4.3' '6.3'
+     v,←⊂'8.123' '3.234' '5.345' '4.567' '8.345'
+     v,←⊂'100,234' '34,456' '342,445' '1,234,567'
+     t.Values←⍉↑v
+     t.Classes←'left' 'right' 'right' 'right'
+     s←⎕NS''
+     s.Title←'Geographic Distribution'
+     s.Table←t
+     s.Footer←'Some footer text'
+
+     t←⎕NS''
+     t.Titles←'State' 'Percent' 'WAC' 'Balance' 'Margin'
+     v←⊂'Single Family' 'Condo' 'Rock and Roll'
+     v,←⊂'12.4' '17.4' '34.2'
+     v,←⊂'8.123' '3.234' '5.345'
+     v,←⊂'100,234' '34,456' '342,345'
+     v,←⊂'1.50' '2.00' '2.25'
+     t.Values←⍉↑v
+     t.Classes←'left' 'right' 'right' 'right' 'right'
+     s2←⎕NS''
+     s2.Title←'Property Type'
+     s2.Table←t
+     s2.Footer←'Some footer text'
+
+
+     ⍝ make a bunch of cards
+     c←NewTableCard¨6⍴s s2
+     cs←H.New'section'c
+     cs.class←'cards'
+
+
+     d←BuildTemplate 0
+     m←⊃d H.ElementsWhere'Type' 'main'
+     m.Content←cs
+     H.DOM2HTML d
+
+
+
+
+
+
+
+
+ }

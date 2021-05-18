@@ -1,0 +1,10 @@
+ BuildDialogBoxPage←{
+     ⍝ Build the home page (index.html)
+     d←BuildTemplate 0
+     m←⊃d H.ElementsWhere'Type' 'main'
+     _←m H.New'h1' 'Trying out the HTML5 dialog element.'
+     db←m H.New'dialog'
+     db.open←''
+     _←db H.New'p' 'This is a bunch of text with a bunch of stuff. Greetings!'
+     H.DOM2HTML d
+ }

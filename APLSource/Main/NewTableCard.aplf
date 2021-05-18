@@ -1,0 +1,15 @@
+ NewTableCard←{
+     ⍝ ⍵ ←→ Namespace
+     ⍝     .Title
+     ⍝     .Table
+     ⍝     .Footer
+     ⍺←0
+     s←⍺ H.New'section'
+     s.class←'card'
+     h←s H.New'header'
+     h1←h H.New'h1'⍵.Title
+     t←s H.NewTable ⍵.Table
+     f←s H.New'footer'
+     p←f H.New'p'⍵.Footer
+     s
+ }

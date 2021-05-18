@@ -2,7 +2,7 @@
      ⍝ Build the home page (index.html)
      d←BuildTemplate 0
      m←⊃d H.ElementsWhere'Type' 'main'
-     m.Content←3↑⍵.Article
+     m.Content,←3↑⍵.Article
      h2←m H.New'h2'
      a←h2 H.New'a' 'More posts...'
      a.href←'/posts'

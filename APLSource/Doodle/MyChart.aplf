@@ -1,0 +1,19 @@
+ {svg}←MyChart;⎕USING;data;exp;key;sp
+ ⍝ ⎕USING←'System.Drawing,system.drawing.dll' 'System.Drawing.Imaging' 'Causeway,sharpplot.dll'
+ ⎕USING←'System.Drawing,system.drawing.dll' 'Causeway,sharpplot.dll'
+
+ data←33 18 12 10
+ exp←0 0 0 20
+ key←'UK' 'France' 'Italy' 'Ireland'
+
+ sp←⎕NEW SharpPlot                                 ⍝ Default size
+ sp.Heading←'Sample pie chart'                     ⍝ Property
+ sp.PieChartStyle←PieChartStyles.ValueTags         ⍝ Flag property with single flag
+ sp.KeyStyle←KeyStyles.(CenterAlign+BottomAlign)   ⍝ Flag property with multiple flags
+ sp.SetKeyText(⊂key)                               ⍝ Need to enclose the key vector because it is a single argument, rather than a list of arguments
+ sp.SetColors⊂Color.(Navy Maroon Teal Green)      ⍝ Need to enclose the vector because it is a single argument
+ sp.SetMargins(42 48 36 18)                        ⍝ No need to enclose because the 4-item vector maps to 4 arguments
+ sp.DrawPieChart(data exp)                         ⍝ No need to enclose here because the 2-item vector maps to 2 different arguments
+
+  ⍝ sp.SaveImage('samplepie.png' ImageFormat.Png)     ⍝ Save the chart as a PNG image, at default size
+ svg←sp.RenderSvg ⍬                                ⍝ Return SVG image source
