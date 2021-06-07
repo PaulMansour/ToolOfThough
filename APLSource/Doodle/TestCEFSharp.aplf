@@ -1,0 +1,9 @@
+ TestCEFSharp;⎕USING
+
+ ⎕USING←'System' 'CefSharp,C:\Paul\Release\CefSharp.WinForms.dll' ',C:\Paul\Release\CefSharp.Core.dll' ',C:\Paul\Release\CefSharp.dll'
+
+
+
+
+ 'f'⎕WC'Form'
+ 'f.cef'⎕WC'NetControl' 'CefSharp.WinForms.ChromiumWebBrowser'

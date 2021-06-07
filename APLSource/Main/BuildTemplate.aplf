@@ -6,9 +6,9 @@
          m←⊂'Home' '/'
          m,←⊂'Posts' '/posts'
          m,←⊂'Projects' '/projects'
-         m,←⊂'Reference' '/Reference '
+         m,←⊂'Reference' '/reference'
          m,←⊂'Don''ts' '/donts'
-         m,←⊂'Elements' '/Elements'
+         m,←⊂'Elements' '/elements'
          m,←⊂'Links' '/links'
          m,←⊂'About' '/about'
          m

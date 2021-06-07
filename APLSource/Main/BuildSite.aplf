@@ -10,8 +10,8 @@
      n←{('DRAFT'∘≢¨⊃¨⍵)/⍵}##.Posts.(⍎¨⎕NL ¯2)
      p←Sort BuildPostPage¨n
      _←(1↓¨p.URL)write¨p.HTML
-     ⍝ _←'posts'write'Posts'BuildPostsPage p
-     _←'posts'write'Posts'BuildDialogBoxPage p
+     _←'posts'write'Posts'BuildPostsPage p
+     ⍝ _←'posts'write'Posts'BuildDialogBoxPage p
 
      _←'index'write BuildHomePage p
 
@@ -22,11 +22,13 @@
      _←(1↓¨p.URL)write¨p.HTML
      _←'reference'write'Reference'BuildPostsPage p
 
-
-
-
      on←##.OtherPages.⎕NL ¯2
-     _←on write¨BuildStaticPage¨##.OtherPages⍎¨on
+     _←(⎕C on)write¨BuildStaticPage¨##.OtherPages⍎¨on
+
+     ⍝ Copy images
+     _←d ⎕NCOPY ##.AcreConfig.ProjectFolder,'images'
+
+
      ⎕←'#.ToolOfThought.Main.Run 0'
      ']open ',d
  }

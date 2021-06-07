@@ -1,0 +1,12 @@
+ FreqCount
+
+⍝ Hmm.. say I have a set of random numbers between 0 and 4 in a.
+⍝ I want to count how many times each shows up.
+⍝ Obviously something like {⍺ ⍵}⌸a sort of gets me there
+⍝ but it would be convenient if the counts came in a vector
+⍝ with counts for 0, 1, 2, 3, 4 in that order.
+⍝ I can think of two other ways: +/(⍳5)∘.=a and b←5⍴0 ⋄ b[a]+←1.
+⍝ What would real APLers write though?
+
+⍝ ⎕io←0 ⋄ a←?100000⍴5
+⍝ ]runtime -c "+/(⍳5)∘.=a" "{1-⍨≢⍵}⌸(⍳5),a" "1-⍨{≢⍵}⌸(⍳5),a" "1-⍨⊢∘≢⌸(⍳5),a"

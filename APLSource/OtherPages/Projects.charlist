@@ -2,7 +2,7 @@
 
 ## [Dado](http://www.github.com/the-carlisle-group/Dado)
 
-Dado is an acronymn for Dyalog APL Development Operations. It is used by the 
+Dyalog APL Development Operations. Used by the 
 Carlisle Group for project and dependency management, releasing new versions, etc.
 
 ## [HTML](http://www.github.com/the-carlisle-group/HTML)
@@ -16,8 +16,9 @@ A Web server.
 
 ## [XL2APL](http://www.github.com/the-carlisle-group/XL2APL)
 
-Reads Excel files in .xlsx format (XML) into APL. 
+Read Excel files in .xlsx format (XML) into APL. 
 
 ## [Tool of Thought](http://www.github.com/paulmansour/toolofthought)
 
 The project that contains this site.
+
