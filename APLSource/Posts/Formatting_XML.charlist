@@ -1,0 +1,93 @@
+# [Two Issues with ⎕XML](/posts/two-issues-with-xml)
+
+#### June 10, 2021
+
+First, consider:
+
+~~~
+      ⎕XML 0 'p' 'This is a <em>bold</em> word.'
+<p>This is a &lt;em&gt;bold&lt;/em&gt; word.</p> 
+~~~
+
+That is, when trying to embed some already formatted XML into the argument
+of `⎕XML`, the results are not what we want. Richard Smith at Dyalog suggested
+a possible enhancement, stealing some ideas from how `⎕JSON` works, which would be
+to enclose data that we do not want `⎕XML` to modify in any way. The extra depth 
+would be a signal to leave the data alone.
+
+Second, consider: 
+
+~~~
+      m←2 3⍴0 'pre' '' 1 'code' '      a←5'
+      ]display m
+┌→─────────────────────┐
+↓   ┌→──┐  ┌⊖┐         │
+│ 0 │pre│  │ │         │
+│   └───┘  └─┘         │
+│   ┌→───┐ ┌→────────┐ │
+│ 1 │code│ │      a←5│ │
+│   └────┘ └─────────┘ │
+└∊─────────────────────┘
+      ⎕XML m
+<pre>                          
+  <code>a←5</code>             
+</pre>                         
+~~~
+
+Nicely formatted, but white space lost. Using the `Whitespace=Preserve` variant:
+
+~~~
+       xml←⎕XML⍠'Whitespace' 'Preserve'
+       xml m
+<pre><code>      a←5</code></pre>
+~~~
+
+we preserve the whitespace but lose the indented formatting. 
+With ⎕XML is is currently all or nothing. What we want to do is have nicely 
+formatted HTML output from `⎕XML`, except for certain elements were we we know we
+want to preserve the whitespace.
+
+Absent enhancements to `⎕XML` by Dyalog, we can solve both problems in a similar way.
+For embedded HTML, we can enclose the data, note it, insert a special character
+as a holding place, and then after `⎕XML` is run replace the special character with 
+the raw HTML. Thus this works:   
+
+~~~
+      H.DOM2HTML H.New 'p' (⊂⊂'This is a <em>bold</em> word.')
+<p>This is a <em>bold</em> word.</p> 
+~~~
+
+Note the use of enclose twice here (`⊂⊂`) is for the same reason as this:
+
+~~~
+      ]display A←'One' 'Two' 'Three'
+┌→────────────────────┐
+│ ┌→──┐ ┌→──┐ ┌→────┐ │
+│ │One│ │Two│ │Three│ │
+│ └───┘ └───┘ └─────┘ │
+└∊────────────────────┘
+      A[1]←⊂⊂'Two'
+      ]Display A
+┌→────────────────────────┐
+│ ┌→──┐ ┌───────┐ ┌→────┐ │
+│ │One│ │ ┌→──┐ │ │Three│ │
+│ └───┘ │ │Two│ │ └─────┘ │
+│       │ └───┘ │         │
+│       └∊──────┘         │
+└∊────────────────────────┘ 
+~~~
+
+For preserving blanks and line endings while still getting nicely indented XML,
+an `EncodePre` function is provided to temporaily replace blanks and newlines with 
+special characters. Then, the `DOM2HTML` function will reverse the substitions after
+the application of `⎕XML`:
+
+~~~
+      p←H.New'pre'
+      _←p H.New'code' (H.EncodePre'      ⎕←a←⍳5 ',(⎕UCS 13),'0 1 2 3 4')
+      H.DOM2HTML p 
+<pre>                                             
+  <code>      ⎕←a←⍳5                                
+0 1 2 3 4</code>                                    
+</pre>  
+~~~

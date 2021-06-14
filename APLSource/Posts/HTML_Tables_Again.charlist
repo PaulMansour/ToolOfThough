@@ -28,14 +28,20 @@ NewTable←{
 It's shorter too. We get rid of a lot of code by recognizing that
 the `thead`, `tbody`, and `tfoot` elements are (almost) indentically structured.
 
-BodyContent, HeaderContent, and FooterContent are matrices or vectors of 
+`BodyContent`, `HeaderContent`, and `FooterContent` are matrices or vectors of 
 simple text vectors. Vectors are treated as one-row matrices.
-BodyContent is required, HeaderContent and FooterContent are both
-optional. If FooterContent is provided but a HeaderContent is not, 
+`BodyContent` is required, `HeaderContent` and `FooterContent` are both
+optional. If `FooterContent` is provided but `HeaderContent` is not, 
 a `⍬` placeholder is needed.
+
+The class specification is still left out, as using the utility functions
+`Cells`, `BodyCells`, `HeaderCells` and `FooterCells` is a much better way 
+to specify classes, or any other attributes or additional content.
 
 I usually avoid nested multi-line dfns
 (especially in application-specfic code),
 but I make exceptions for tightly designed utility functions.
 
-I'm always annoyed by the parentheses required for the power operator (`⍣`). 
+The parentheses required for the power operator are annoying (`⍣`).
+
+Let's see how long this function lasts. 

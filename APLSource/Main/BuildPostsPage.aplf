@@ -6,7 +6,7 @@
      n←⍵.Title
      h2←H.New¨{'h2'}¨n
      a←h2 H.NewLink¨n{⍺ ⍵}¨⍵.URL
-     h4←H.New¨{'p'⍵}¨⍵.Date
+     h4←H.New¨{'time'⍵}¨⍵.Date
      m.Content,←,⍉↑h2 h4
      H.DOM2HTML d
  }

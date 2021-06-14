@@ -2,5 +2,6 @@
      m d y←{↓⍉↑(⍵≠' ')⊆¨⍵}⍵.Date~¨','
      am←12 3⍴'JanFebMarAprMayJunJulAugSepOctNovDec'
      m←am⍳3↑[1]↑m
+     d←⍎¨d
      ⍵[⍒⍉↑y m d]
  }
