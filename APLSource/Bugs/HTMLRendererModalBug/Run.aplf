@@ -1,0 +1,8 @@
+ Run←{
+     _←'h1'⎕WC'HTMLRenderer'('Caption' 'Main Form')
+     h1.InterceptedURLs←1 2⍴'*' 1
+     h1.onHTTPRequest←'OnHTTPRequest'
+     h1.HTML←'<a href="/gui">Press Me</a>'
+     _←h1.Wait
+     0
+ }

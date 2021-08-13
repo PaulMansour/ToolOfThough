@@ -2,7 +2,7 @@
      ⍝ ⍵ ←→ MarkDown
      ⍝   ←→ Complete HTML Page
      d←BuildTemplate 0
-     m←⊃d H.ElementsWhere'Type' 'main'
+     m←⊃d H.ElementsWhere'Tag' 'main'
      s←BuildPost ⍵
      m.Content←,s.Article
      s.HTML←H.DOM2HTML d

@@ -1,0 +1,6 @@
+ PutUpDialogBox←{
+     _←'h2'⎕WC'HTMLRenderer'
+     h2.HTML←'<h1>I should be modal!</h1>'
+     _←h2.Wait
+     0
+ }

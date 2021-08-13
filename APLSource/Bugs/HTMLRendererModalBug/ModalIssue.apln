@@ -1,0 +1,27 @@
+:Namespace ModalIssue
+
+ OnHTTPRequest←{
+     'http://dyalog_root/gui'≢7⊃⍵:⍵
+     _←PutUpDialogBox&0
+     z←⍵
+     z[3 4 5]←1 204 'No Content'
+     z
+ }
+
+ PutUpDialogBox←{
+     _←'h2'⎕WC'HTMLRenderer'
+     h2.HTML←'<h1>I should be modal!</h1>'
+     _←h2.Wait
+     0
+ }
+
+ Run←{
+     _←'h1'⎕WC'HTMLRenderer'('Caption' 'Main Form')
+     h1.Posn←20 20 
+     h1.InterceptedURLs←1 2⍴'*' 1
+     h1.onHTTPRequest←'OnHTTPRequest'
+     h1.HTML←'<a href="/gui">Press Me</a>'
+     _←h1.Wait
+     0
+ }
+:EndNamespace

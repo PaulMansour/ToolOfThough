@@ -1,0 +1,17 @@
+ DrawVector2←{
+     ⍝ ⍵ ←→ Magnitude,
+     ⍝      [Line height, Arrow height, arrow width]
+     ⍝      Line height and Arrow height must be odd
+     m lh ah aw←4↑⍵,6 14 15
+     c←ah÷2
+     lw←m-aw
+     y1←2÷⍨ah-lh
+     y2←y1+lh
+     ⍝ Make sub foo, given points
+     x←'L',¨⍕¨lw lw m lw lw 0
+     y←',',¨⍕¨y1 0 c ah y2 y2
+     d←'M0,',(⍕y1),(∊' ',¨x,¨y)
+     d←d,' Z' ⍝  d,←'Q-5,7 0,4 Z'
+     ⍝ Sub this out
+     d
+ }

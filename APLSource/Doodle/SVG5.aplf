@@ -1,0 +1,50 @@
+ SVG5←{
+
+     H←#.HTML.Main
+     g←H.New'svg'
+     g.xmlns←'http://www.w3.org/2000/svg'
+     g.viewBox←'0 0 256 256'
+     ⍝ g.xml:lang←'en'
+     ⍝ g.width←500
+     ⍝ g.height←500
+
+
+     bx←g H.New'rect'
+     bx.(x y height width)←0 0 90 160
+     bx.rx←10
+     bx.fill←'crimson'
+
+     t←g H.New'text' 'APL'
+     t.x←30
+     t.y←70
+     t.dx←'0 -2 -10'
+     t.font_style←'italic'
+     t.font_size←64
+     t.font_weight←'bold'
+     t.font_family←'Calibri' ⍝  'APL385 Unicode'
+
+     g.fill←'#3d5a98'
+     g.fill←'#FF0000'
+     g.fill←'#CD5C5C'
+     g.fill←'#DC143C'
+     g.fill←'white'
+
+
+
+
+     v1←g H.New'path'
+     v1.d←DrawVector2 140 6 14 15
+     v1.transform←'translate(12,72) rotate(0)'
+
+     v2←g H.New'path'
+     v2.d←DrawVector2 72 6 14 15
+     v2.transform←'translate(7,64) rotate(-57)'
+
+
+
+
+     _←'hr5'⎕WC'HTMLRenderer'
+     hr5.HTML←H.DOM2HTML g
+     ⍝ hr.HTML←∊NETLogo
+     0
+ }

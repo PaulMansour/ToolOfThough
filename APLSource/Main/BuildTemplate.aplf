@@ -8,7 +8,6 @@
          m,←⊂'Projects' '/projects'
          m,←⊂'Reference' '/reference'
          m,←⊂'Don''ts' '/donts'
-         m,←⊂'Elements' '/elements'
          m,←⊂'Links' '/links'
          m,←⊂'About' '/about'
          m

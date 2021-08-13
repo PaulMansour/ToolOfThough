@@ -5,7 +5,7 @@
      _←3 ⎕MKDIR d,'posts'
      _←3 ⎕MKDIR d,'reference'
      write←{t←(⎕UCS 13)(≠⊆⊢)⍵ ⋄ (⊂t)⎕NPUT d,⍺,'.html'}
-     _←'ThorntonMelon.css'{⍵ ⎕NPUT d,⍺}H.##.CSS.ThorntonMelon 0
+     _←'ThorntonMelon.css'{⍵ ⎕NPUT d,⍺}H.ComposeRules H.##.CSS.ThorntonMelon 0
      _←'CNAME'{⍵ ⎕NPUT d,⍺}'www.toolofthought.com'
      n←{('DRAFT'∘≢¨⊃¨⍵)/⍵}##.Posts.(⍎¨⎕NL ¯2)
      p←Sort BuildPostPage¨n

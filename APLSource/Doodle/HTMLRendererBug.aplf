@@ -1,0 +1,8 @@
+ HTMLRendererBug←{
+
+     _←'h1'⎕WC'HTMLRenderer'('Caption' 'Main Form')
+     h1.HTML←'<a href="/blah"> Press Me'
+     h1.Wait
+
+
+ }

@@ -1,0 +1,12 @@
+ NewVector←{
+     ⍝ ⍵ ←→ Origin (point), Direction (degrees), Magnitude
+     ⍝ ⍺ ←→ Parent
+     o d m←⍵
+     ⍺←0
+     p←⍺ H.New'path'
+     p.d←DrawVector m
+
+     p.transform←'translate(0,60) rotate(0)'
+
+     p
+ }
