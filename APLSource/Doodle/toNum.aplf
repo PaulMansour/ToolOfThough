@@ -1,0 +1,10 @@
+ toNum←{
+     ⍝ ⍵ ←→ Char Mat
+     ⍝ ← ←→ Num vector
+     v f←vfi ⍵
+     ∧/v:f
+     b←~v
+     w←{(+/∨\' '≠⌽⍵)↑¨↓⍵}{⍵⌽⍨+/∧\' '=⍵}b⌿⍵
+     (b/f)←1⊃vfi↑toNumFix¨w
+     f
+ }

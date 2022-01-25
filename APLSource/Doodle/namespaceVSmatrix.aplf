@@ -1,0 +1,11 @@
+ namespaceVSmatrix←{
+     ⍺←10 5        ⍝ Rows, Columns
+     r c←⍺
+     n←'Column'∘,¨⍕¨⍳c
+     e←'(',(⍕n),')←⍵'
+     m←⍺ NestedFloatMatrix ⍬
+     v←{⍺←⎕NS'' ⋄ ⍺⊣⍺⍎e}¨↓m
+     vm←↑¨↓m      ⍝ Vector of matrices
+     ⎕←'CI20'⎕FMT ⎕SIZE'm' 'v' 'vm'
+     m v vm
+ }

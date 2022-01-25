@@ -1,0 +1,5 @@
+ Primatives←{
+
+     t←0⊃⎕NGET'C:\Uploads\APLFNS_.html'
+     0
+ }

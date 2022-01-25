@@ -1,0 +1,11 @@
+ nsClone←{
+     _←⎕EX¨'ABCD'
+     _←'A'⎕NS''
+     A.C←⎕NS''
+     A.C.D←⎕NS''
+     _←'B'⎕NS''
+     ⎕←'A.C.D was'A.C.D
+     B.C←A.⎕NS A.C
+     ⎕←'A.C.D is'A.C.D
+     ⎕←'B.C.D is'B.C.D
+ }

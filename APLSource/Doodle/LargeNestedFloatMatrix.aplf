@@ -1,0 +1,12 @@
+ LargeNestedFloatMatrix←{
+     ⍺←10000 50
+     r←360⍴100000  ⍝ Items per element
+     m←100000      ⍝ Random numbers up to..
+     ⍝ t←{?r}¨⍺⍴0
+     ⍝ b←{?r}¨⍺⍴0
+
+     ÷/{?r}¨0⍴⍨⍺,2
+
+
+   ⍝   t÷1+b
+ }

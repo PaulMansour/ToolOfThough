@@ -1,0 +1,37 @@
+DRAFT
+
+# [Section Keyword](/posts/section-keyword)
+
+#### December 23, 2021
+
+If your function needs sections, your function is too long. 
+Sections gather related stuff together and allow you to
+name or comment the section, and collapse it and expand it:
+
+~~~
+      :Section  DoSomeStuffHere
+      
+      :EndSection
+~~~
+
+Most of the time, we should write a function named DoSomeStuffHere
+instead. This is a perfect example of when the name of the function
+makes the comment superfluous.  
+
+However, I have been experimenting with sections for 
+contructing CSS, where I think they may be usefull, and 
+where having a separate function for each section may be overkill.  
+
+For example:
+
+~~~
+   
+   
+
+                                                            
+~~~
+
+Issues arising:
+ 
+1. 
+

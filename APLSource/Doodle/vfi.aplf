@@ -1,0 +1,12 @@
+ vfi←{
+     ⍝ ⎕VFI using ⎕CSV
+     ⍝ ⍵ ←→ Char Mat
+     ⍝ ← ←→ Num vector
+     ⍺←-2*31
+     o←⊂'Separator' '⎕'
+     o,←⊂'Thousands' ','
+     o,←⊂'Fill'⍺
+     r←,(⎕CSV⍠o)(,⍵,⎕UCS 13)'S' 3
+     v←r≠⍺
+     v(v×r)
+ }

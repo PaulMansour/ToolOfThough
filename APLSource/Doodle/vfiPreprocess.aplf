@@ -1,0 +1,18 @@
+ vfiPreprocess←{
+     ⍝ ⍵ ←→ Char mat
+     ⍝   ←→ Modified char mat
+     ⎕IO ⎕ML←0 1
+     ~∨/'$%('∊⍵:⍵
+     m←⍵
+     m[⍸m[;0]='$';0]←' '
+     lp←m[;0]='('
+     ljust←{⍵⌽⍨+/∧\' '=⍵}
+     m[;]←ljust⌽m
+     rp←m[;0]=')'
+     m[⍸m[;0]='%';0]←' '
+     n←⍸lp∧rp
+     m[n;0]←' '
+     m[;]←ljust⌽m
+     m[n;0]←'-'
+     m
+ }

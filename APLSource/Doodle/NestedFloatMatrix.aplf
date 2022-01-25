@@ -1,0 +1,6 @@
+ NestedFloatMatrix←{
+     ⎕DIV←1
+     ⍺←10000 50            ⍝ Rows, Columns
+     r←⊃⍴/2↑⍵,360 100000   ⍝ Items per cell, randrom draw from
+     ÷/{?r}¨0⍴⍨⍺,2
+ }
