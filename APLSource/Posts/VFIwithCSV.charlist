@@ -16,7 +16,7 @@ handles all the specific cases noted above when converting columns
 to numeric. Furthermore it works on in-memory data, so we don't need a file.
 This makes it trivial to write an implementation of `⎕VFI` using `⎕CSV`:
 
-~~~ 
+~~~
 vfi←{
      ⍝ ⎕VFI using ⎕CSV
      ⍝ ⍵ ←→ Char Mat
@@ -33,7 +33,7 @@ vfi←{
 
 Note:
 
-1. The argument here is a char mat, not a delimited vector like ⎕VFI.
+1. The argument here is a char mat, not a delimited vector like `⎕VFI`.
 
 2. The separator is arbitrary, and should not exist in the argument.
  Probably should check for this.
