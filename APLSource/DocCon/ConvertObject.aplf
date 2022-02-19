@@ -1,0 +1,16 @@
+ ConvertObject←{
+     d←⍺,'_Class'
+     cn←1⊃⎕NPARTS ⍺
+     v←⍵.∆DefaultPage
+     b←'[Data]'∘≡¨6↑¨v
+     b←b∨∨/¨'⍎⍎⍎'∘⍷¨v
+     v←(~b)/v
+     v←v{⍺/⍨~1 1⍷⍵}0=≢¨v
+     v←(0=≢⊃v)↓v
+     v←('# ',cn,' Object')'',v
+     v←{⍵↓⍨-⊥⍨' '=⍵}¨v
+     _←(⊂v)⎕NPUT d,'.md'
+     _←⍺∘ConvertProperties ⍵
+     _←⍺∘ConvertMethods ⍵
+     0
+ }

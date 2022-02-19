@@ -1,0 +1,61 @@
+ BuildObjectReference←{
+     ⍝ Nested
+     ⍝ ⍵[1] ←→ Object Reference Folder
+     ⍝ ⍵[2] ←→ Target
+     ⎕THIS.A←#.Abacus.Main
+     sd td←⍵
+     sd←'c:\FDBDocCon\Objects\'
+     td←'c:\FDBDocOut\'
+     _←3 ⎕NDELETE td
+     f←⊃(⎕NINFO⍠1)sd,'*.*'
+     n←1⊃¨⎕NPARTS f
+     v←⊃¨{⎕NGET ⍵ 1}¨f
+     d←A.MD2DOM¨v
+     on mt mn←↓⍉↑{⍵⊆⍨⍵≠'_'}¨n
+     b←≠on
+     cn←(mt∊⊂'Class')/on   ⍝ Class Names
+     od←(mt∊⊂'Class')/d    ⍝ Object vars
+     m←((⊂mt∊⊂'Method')∧↓⍉on∘.≡∪on)/¨⊂mn     ⍝ Methods per object
+     p←((⊂mt∊⊂'Property')∧↓⍉on∘.≡∪on)/¨⊂mn   ⍝ Properties per object
+
+
+     md←((⊂mt∊⊂'Method')∧↓⍉on∘.≡∪on)/¨⊂d
+     pd←((⊂mt∊⊂'Property')∧↓⍉on∘.≡∪on)⌿¨⊂d
+
+
+     pl←cn CreatePropListNested¨p
+     ml←cn CreateMethodListNested¨m
+     od←pl,¨ml,¨od
+     ds←td∘,¨,cn∘.,'\Properties' '\Methods'
+     _←3 ⎕MKDIR¨ds     ⍝ Make All directories
+
+     ⍝ Write out root index.html
+     _←td CreateObjectRootIndex cn
+
+
+
+
+     ⍝ Write out Object topics
+     fn←td∘,¨cn,¨⊂'/index.html'
+     hd←A.NewDocument¨od
+     mm←A.DOM2HTML¨hd
+     _←mm{(⊂⍺)⎕NPUT ⍵}¨fn
+     ⍝ Write out properties per object
+     _←(td∘,¨cn)WritePropList¨p
+     _←(td∘,¨cn)WriteMethodList¨m
+
+
+     ⍝ Write out Property topics
+     _←(td∘,¨cn)WritePropertyTopics¨p{⍺ ⍵}¨pd
+     _←(td∘,¨cn)WriteMethodTopics¨m{⍺ ⍵}¨md
+
+
+
+
+
+     ⎕←'#.Rumba.Core.Start ''',td,''''
+     ⎕←']open ',td
+
+
+     0
+ }

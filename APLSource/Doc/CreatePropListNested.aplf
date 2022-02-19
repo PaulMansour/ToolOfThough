@@ -1,0 +1,8 @@
+ CreatePropListNested←{
+     c←⍺
+     p←⍵
+     r←(c,'/properties/')∘,¨p
+     l←A.NewLink¨p{⍺ ⍵}¨r
+     h←A.New'h2' 'Properties:'
+     h,l
+ }

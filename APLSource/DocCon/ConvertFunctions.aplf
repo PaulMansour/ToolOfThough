@@ -1,0 +1,10 @@
+ ConvertFunctions←{
+     s←#.FlipDB.Documentation.Reference.Functions
+     n←s.⎕NL ¯2
+     n←n~⊂'∆DefaultPage'
+     v←s⍎¨n
+     d←⍵
+     _←3 ⎕MKDIR d
+     _←v{(⊂⍺)⎕NPUT d,⍵,'.md'}¨n
+     0
+ }

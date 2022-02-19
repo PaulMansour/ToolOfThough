@@ -1,0 +1,8 @@
+ ConvertProperties←{
+     0=⍵.⎕NC'Properties':0
+     s←⍵.Properties
+     d←⍺,'_Property_'
+     n←s.⎕NL ¯2
+     v←s⍎¨n
+     v{(⊂⍺)⎕NPUT d,⍵,'.md'}¨n
+ }

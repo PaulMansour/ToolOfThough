@@ -1,0 +1,8 @@
+ WriteMethodList←{
+     r←'methods/'∘,¨⍵
+     l←A.NewLink¨⍵{⍺ ⍵}¨r
+     d←A.NewDocument l
+     h←A.DOM2HTML d
+     _←(⊂h)⎕NPUT ⍺,'/Methods.html'
+     0
+ }

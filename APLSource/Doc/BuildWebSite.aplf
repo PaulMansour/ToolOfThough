@@ -1,0 +1,14 @@
+ BuildWebSite←{
+    ⍝ ⍵ ←→ Source Doc Folder , Target Folder
+
+
+
+
+    ⍝ Build it!
+     Build Each Folder
+
+
+
+
+
+ }

@@ -1,0 +1,8 @@
+ CreateMethodListNested←{
+     c←⍺
+     p←⍵
+     r←(c,'/methods/')∘,¨p
+     l←A.NewLink¨p{⍺ ⍵}¨r
+     h←A.New'h2' 'Methods:'
+     h,l
+ }

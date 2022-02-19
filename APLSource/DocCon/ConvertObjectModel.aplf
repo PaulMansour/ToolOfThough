@@ -1,0 +1,8 @@
+ ConvertObjectModel←{
+     s←#.FlipDB.Documentation.Reference.Objects
+     d←⍵
+     _←3 ⎕MKDIR d
+     n←s.⎕NL ¯9
+     (d∘,¨n)ConvertObject¨s⍎¨n
+     0
+ }

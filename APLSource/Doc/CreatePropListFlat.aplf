@@ -1,0 +1,8 @@
+ CreatePropListFlat←{
+     c←⍺                ⍝ Class Name
+     p←⍵                ⍝
+     r←{c,'-property-',⍵}¨p
+     l←A.NewLink¨p{⍺ ⍵}¨r
+     h←A.New'h2' 'Properties:'
+     h,l
+ }

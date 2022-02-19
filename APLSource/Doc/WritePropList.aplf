@@ -1,0 +1,8 @@
+ WritePropList←{
+     r←'properties/'∘,¨⍵
+     l←A.NewLink¨⍵{⍺ ⍵}¨r
+     d←A.NewDocument l
+     h←A.DOM2HTML d
+     _←(⊂h)⎕NPUT ⍺,'/Properties.html'
+     0
+ }

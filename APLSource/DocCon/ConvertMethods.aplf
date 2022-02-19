@@ -1,0 +1,8 @@
+ ConvertMethods←{
+     0=⍵.⎕NC'MethodList':0
+     s←⍵.MethodList
+     d←⍺,'_Method_'
+     n←s.⎕NL ¯2
+     v←s⍎¨n
+     v{(⊂⍺)⎕NPUT d,⍵,'.md'}¨n
+ }

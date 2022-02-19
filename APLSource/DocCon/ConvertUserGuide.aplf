@@ -1,0 +1,15 @@
+ ConvertUserGuide←{
+     s←#.FlipDB.Documentation.User_Guide
+     ss←s⍎¨s.⎕NL ¯9
+     n←ss.⎕NL ¯2
+     v←ss⍎¨¨n
+     n←⊃,/n
+     v←⊃,/v
+     b←≠n  ⍝ For now Losing SOME HERE!
+     v←b/v
+     n←b/n
+     d←⍵
+     _←3 ⎕MKDIR d
+     _←v{(⊂⍺)⎕NPUT d,⍵,'.md'}¨n
+     0
+ }

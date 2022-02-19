@@ -1,0 +1,8 @@
+ AddPropList←{
+     p←⍵                      ⍝ List of properties
+     l←A.NewLink¨{⍵ ⍵}¨p      ⍝ Relative Links
+     h←A.New'h2' 'Properties:'
+     h,l
+
+
+ }

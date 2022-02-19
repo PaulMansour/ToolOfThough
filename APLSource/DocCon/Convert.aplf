@@ -1,0 +1,9 @@
+ Convert←{
+     d←'c:\FDBDocCon\'
+     _←3 ⎕NDELETE d
+     _←3 ⎕MKDIR d
+     _←ConvertFunctions d,'Functions\'
+     _←ConvertObjectModel d,'Objects\'
+     _←ConvertUserGuide d,'UserGuide\'
+     0
+ }
