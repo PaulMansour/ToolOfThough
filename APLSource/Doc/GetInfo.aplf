@@ -1,0 +1,17 @@
+ GetInfo←{
+     ⍝ ⍵ ←→ Source Directory
+     ⍝ GetInfoItemReference
+     ⍝ GetInfoObjectReference
+     ⍝ GetInfoUserGuide
+     a←⊃(⎕NINFO⍠1)⍵,'/*.*'
+     t←GetFolderType a
+     f←a/⍨'.md'∘≡¨2⊃¨⎕NPARTS a
+     p←⎕NS''
+     p.SourceFolder←⍵
+     p.File←f
+     p.Name←1⊃¨⎕NPARTS f
+     p.Type←t
+     p.BuildFunction←'Build',t
+     p.ParentSegment←'/',(1⊃⎕NPARTS ⍵),'/'
+     (⍎'GetInfo',t)p
+ }

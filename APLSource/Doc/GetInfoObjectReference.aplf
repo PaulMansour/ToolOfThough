@@ -1,0 +1,11 @@
+ GetInfoObjectReference←{
+     ⍝ ⍵ ←→ Info Space
+     m←' '~¨⍨↑{⍵⊆⍨⍵≠'_'}¨⍵.Name
+     ⍵.(Object MemberType MemberName)←↓⍉m
+     c←⍵.MemberType∊⊂'Class'
+     i←'CMP'⍳⊃¨m[;1]
+     m[;1]←'' 'Methods' 'Properties'[i]
+     ⍵.URL←⍵.ParentSegment∘,¨(-3*c)↓¨,/m,¨'/'
+     ⍵.TargetFile←⍵.URL,¨c⌿¨⊂'/index'
+     ⍵
+ }

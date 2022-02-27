@@ -1,14 +1,20 @@
  BuildWebSite←{
-    ⍝ ⍵ ←→ Source Doc Folder , Target Folder
+     ⍝ ⍵ ←→ Source Doc Folder , Target Folder
+     ⎕THIS.A←#.Abacus.Main
+     sd←'c:/APLProjects/FlipDBDoc/APLSource/MD'
+     td←'c:/FDBDocOut/'
+     _←InitDirectory td
+     ss←                     ⍝ Source SubDirectories
+     i←GetInfo¨ss
+     i.TargetFolder←⊂td
+     u←⊃,/i.URL
+     _←u i.'BuildFunction)i
 
 
+     ⍝ m←n↓¨BuildItemReference sd td,¨⊂'Functions/'
 
-
-    ⍝ Build it!
-     Build Each Folder
-
-
-
-
-
+     GetItemReferenceInfo
+     ⎕←'#.Rumba.Core.Start ''',td,''''
+     ⎕←']open ',td
+     0
  }

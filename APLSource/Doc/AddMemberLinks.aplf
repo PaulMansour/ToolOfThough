@@ -1,0 +1,6 @@
+ AddMemberLinks←{
+     :⍵
+     CreatePropListNested
+     CreateMethodListNested
+
+ }

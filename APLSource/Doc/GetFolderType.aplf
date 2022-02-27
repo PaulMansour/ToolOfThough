@@ -1,0 +1,6 @@
+ GetFolderType←{
+   ⍝ ⍵ ←→ Content File Names
+     '_'∊⊃⍵:'ObjectReference'
+     ∨/∨/'/_TOC.'⍷↑⍵:'UserGuide'
+     'ItemReference'
+ }

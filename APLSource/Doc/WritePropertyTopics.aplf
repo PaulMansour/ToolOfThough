@@ -1,10 +1,9 @@
  WritePropertyTopics←{
      d←⍺
      pn pv←⍵
-     0=≢pn:0
+     0=≢pn:''
      fn←{d,'/Properties/',⍵,'.html'}¨pn
      hd←A.NewDocument¨pv
      mm←A.DOM2HTML¨hd
-     _←mm{(⊂⍺)⎕NPUT ⍵}¨fn
-     0
+     mm nput¨fn
  }

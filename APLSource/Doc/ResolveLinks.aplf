@@ -1,0 +1,13 @@
+ ResolveLinks←{
+     m←⍺.SiteMap
+     l←GetLinks ⍵
+     0=≢l:0
+     t←⊃¨l.Content                 ⍝ Probably need innerText here, as this assumes no other markup
+     h←t{0=≢⍵:⍺ ⋄ ⍵}¨l.href~¨' '
+     r←'/',¨h,¨'.'                 ⍝ Could be dupes, not unambiguous
+     i←⊃¨⍸¨1,¨⍨∨/¨r⍷¨⊂↑⍺,¨'.'      ⍝ Should warn, and pick first
+     q←(m,⊂'')[i]                  ⍝ Not found, some blank again
+     j←h{0=≢⍵:⍺ ⋄ ⍵}¨q             ⍝ Put those back
+     l.href←j
+     0
+ }

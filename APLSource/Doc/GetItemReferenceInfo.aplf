@@ -1,0 +1,11 @@
+ GetItemReferenceInfo←{
+     ⍝ ⍵ ←→ Source Folder
+     p←⎕NS''
+     p.FolderType←'ItemReference'
+     p.BuildFunction←'Build',p.FolderType
+     ...
+
+
+
+
+ }

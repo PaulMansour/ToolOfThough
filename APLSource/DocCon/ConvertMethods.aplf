@@ -3,6 +3,6 @@
      s←⍵.MethodList
      d←⍺,'_Method_'
      n←s.⎕NL ¯2
-     v←s⍎¨n
+     v←CleanUp¨s⍎¨n
      v{(⊂⍺)⎕NPUT d,⍵,'.md'}¨n
  }

@@ -1,11 +1,8 @@
  CreateObjectRootIndex←{
-
      d←A.NewDocument''
      b←A.GetBody d
      _←b A.New'h1' 'Objects'
      _←b A.NewLink¨{⍵ ⍵}¨⍵
      h←A.DOM2HTML d
-     _←(⊂h)⎕NPUT ⍺,'index.html'
-     0
-
+     h nput ⍺,'index'
  }

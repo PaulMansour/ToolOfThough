@@ -1,0 +1,5 @@
+ GetFileNames←{
+     f←⊃(⎕NINFO⍠1)⍵,'*.md'
+     n←1⊃¨⎕NPARTS f
+     f n
+ }

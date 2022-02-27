@@ -1,0 +1,7 @@
+ BuildUserGuide←{
+     ⍝ Build a grouped and ordered collection
+     d←GetBasicDocs ⍵
+     h←A.DOM2HTML¨d
+     _←h nput¨⍵.TargetFolder∘,¨⍵.TargetFile
+     ⍵ BuildTOC d
+ }

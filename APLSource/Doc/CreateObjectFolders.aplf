@@ -1,0 +1,6 @@
+ CreateObjectFolders←{
+     tf←⍵.TargetFolder,⍵.ParentSegment
+     c←∪⍵.Object
+     ds←tf∘,¨,c∘.,'/Properties' '/Methods'
+     3 ⎕MKDIR ds
+ }

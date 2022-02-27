@@ -1,0 +1,7 @@
+ CreateMemberLinks←{
+     c p←⍵
+     r←(c,'/',⍺,'/')∘,¨p
+     l←A.NewLink¨p{⍺ ⍵}¨r
+     h←A.New'h2'(⍺,':')
+     h,l
+ }

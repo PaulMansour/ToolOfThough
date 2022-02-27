@@ -1,0 +1,4 @@
+ InitDirectory←{
+     _←3 ⎕NDELETE ⍺
+     3 ⎕MKDIR ⍺∘,¨⍵
+ }

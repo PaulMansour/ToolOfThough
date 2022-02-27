@@ -1,0 +1,7 @@
+ GetUserGuideTOC←{
+     s←#.FlipDB.Documentation.User_Guide
+     ch←(s.∆TopicProperties 0)[;0]
+     ss←s⍎¨ch
+     ci←{(4⍴⊂' ')∘,¨⍵[;0]}¨ss.∆TopicProperties 0
+     ↑⊃,/ch{(⊂⍺),⍵}¨ci
+ }

@@ -1,0 +1,47 @@
+ BuildObjectReference_old←{
+     sd td←⍵
+     p←GetObjectReferenceURLs sd
+     v←ReadFiles sd
+     _←InitDirectory td
+
+     d←A.MD2DOM¨v
+
+
+     on mt mn←↓⍉↑{⍵⊆⍨⍵≠'_'}¨n
+     b←≠on
+     cn←(mt∊⊂'Class')/on   ⍝ Class Names
+     od←(mt∊⊂'Class')/d    ⍝ Object vars
+     m←((⊂mt∊⊂'Method')∧↓⍉on∘.≡∪on)/¨⊂mn     ⍝ Methods per object
+     p←((⊂mt∊⊂'Property')∧↓⍉on∘.≡∪on)/¨⊂mn   ⍝ Properties per object
+
+
+     md←((⊂mt∊⊂'Method')∧↓⍉on∘.≡∪on)/¨⊂d
+     pd←((⊂mt∊⊂'Property')∧↓⍉on∘.≡∪on)⌿¨⊂d
+
+
+     pl←cn CreatePropListNested¨p
+     ml←cn CreateMethodListNested¨m
+     od←pl,¨ml,¨od
+
+
+     ds←td∘,¨,cn∘.,'/Properties' '/Methods'
+     _←3 ⎕MKDIR¨ds     ⍝ Make All directories
+
+     ⍝ Write out root index.html
+     z←⊂td CreateObjectRootIndex cn
+
+     ⍝ Write out Object topics
+     fn←td∘,¨cn,¨⊂'/index'
+     hd←A.NewDocument¨od
+     mm←A.DOM2HTML¨hd
+     z,←mm nput¨fn
+     ⍝ Write out properties per object
+     z,←(td∘,¨cn)WritePropList¨p
+     z,←(td∘,¨cn)WriteMethodList¨m
+     ⍝ Write out Property topics
+     z,←⊃,/(td∘,¨cn)WritePropertyTopics¨p{⍺ ⍵}¨pd
+     z,←⊃,/(td∘,¨cn)WriteMethodTopics¨m{⍺ ⍵}¨md
+
+
+     z
+ }

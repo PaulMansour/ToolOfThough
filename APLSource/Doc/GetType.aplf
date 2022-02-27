@@ -1,0 +1,8 @@
+ GetType←{
+     GetFiles
+
+     :'UserGuide'
+     :'ObjectReference'
+     :'ItemReference'
+
+ }

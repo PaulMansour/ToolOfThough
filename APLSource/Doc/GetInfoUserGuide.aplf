@@ -1,0 +1,7 @@
+ GetInfoUserGuide←{
+     ⍝ ⍵ ←→ Info space
+     ⍝ ⍵ ←→ Info Space
+     ⍵.URL←⍵.ParentSegment∘,¨⍵.Name
+     ⍵.TargetFile←⍵.URL
+     ⍵
+ }

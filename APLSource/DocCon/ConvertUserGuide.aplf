@@ -4,10 +4,8 @@
      n←ss.⎕NL ¯2
      v←ss⍎¨¨n
      n←⊃,/n
-     v←⊃,/v
-     b←≠n  ⍝ For now Losing SOME HERE!
-     v←b/v
-     n←b/n
+     v←CleanUp¨⊃,/v
+     n←n,¨' '~¨⍨↓'BI3'⎕FMT(~≠n)×⍳≢n
      d←⍵
      _←3 ⎕MKDIR d
      _←v{(⊂⍺)⎕NPUT d,⍵,'.md'}¨n

@@ -1,0 +1,4 @@
+ GetLinks←{
+     d←A.NewDocument⊃,/⍵    ⍝ Temp cover element - Should Elements by tag do this if needed?
+     d A.ElementsByTag'a'
+ }

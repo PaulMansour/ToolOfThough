@@ -1,0 +1,5 @@
+ GetItemReferencePaths←{
+     sd td←⍵
+     f n←GetFileNames sd
+     td∘,¨n
+ }

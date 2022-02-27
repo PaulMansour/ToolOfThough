@@ -1,0 +1,20 @@
+ AddMemberLinksToClass←{
+     ⍝ ⍺ ←→ Info space
+     ⍝ ⍵ ←→ DOM
+     k←⍺.MemberType∊⊂'Class'
+     c←k/⍺.Object
+     mt←⍺.MemberType
+     mn←⍺.MemberName
+     bv←↓⍉⍺.Object∘.≡c
+     m←(bv∧⊂mt∊⊂'Method')/¨⊂mn
+     p←(bv∧⊂mt∊⊂'Property')/¨⊂mn
+     l←'Properties'∘CreateMemberLinks¨c{⍺ ⍵}¨p
+     l,¨←'Methods'∘CreateMemberLinks¨c{⍺ ⍵}¨m
+     b←A.GetBody¨k/⍵
+     b.Content←l{(⊃⍵),⍺,1↓⍵}¨b.Content
+     ⍝ Precompute m and p in GetInfoObjectReference
+     q←⍺.TargetFolder,⍺.ParentSegment
+     _←(q∘,¨c)WritePropList¨p    ⍝ MAKE ONE FN
+     _←(q∘,¨c)WriteMethodList¨m  ⍝ ....
+     0
+ }

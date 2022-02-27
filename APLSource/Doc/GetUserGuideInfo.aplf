@@ -1,0 +1,8 @@
+ GetUserGuideInfo←{
+     ⍝ ⍵ ←→ Source Folder
+     p←⎕NS''
+     p.FolderType←'UserGuide'
+     p.BuildFunction←'Build',p.FolderType
+     ...
+     p
+ }

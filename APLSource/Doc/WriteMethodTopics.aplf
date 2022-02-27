@@ -1,10 +1,9 @@
  WriteMethodTopics←{
      d←⍺
      pn pv←⍵
-     0=≢pn:0
+     0=≢pn:''
      fn←{d,'/Methods/',⍵,'.html'}¨pn
      hd←A.NewDocument¨pv
      mm←{0::A.DOM2HTML A.NewDocument A.New'h1' 'Error!!!' ⋄ A.DOM2HTML ⍵}¨hd
-     _←mm{(⊂⍺)⎕NPUT ⍵}¨fn
-     0
+     mm nput¨fn
  }

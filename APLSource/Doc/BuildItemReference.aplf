@@ -1,8 +1,6 @@
- BuildObjectReference←{
+ BuildItemReference←{
      ⍝ ⍵ ←→ Info space
-     _←CreateObjectFolders ⍵
      d←GetBasicDocs ⍵
-     _←⍵ AddMemberLinksToClass d
      h←A.DOM2HTML¨d
      h nput¨⍵.TargetFolder∘,¨⍵.TargetFile
  }

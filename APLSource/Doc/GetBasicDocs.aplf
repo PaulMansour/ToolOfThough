@@ -1,0 +1,6 @@
+ GetBasicDocs←{
+     v←ReadFiles ⍵.File
+     d←A.MD2DOM¨v
+     _←⍵ ResolveLinks d
+     A.NewDocument¨d
+ }

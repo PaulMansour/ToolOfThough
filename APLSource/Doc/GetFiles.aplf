@@ -1,0 +1,9 @@
+ GetFiles←{
+     ⍺←0
+     f←⊃(⎕NINFO⍠1)⍵,'*.md'
+     n←1⊃¨⎕NPARTS f
+     ⍺:f n
+     v←⊃¨{⎕NGET ⍵ 1}¨f
+     v←v~¨¨⊂⊂⎕UCS 24 29 8 28     ⍝ ??? wtf?
+     f n v
+ }

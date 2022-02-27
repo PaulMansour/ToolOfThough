@@ -1,0 +1,15 @@
+ BuildTOC←{
+     sf←⍺.SourceFolder
+     c←⊃⎕NGET(sf,'/_TOC.charmat')1
+     h1←{⍵ A.ElementByTag'h1'}¨⍵
+     t←⊃¨h1.Content
+     n←⍺.Name
+     m←c,[0.5](t,⊂'')[('    '∘,¨n)⍳c]
+     e←CreateTOCEntry¨↓m
+     d←A.NewDocument''
+     b←A.GetBody d
+     _←b A.New'h1' 'Table of Contents'
+     b.Content,←e
+     h←A.DOM2HTML d
+     h nput ⍺.TargetFolder,⍺.ParentSegment,'index'
+ }

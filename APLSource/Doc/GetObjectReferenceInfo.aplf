@@ -1,0 +1,17 @@
+ GetObjectReferenceInfo←{
+     ⍝ ⍵ ←→ Souce Folder
+     f←⍵
+     p←⎕NS''
+     p.FolderType←'ObjectReference'
+     p.BuildFunction←⍎'Build',p.FolderType
+     p.SourceFile←f
+     n←1⊃¨⎕NPARTS f
+     m←' '~¨⍨↑{⍵⊆⍨⍵≠'_'}¨n
+     p.(Object Type Name)←↓⍉m
+     c←p.Type∊⊂'Class'
+     i←'CMP'⍳⊃¨m[;1]
+     m[;1]←'' 'Methods' 'Properties'[i]
+     p.URL←(¯2×c)↓¨,/'/',¨m
+     p.TargetFile←p.URL,¨c⌿¨⊂'/index'
+     p
+ }

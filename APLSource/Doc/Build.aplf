@@ -1,0 +1,15 @@
+ Build←{
+     ⎕THIS.A←#.Abacus.Main
+     sr←'c:/APLProjects/FlipDBDoc/APLSource'
+     td←'c:/FDBDocOut'
+     sf←GetSourceFolders sr
+     i←GetInfo¨sf
+     i.TargetFolder←⊂td
+     i.SiteMap←,/i.URL
+     _←3 ⎕NDELETE td
+     _←3 ⎕MKDIR td∘,¨i.ParentSegment
+     _←{(⍎⍵.BuildFunction)⍵}¨i
+     ⎕←']open ',td
+     ⎕←'#.Rumba.Core.Start ''',td,''''
+     0
+ }

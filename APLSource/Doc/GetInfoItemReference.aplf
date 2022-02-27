@@ -1,0 +1,6 @@
+ GetInfoItemReference←{
+     ⍝ ⍵ ←→ Info Space
+     ⍵.URL←⍵.ParentSegment∘,¨⍵.Name
+     ⍵.TargetFile←⍵.URL
+     ⍵
+ }
