@@ -40,6 +40,7 @@ Note:
 
 3. There is currently a bug in `⎕CSV` where it throws an error on a number
  with a thousand separator and no decimal - so don't adapt for production yet!
+ (UPDATE: This is is now fixed in version 18.2.45319.0)
 
 4. We should probably test there are no line endings in the argument.
 

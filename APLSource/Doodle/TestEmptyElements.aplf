@@ -1,0 +1,9 @@
+ TestEmptyElements←{
+     d←H.NewDocument''
+     b←H.GetBody d
+     _←b H.New'p' 'This is some text, below is a horiz rule:'
+     _←b H.New¨5⍴⊂'br'
+     _←b H.New'hr'
+     _←b H.New'p' 'This is text below the horiz rule.'
+     d
+ }

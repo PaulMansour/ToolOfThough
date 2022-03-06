@@ -40,20 +40,11 @@ text versions of dws files, analagous to Microsoft Excel `.xls` and `.xlsx` file
 
 All sorts of possibilites arise with a zipped `.dwsx` file format, as it can contain,
 like `.xlsx` files, multiple files and folders. 
-For example, it could contain a [configuration file](https://help.dyalog.com/18.0/#UserGuide/Installation%20and%20Configuration/Configuration%20Files.htm#Configuration_Files)   
+For example, it could contain a [configuration file](https://help.dyalog.com/18.0/#UserGuide/Installation%20and%20Configuration/Configuration%20Files.htm#Configuration_Files).   
 It could have multiple namespace scripts and only load and fix code on demand.
 
 A `.dwsx` would probably not be appropriate for developement, as it would have the same
-drawbacks as a binary `.dws` file, but for sharing code, transport and application distribtion
+drawbacks as a binary `.dws` file, but for sharing code, transport and application distribution
 it may be ideal. A non-zipped `.apln` file, however, may be quite useful for development:
 Open a clear workspace, start coding, `)saveastext` and
 have a text file representation of the workspace.
-
-  
-
-
-
-
-
-
-
