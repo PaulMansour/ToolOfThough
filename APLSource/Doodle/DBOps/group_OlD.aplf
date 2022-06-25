@@ -1,0 +1,9 @@
+ group_OlD←{
+ ⍝ DOES NOT WORK AS grade key depends on order
+ ⍝ Could just find uniques to preserve order
+     ⍺←⍳≢⍵
+     u←∪⍵
+     g←⍋⍺
+     i←{↓⍵}⌸u,⍵[g]
+     g∘{⍺[⍵]}¨i-1
+ }

@@ -1,0 +1,6 @@
+ TestTimerExpunge←{
+     _←'fmF'⎕WC'Form'
+     _←'tmT'fmF.⎕WC'Timer' 5000
+     fmF.tmT.onTimer←'OnTimer'
+     fmF
+ }

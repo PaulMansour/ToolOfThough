@@ -1,0 +1,6 @@
+ TestTimerExpunge2←{
+     s←⎕NS''
+     _←'tmT's.⎕WC'Timer' 5000
+     s.tmT.onTimer←'OnTimer'
+     s
+ }

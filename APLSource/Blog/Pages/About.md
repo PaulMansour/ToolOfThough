@@ -1,0 +1,23 @@
+# About
+
+This is the personal APL blog of Paul Mansour.
+
+The site serves at least two purposes. First, it acts as a test case for
+APL code that generates HTML and converts Markdown to HTML. Second, and 
+more importantly, it is a permanent, central repository for issues and
+interesting things that come up in my day-to-day work as a practical APL programmer -- stuff that
+is generally scattered and lost in old emails or various chat boards or forums. 
+
+The title of this site is taken from
+[Ken Iverson's Turing Award lecture.](https://www.eecg.utoronto.ca/~jzhu/csc326/readings/iverson.pdf)
+
+The subtitle of this blog is taken from a series of 
+[math books written by J.E. Thompson](https://www.thriftbooks.com/a/j-e-thompson/1950025/)
+: Arithmetic for the Practical Man, Algebra for the Practical Man,
+Geometry for the Practical Man, etc. I believe that Richard Feynman tought himself math
+from these books. This is, I think, the only thing I have in common with Richard Feynman.  
+
+I can be reached by my first name at carlislegroup dot com. 
+
+
+

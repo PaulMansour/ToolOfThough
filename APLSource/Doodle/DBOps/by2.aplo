@@ -1,0 +1,13 @@
+ by2←{                       ⍝ Try selectin first
+     ⍺←⊣
+     a i b←3↑⍵,⊂1⍴⍨≢⊃⍵
+     p←(⊆i)~¨⊂⍸~b
+     g←{⍵⌷⍨⊂⍺}
+     pa←p g¨⊂a
+     sa←pb/¨pa
+     r←⍺ ⍺⍺¨sa `
+     t←(1=≡r)∨2=≢61 ⎕ATX'⍺⍺'
+     e←t{⍺:|2-/⍸⍵,1 ⋄ ⍵}b    ⍝ NOPE, boolean must be grouped and sorted too and sorted too.
+     v←e\r
+     v[⍋∊i]
+ }

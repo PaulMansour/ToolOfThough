@@ -1,0 +1,12 @@
+:Namespace NSS1
+
+      foo←{
+          +/⍵
+      }
+    :Namespace NSS2
+          goo←{
+              ⍺+⍵
+          }
+    :EndNamespace
+
+:EndNamespace

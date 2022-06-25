@@ -1,4 +1,5 @@
  BuildSite←{
+     ⎕THIS.H←#.Abacus.Main
      _←⎕NUNTIE ⎕NNUMS
      d←##.AcreConfig.DistFolder
      _←3 ⎕NDELETE d

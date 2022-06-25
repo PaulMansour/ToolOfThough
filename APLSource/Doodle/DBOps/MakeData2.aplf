@@ -1,0 +1,7 @@
+ MakeData2
+
+ RowId←1+⍳10
+ Account←1 2 3 3 1 2 1 1 1 2
+ Payment←8 3 5 4 2 7 1 9 6 10
+ Day←31 1 9 5 14 27 22 17 3 11
+ '⍉↑ RowId Account Payment Day'

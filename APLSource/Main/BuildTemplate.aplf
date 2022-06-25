@@ -6,13 +6,13 @@
          m←⊂'Home' '/'
          m,←⊂'Posts' '/posts'
          m,←⊂'Projects' '/projects'
-         m,←⊂'Reference' '/reference'
+         ⍝ m,←⊂'Reference' '/reference'
          m,←⊂'Don''ts' '/donts'
-         m,←⊂'Hmmm' '/hmmm'
+         ⍝ m,←⊂'Hmmm' '/hmmm'
          m,←⊂'Links' '/links'
          m,←⊂'About' '/about'
          m
      }0
-     p.Footer←'Copyright 2021 Paul S. Mansour'
+     p.Footer←'Copyright 2022 Paul S. Mansour'
      H.NewSimpleSiteTemplate p
  }

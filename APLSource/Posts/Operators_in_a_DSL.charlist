@@ -1,0 +1,282 @@
+# [Operators in a DSL](/posts/operators-in-a-dsl)
+
+## May 28, 2022
+
+When designing a number-crunching domain specific language (DSL) in Dyalog APL
+we have the luxury of using operators. This immediately presents many
+design issues. Operators decrease the number of functions in the DSL,
+reducing overall size and complexity. At the same time, operators increase the complexity
+of composing an individual expression by introducing more moving parts.
+
+> Note `⎕IO←0` and `⎕ML←1` throughout. In addition, all functions and operators
+> defined below are simplified and unoptimized versions of production code.  
+
+Consider providing a `maximum` function and a `reduce` operator in the DSL as direct
+covers of their APL counterparts:
+
+~~~
+      maximum←{⍺⌈⍵}
+      reduce←{⍺⍺/⍵}
+~~~
+
+No end-user wants to think or type:
+
+~~~
+      maximum reduce StockPrice
+~~~
+
+when he could type:
+
+~~~
+      max StockPrice
+~~~
+
+which one can do in say, SQL. So instead we provide the aggregate functions like `sum` and `max` 
+in addition to their scalar counterparts:
+
+~~~
+      sum←{+/⍵}
+      max←{⌈/⍵}
+~~~
+
+As noted, fewer operators make more functions.
+However, many if not most of the primitive arithmetic and boolean reductions
+are so commonly used that they have useful and well-known names 
+like sum, min, max, any, all, etc. In addition, there are many more common 
+aggregate functions like average and variance that are not primitive scalar reductions
+and these would need to be provided directly as functions anyway.
+So this is an easy decision; the trade-off of more functions and fewer operators
+in this case is well worth it. 
+
+Now let's take the next step: running aggregates. Again, we have the option
+of providing a single operator or an additional set of functions. In APL
+we use the scan operator with a scalar function for this. However, in our DSL, once
+we have named aggregate functions like `sum` and `max`, it makes sense to use the aggregate function
+as the operand rather than the scalar function on which the aggregate is based,
+so we might define a `running` operator as:
+
+~~~
+      running←{
+          h←⊃61 ⎕ATX'⍺⍺'
+          f←{⍵↑⍨⍵⍳'←'}1↓h
+          f≡'sum':+\\⍵
+          f≡'max':⌈\\⍵
+          ⍺⍺¨,\\⍵
+      }
+~~~
+
+Here the choice is more open for debate, but I think it is still clearly in favor
+of the operator, especially considering that moving statistics could be handled by
+just giving a left argument to the running operator. Now a single operator is
+reducing the need for a lot of functions that will have awkward names and
+that will not get called very often. Kx Systems took the opposite approach with q,
+but I can only imagine there was no choice, as k does not support
+user-defined operators. The proliferation of functions and the
+difficulty naming them [is immediately apparent.](https://code.kx.com/q/ref/sum/) 
+
+The derived function `sum running` is an example of a **uniform** function - a function
+that returns a result that is the same shape as its argument.
+The result of a uniform function generally depends on the totality of the items in the array -
+both the existence and the ordering of the items.
+This feature distinguishes them from scalar functions. There are many
+uniform functions that are not derived functions. Prime examples in APL
+are grade up (`⍋`) and grade down `(⍒)`, rotate `(⌽)` and first occurrence (monadic `≠`).
+A DSL may have many more like `lag` and `lead`:
+
+~~~
+      lag←{
+           ¯1↓0,⍵
+       }
+
+      lead←{
+          1↓⍵,0
+       } 
+~~~
+
+Uniform functions lend themselves to being applied to an argument that is conceptually
+grouped and or ordered. Yet again we are faced with the choice of an operator or a plethora
+of additional functions- functions that are even more awkward to name,
+and that require a lot of arguments. In this case there is simply no contest. 
+Going the route of additional functions is [not pretty.](https://docs.1010data.com/1010dataReferenceManual/Functions/GroupFunctions/Group.html)
+ 
+Let's define an operator `by` with the following syntax:
+
+~~~
+      R←[X] F by Y I [B]     
+~~~
+
+Here `F` is any uniform (or aggregate - more on this later) function. `Y` is a suitable right argument for `F`,
+and `X` is an optional left argument for `F`. `I` is a grade vector that orders `Y`,
+or a set of grade vectors that groups and optionally orders `Y`. 
+`B` is an optional boolean selection vector that flags items to include
+and exclude in the computation.
+
+The `by` operator sorts and groups `Y` according to `I`, (optionally selecting by `B`), 
+applies `F` to each group, and then ungroups and reorders the results to correspond
+to the original argument `Y`. This is similar to the under [operator](https://aplwiki.com/wiki/Under), but
+I don't think it can handle this particular case.  
+
+Sorting and grouping is provided by grade vectors rather than providing corresponding
+values on which to sort and group for the same reason sorting in APL is a two-step process
+with grade up and grade down. In addition we extract some complexity from the by operator
+by computing I beforehand using grouping and sorting functions.
+
+Let's define `by` as follows:
+
+~~~
+by←{
+     ⍺←⊣
+     a i b←3↑⍵,⊂1⍴⍨≢⊃⍵
+     g←{⍺{⍵⌷⍨⊂⍺}¨⊂⍵}
+     (pa pb)←(⊆i)∘g¨a b
+     sa←pb/¨pa
+     r←⍺ ⍺⍺¨sa
+     af←1=≡r
+     ua←2=≢61 ⎕ATX'⍺⍺'
+     ff←af∨ua
+     z←(~⊃¨pb)∧~af
+     (⊃¨pb)←1
+     e←({|2-/⍸⍵,1}¨⍣ff)pb
+     v←∊e\\¨r,¨⍨z/¨0
+     v[⍋∊i]
+ }
+~~~
+
+Now we can do a running sum from lowest to highest:
+
+~~~
+      A←100 2 1 8 12
+      sum running by A (⍋A)
+123 3 1 11 23
+~~~
+
+In other words, for each item, find the sum of it and all items less than it.
+Let's also define a grouping function that can optionally take a grade vector
+as its left argument:
+
+~~~
+group←{
+     ⍺←⍳≢⍵
+     i←{↓⍵}⌸⍵[⍺]
+     ⍺∘{⍺[⍵]}¨i
+ }
+~~~
+
+And some more data to play around with:           
+
+~~~
+      RowId←1+⍳10
+      Account←1 2 3 3 1 2 1 1 1 2
+      Payment←8 3 5 4 2 7 1 9 6 10
+      Day←31 1 9 5 14 27 22 17 3 11
+      M←⍉↑RowId Account Payment Day
+      M
+ 1 1  8 31
+ 2 2  3  1
+ 3 3  5  9
+ 4 3  4  5
+ 5 1  2 14
+ 6 2  7 27
+ 7 1  1 22
+ 8 1  9 17
+ 9 1  6  3
+10 2 10 11
+~~~
+
+To round out our little DSL, let's also cover grade up:
+
+~~~
+orderUp←{
+     ⍋⍵
+ }
+~~~
+
+Now we can compute a running sum of payments by account:
+
+~~~
+      M,sum running by Payment (group Account)
+ 1 1  8 31  8
+ 2 2  3  1  3
+ 3 3  5  9  5
+ 4 3  4  5  9
+ 5 1  2 14 10
+ 6 2  7 27 10
+ 7 1  1 22 11
+ 8 1  9 17 20
+ 9 1  6  3 26
+10 2 10 11 20
+~~~
+
+It is often useful to compute and save the ordering and grouping.
+So to find the ordered running sum of payments by account:
+
+~~~
+      G←(orderUp Day) group Account
+      M,sum running by Payment G
+ 1 1  8 31 26
+ 2 2  3  1  3
+ 3 3  5  9  9
+ 4 3  4  5  4
+ 5 1  2 14  8
+ 6 2  7 27 20
+ 7 1  1 22 18
+ 8 1  9 17 17
+ 9 1  6  3  6
+10 2 10 11 13
+~~~
+
+And to find the previous payment for each day by account:
+
+~~~
+      M,lag by Payment G
+ 1 1  8 31  1
+ 2 2  3  1  0
+ 3 3  5  9  4
+ 4 3  4  5  0
+ 5 1  2 14  6
+ 6 2  7 27 10
+ 7 1  1 22  9
+ 8 1  9 17  2
+ 9 1  6  3  0
+10 2 10 11  3
+~~~
+
+The `by` operator is useful not only with uniform functions, but with aggregate functions
+as well. The result of the aggregate function on each group 
+is replicated to line up with the original argument:
+
+~~~
+      M,sum by Payment (group Account)
+ 1 1  8 31 26
+ 2 2  3  1 20
+ 3 3  5  9  9
+ 4 3  4  5  9
+ 5 1  2 14 26
+ 6 2  7 27 20
+ 7 1  1 22 26
+ 8 1  9 17 26
+ 9 1  6  3 26
+10 2 10 11 20
+~~~
+
+And we can apply a boolean selection as well:
+
+~~~
+      M,sum by Payment (group Account) (Day<15)
+ 1 1  8 31  8
+ 2 2  3  1 13
+ 3 3  5  9  9
+ 4 3  4  5  9
+ 5 1  2 14  8
+ 6 2  7 27 13
+ 7 1  1 22  8
+ 8 1  9 17  8
+ 9 1  6  3  8
+10 2 10 11 13
+~~~
+
+There is a balancing act with respect to operators and functions. This is similar to 
+the balancing act of fewer functions with more arguments, versus more functions and fewer
+arguments. Overuse of operators can make individual expressions and discovery difficult.
+Underuse can lead to a proliferation of badly named and rarely used functions that have too
+many arguments.

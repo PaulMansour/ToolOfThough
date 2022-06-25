@@ -1,0 +1,154 @@
+# Don'ts
+
+Or how not to program in Dyalog APL.
+
+## Don't use trad functions and control structures
+
+There is almost never a reason to use a trad function. 
+First, naming things is difficult (one of the hardest tasks in programming someone famous once said). Dfns name your arguments for you, and do not require you to name your result. That is three difficult decisions that are made for you, every time you write a function, by the wisdom of our ancestors. 
+
+More importantly, the biggest problem with traditional functions are control structures. Control structures make it much too easy to accumulate technical dept, and much too easy to write really long, meandering functions. When a bug or design issue is encountered it is tempting to just `:If :Then :Else` around it, or worse yet, `:Trap 0` around it, when re-thinking and refactoring should be done. But the heart of the problem is that control structures let us avoid naming a new function. As noted, naming is hard, and programmers are lazy. Wherever a control structure is used to avoid naming a new function, we see an ill-defined comment that attempts to accomplish the task. Let your functions do the talking!
+Use dfns, and let you functions themselves be the control structures. If your functions are well-named, there is almost no need to comment the code.     
+
+## Don't nest control structures
+
+[Don't use control structures](#don'tusetradfunctionsandcontrolstructures). But if you must, don't nest them.
+
+## Don't mix code golf with control structures
+
+[Don't use control structures](#don'tusetradfunctionsandcontrolstructures), But if you do,  don't write a long string of jots and tacks, with a tilda diaresis thrown in for good measure, all dangling off the end of an :If statement in the middle of a 100 line function full of loops and case statements. Write functions at the same level of abstraction. Functions should be mostly primitives, or mostly calls to other functions. Functions should be mostly readable in English, or in APL.
+
+## Don't dangle major functionality off the end of an `:If` clause 
+
+Don't use control structures, but if you do, keep it simple. Don't do this:
+
+~~~
+:If 0=⊃r←ThisReallyBigTask x
+       blah blah flah
+:EndIf
+~~~
+
+I mean, you are already using control structures. Why are you trying to save 
+a line of code? ThisReallyBigTask is important, and deserves a line of its own.
+Do this:
+
+~~~
+r←ThisReallyBigTask x
+:If 0=⊃r
+      blah blah flah
+:EndIf
+~~~
+
+## Don't nest parentheses
+
+One level is fine. Even multiple non-nested pairs on a line is OK. There is nothing wrong with using parenthesis to change the order of execution (that's what they are for):
+
+~~~
+(+/⍵)÷⍴⍵
+~~~
+
+## Don't use namespace scripts
+
+Does anyone know exactly what these things really are?
+[Here is the problem](/posts/the-problem-with-namespace-scripts).
+
+## Don't use `⎕CS`
+
+I have forgotten exactly why, but I'm pretty sure there is simply no need to.
+
+## Don't use `⎕PATH`
+
+To make functions in other namespaces easily accessible, simply assign a reference
+in the function, or even in the namepace:
+
+~~~
+      R←#.This.That.TheOtherSpace
+      z←R.Foo x
+~~~
+
+## Don't embed assignment
+
+Unless you are doing code golf. 
+
+## Don't use classes
+
+Don't use classes unless you intend to properly encapsulate. That is, if your class definition begins with 50 public fields, and you can't be bothered to write the getters and setters to that would make them properties, what's the point? This would eliminate 99.9 percent of all classes ever written in Dyalog APL. Use regular functions in a (named) namespace to act as methods of a class. Use unnamed namespaces for instances. Pass the the instance to the method as the left argument. Thus, instead of writing;
+
+~~~
+  i.MethodName x
+~~~
+
+we would write:
+
+~~~
+  i MethodName x
+~~~
+
+## Don't use a naked `⎕NEW`
+
+Don't use classes, but if you do, don't directly use `⎕NEW`. 
+Have an static method named `New` in the class that calls `⎕NEW`.
+This forces all instances of the class to be in a known place,
+where they can find friendly classes by doing something `##.FriendlyClass.New`.   
+
+## Don't trap 0
+
+If you trap 0 around anything more than trivial code, you have no idea if your code works the way you think it works, and it probably does not. Minimize the amount of code wrapped in a trap. Use a specific error number (like 6 for VALUE ERROR) if you can. If you must trap, use a dfn with a specific error guard to trap trivial code. 
+
+## Don't use `⍬` as a place holder for a namespace or class 
+
+Use 0 instead. Namespaces and classes are scalar items and may be compared with each other or any scaler with `=` rather than `≡`.  Inserting a `⍬` into an array of namespaces increases the depth, and makes many operations more complex. A zero keeps the depth at 1. Thus a zero is a perfect value to use for a missing or unknown instance of a class or namespace. 
+
+Compare:
+
+~~~
+     0=(⎕NS '') 0 (⎕NS '') 
+0 1 0
+     (⊂⍬)≡¨(⎕NS'') ⍬ (⎕NS'')
+0 1 0
+~~~
+
+## Don't abbreviate names
+
+In the proper circumstances, the letter `d` is an excellent name. Again, in the proper circumstances, the string `NextRateAdjustmentDate` may be an excellent name, as is the string `NRADate`. These names have in common the following property: they may be spoken over the phone, and the hearer has a reasonable chance of understanding what is being communicated. The string `NxtRtAdjDt` is _never_ a good name. It sows confusion. It is the Voldemort of names by force: it must not be spoken because it cannot be spoken. 
+
+## Don't use long names for short-lived variables
+
+In dfns, the left argument is `⍺`, and the right argument is `⍵`. Not `alpha` and `omega`, but `⍺` and `⍵`. The 26 individual letters of the alphabet provide the next best 26 choices for local variable names. If you need more, your function is probably trying to do too much.  Long names obscure the relationship between primitive functions, and make anything more than a trivial expressions hard to read. 
+
+## Don't use short names for long-lived variables
+
+Use long, descriptive names for long-lived variables. A long-lived variable is is either a global or semi-global (both of which should generally be avoided), or a property or field in class, or a variable in an unnamed namespace.  Marshal long variables names into short names by assignment when you don't want long names for short-lived variables.  
+
+## Don't write long function headers
+
+[Don't use trad functions](#don'tusetradfunctionsandcontrolstructures) But if you do, don't have your header so long that you have to scroll. And don't put the header on multiple lines! Use a namespace to encapsulate local variables if you really need a lot.  
+
+## Don't write long lines of code
+
+Keep your functions thin. If you need to scroll to the right, your lines of code are too damn long! 
+
+## Don't write long functions
+
+Keep your functions short. If you need to scroll down, or use collapsing tree views, or control structures to divide it into sections, or an Uber car to get from one end to the other, your function is too damn long! 
+
+## Don't require multiple, ordered arguments
+
+Use a namespace to pass multiple named arguments to a function.
+Order is then unimportant, and it is easier to default specific items.
+
+## Don't trap errors in utility or low-level functions
+
+Expect the arguments to be valid. Trap as high up the stack as possible.
+
+## Don't comment lines of code
+
+You read that correctly. Carefully choose the name of your function, its arguments, and its result. Provide a comment line or two or three at the top of the function describing the arguments and the result.  
+
+## Don't use the result of `⎕DQ`
+
+Or of the `Wait` method. Use callbacks on your GUI objects. Do not exit `⎕DQ` and inspect the result and take action based it. If you do this, you will be unable to write automated GUI tests. If you need to run `⎕DQ` to make a form modal, it must be on the last line of the function, and the result thrown away. There should be a guard or a no-op in cover function that bypasses the `Wait` when running tests.  
+
+## Don't write tests that look at the internals of your project
+
+Tests should be code that is useful as documentation for a user of the API. Tests should exercise the API, making sure results are appropriate given inputs. Tests should not test and expose internal architecture or data structures that are not exposed by the API.
