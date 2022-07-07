@@ -1,0 +1,51 @@
+# [LeetCode 571: Find Median Given Frequency of Numbers](/posts/leetcode-571)
+
+## July 6, 2022
+
+One of the most powerful aspects of FlipDB is that we can employ APL-style solutions directly in a query.
+We can take, drop, rotate, expand, replicate, grade (and much more!), 
+doing all sorts of things with intermediate values and structures,
+and as long as as the final result is conforming (produces a table), we are good to go.
+This makes solving LeetCode 571 not just easy, but trival.
+We are given a table of observations and their frequencies:
+
+~~~          
+   t.Display 0
+── LeetCode571.Numbers 
+ ┌Num─┐  ┌Frequency┐   
+ ↓0   │  ↓7        │   
+ │1   │  │1        │   
+ │2   │  │3        │   
+ │3   │  │1        │   
+ └Int8┘  └Int8─────┘   
+── 4 rows by 2 columns 
+~~~
+
+and tasked with computing the median:
+
+~~~          
+     q←t.Query''
+     _←q.AddColumn'Median' 'median Frequency replicate Num'
+     r←q.Execute 0
+     r.Display 0
+───────────────────────
+ ┌Median┐              
+ │0     │              
+ └Int8──┘              
+── 1 row by 1 column ──
+~~~
+
+Of course FlipDB has a median function (as well as the more general percentile , like SQL),
+so we have abstracted away the problem of actually computing the median. 
+The point here, though, is that we can easily transform the given data to construct the appropriate argument to median,
+using a common APL technique:
+
+~~~
+      7 1 3 1/0 1 2 3
+0 0 0 0 0 0 0 1 2 2 2 3
+~~~
+
+And the intermediate data structure, an array of lenght 12,
+is not directly related to the shape of any tables in the database.
+We have some serious computational freedom within a query,
+and can write direct solutions to complex problems.

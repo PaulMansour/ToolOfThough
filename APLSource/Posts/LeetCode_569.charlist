@@ -1,0 +1,122 @@
+# [LeetCode 569: Median Employee Salary](/posts/leetcode-569)
+
+## July 7, 2022
+
+This problem is poorly constructed and annoying for multiple reasons.
+It's also hard to solve - and that makes it even more annoying.
+We are given the following table:
+
+~~~
+      t.Display 0
+── LeetCode569.Employee ─────
+ ┌ID──┐  ┌Company┐  ┌Salary┐ 
+ ↓1   │  ↓A      │  ↓2,341 │ 
+ │2   │  │A      │  │341   │ 
+ │3   │  │A      │  │15    │ 
+ │4   │  │A      │  │15,314│ 
+ │5   │  │A      │  │451   │ 
+ │6   │  │A      │  │513   │ 
+ │7   │  │B      │  │15    │ 
+ │8   │  │B      │  │13    │ 
+ │9   │  │B      │  │1,154 │ 
+ │10  │  │B      │  │1,345 │ 
+ │11  │  │B      │  │1,221 │ 
+ │12  │  │B      │  │234   │ 
+ │13  │  │C      │  │2,345 │ 
+ │14  │  │C      │  │2,645 │ 
+ │15  │  │C      │  │2,645 │ 
+ │16  │  │C      │  │2,652 │ 
+ │17  │  │C      │  │65    │ 
+ └Int8┘  └Char(1)┘  └Int16─┘ 
+── 17 rows by 3 columns ─────
+~~~
+
+And tasked with:
+
+> Each row of this table indicates the company and the salary of one employee.
+> Write an SQL query to find the median salary of each company.
+
+If we did not have an example to the contrary, and we wanted to 
+*find the median salary of each company* as the instructions say,
+then this is an easy query, first grouping by company,
+and then applying the aggregate expression ` median Salary` in the select clause.
+
+But the desired result is:
+
+~~~
+      r.Display 0
+── Key:ID ───────────────────
+ ┌ID──┐  ┌Company┐  ┌Salary┐ 
+ ↓5   │  ↓A      │  ↓451   │ 
+ │6   │  │A      │  │513   │ 
+ │9   │  │B      │  │1,154 │ 
+ │12  │  │B      │  │234   │ 
+ │14  │  │C      │  │2,645 │ 
+ └Int8┘  └Char(1)┘  └Int16─┘ 
+── 5 rows by 3 columns ──────
+~~~
+
+By inspection we see that the actual instructions should read something more like:
+
+> Write an SQL query that returns the employees that earn
+> the median salary if the median is not an interpolated value,
+> or the two salaries that are averaged
+> to compute the median, for their respective companies.
+> Remove employees that duplicate company/salary combinations
+> from the result set.  
+
+Yuck.
+
+Assume for moment we had a built-in structural function named `medians`
+that returned a one-item array or a two-item array containing the values
+that go into constructing the median. Then we could simply write the select
+clause:
+
+~~~
+      Salary in medians each by Salary (group Company)
+~~~
+
+using the `each` and `by` operators which does everything we need except the final removal of duplicates.
+(I am resisting the urge to implement `medians` in FlipDB). Note that
+the `each` operator is necessary as `medians` is a structural function,
+not an aggregate, or scalar, or uniform function. (More on this in a future post).   
+However, in FlipDB we can do in-line anonymous functions just like dfns in APL,
+so we can replace `medians` above with this mess of a one-liner:
+
+~~~
+     {(floor (shape z) / 2)index each enclose(sortUp z)(sortDown z)}
+~~~
+
+There is probably a much neater way to get the medians. FlipDB uses `z` as the right argument,
+in place of `⍵` in APL. The `enclose` function in FlipDB converts a set of simple columns
+into a single nested column. If there are an odd-number of items, we will get the same item
+twice, but it does not matter for the problem.
+
+With this in hand we can solve the problem:
+
+~~~ 
+      q←t.Query''
+      q.Where←'Salary in {(floor (shape z) / 2)index each enclose(sortUp z)(sortDown z)} each by Salary (group Company)'
+      q.Having←'firstOccurrence Company laminate toChar Salary'
+      r←q.Execute 0
+      r.Display 0
+── Key:ID ───────────────────
+ ┌ID──┐  ┌Company┐  ┌Salary┐ 
+ ↓5   │  ↓A      │  ↓451   │ 
+ │6   │  │A      │  │513   │ 
+ │9   │  │B      │  │1,154 │ 
+ │12  │  │B      │  │234   │ 
+ │14  │  │C      │  │2,645 │ 
+ └Int8┘  └Char(1)┘  └Int16─┘ 
+── 5 rows by 3 columns ──────
+~~~
+
+The having clause should probably be able to be written as:  
+
+~~~
+      firstOccurrence Company Salary
+~~~
+
+The `firstOccurrence` function is a cover for APL's unique mask function (monadic `≠`).
+I don't think there is any reason it should not accept multiple columns. It could also take
+a table or datatable as an argument - on the todo list!

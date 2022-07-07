@@ -1,0 +1,165 @@
+# [LeetCode 262: Trips and Users](/posts/leetcode-262-trips-and-users)
+
+## June 26, 2022
+
+After `weightedAverage`, the single most import function contributing to the 
+success of *The Carlisle Group* is `percentAcross`. Like `weightedAverage`, it
+is an aggregate function. Like `weightedAverage`, it is not complicated mathematically or difficult to implement.
+And like `weightedAverage`, you won't find it in Excel or SQL.
+
+
+
+It takes 2 to 3 arguments. The first argument is the primary numeric vector on which
+we are computing the percentage.
+The second argument is the boolean mask to abe applied to the numerator.
+The optional third argument is the denominator mask, which defaults to 1.
+The result is simply the quotient of the sums of the primary vector masked
+by the two booleans. 
+
+A simple implementation might look like:
+
+~~~
+percentAcross←{
+     v n d←3↑⍵,1
+     (+/v×n)÷+/v×d
+ }
+~~~
+
+We call it "percentAcross"  because in the context of a grouped query, its typical
+usage, it can produce percentages that are additive across the result table, 
+as opposed to down the result table. Repeated calls with 
+mutually exclusive booleans restricting the numerator are a poor man's cross-tab.   
+
+
+Consider:
+
+~~~
+      percentAcross (20 30 10 40) (0 1 0 1)
+0.7
+~~~
+
+The 2nd and 4th item of the vector represent 70 percent of the total.
+We can restrict the denominator as well:
+
+~~~
+      percentAcross (20 30 10 40) (0 1 0 1) (0 1 1 1)
+0.875
+~~~
+
+The 2nd and 4th item represent 87.5% of the 2nd, 3rd, and 4th items.  
+
+With this function in hand, let's tackle LeetCode 262:
+[Trips and Users](https://leetcode.com/problems/trips-and-users/).
+We are given two tables:
+
+~~~
+      d←s.Get '/Databases/LeetCode262'
+      d.Display 0
+ ── LeetCode262.Users ────────────                                               
+  ┌UsersID┐  ┌Banned─┐  ┌Roll───┐                                                
+  ↓1      │  ↓No     │  ↓client │                                                
+  │2      │  │Yes    │  │client │                                                
+  │3      │  │No     │  │client │                                                
+  │4      │  │No     │  │client │                                                
+  │10     │  │No     │  │driver │                                                
+  │11     │  │No     │  │driver │                                                
+  │12     │  │No     │  │driver │                                                
+  │13     │  │No     │  │driver │                                                
+  └Int8───┘  └Char(3)┘  └Char(6)┘                                                
+ ── 8 rows by 3 columns ──────────                                               
+                                                                                 
+ ── LeetCode262.Trips ────────────────────────────────────────────────────────── 
+  ┌ID──┐  ┌ClientID┐  ┌DriverID┐  ┌CityID┐  ┌Status─────────────┐  ┌RequestAt─┐  
+  ↓1   │  ↓1       │  ↓10      │  ↓1     │  ↓completed          │  ↓2013-10-01│  
+  │2   │  │2       │  │11      │  │1     │  │cancelled by driver│  │2013-10-01│  
+  │3   │  │3       │  │12      │  │6     │  │completed          │  │2013-10-01│  
+  │4   │  │4       │  │13      │  │6     │  │cancelled by client│  │2013-10-01│  
+  │5   │  │1       │  │10      │  │1     │  │completed          │  │2013-10-02│  
+  │6   │  │2       │  │11      │  │6     │  │completed          │  │2013-10-02│  
+  │7   │  │3       │  │12      │  │6     │  │completed          │  │2013-10-02│  
+  │8   │  │2       │  │12      │  │12    │  │completed          │  │2013-10-03│  
+  │9   │  │3       │  │10      │  │12    │  │completed          │  │2013-10-03│  
+  │10  │  │4       │  │13      │  │12    │  │cancelled by client│  │2013-10-03│  
+  └Int8┘  └Int8────┘  └Int8────┘  └Int8──┘  └Char(19)───────────┘  └Date──────┘  
+ ── 10 rows by 6 columns ─────────────────────────────────────────────────────── 
+~~~
+
+The problem is:
+
+> The cancellation rate is computed by dividing the number of canceled (by client or driver)
+> requests with unbanned users by the total number of requests with unbanned users on that day.
+> Write a SQL query to find the cancellation rate of requests with unbanned users
+> (both client and driver must not be banned) each day between "2013-10-01" and "2013-10-03".
+> Round Cancellation Rate to two decimal points.
+> Return the result table in any order.
+
+Note that CityID and Roll columns of the given tables are not needed. Furthermore,
+the final restriction of the explicit dates does not add anything material to the problem
+in this particular case, or anything intesting in any case. 
+
+Our query begins with the Trips table, selecting only those rows where neither
+the driver nor the client are banned:
+
+~~~
+      t←d.GetTable 'Trips'
+      q←t.Query''
+      q.Where←'(ClientID.Banned in "No") and (DriverID.Banned in "No")'
+~~~
+
+ClientID and DriverID are foreign keys in the Trips table pointing to the Users table. 
+Then we group and specify the cancellation rate adding a column to the select clause: 
+
+~~~
+      q.GroupBy←'RequestAt'
+      _←q.AddColumn'CancellationRate' '2 round .01 * percentAcross Status (not Status in "completed")'
+~~~
+
+A production verison of `percentAcross` should operate on a character column,
+as it does here, to compute a percentage based on the row count. 
+We need to move the decimal over because in FlipDB the `percentAcross` function naturally returns
+a percentage, not a ratio. And of course round it to 2 decmimal places. And now the result: 
+
+~~~
+     r←q.Execute 0                                                                        
+     r.Display 0 
+────────────────────────────────────────
+ ┌RequestAt───────┐  ┌CancellationRate┐ 
+ ↓2013-10-01      │  ↓0.33            │ 
+ │2013-10-02      │  │0.00            │ 
+ │2013-10-03      │  │0.50            │ 
+ └Date────────────┘  └Dec(2)──────────┘ 
+── 3 rows by 2 columns ─────────────────
+~~~
+
+An issue with this solution, however, is that the where clause might reduce
+the number of unique dates in the result, and will almost certainly, as it
+does in this case, reduce the rows processed by the grouping clause. 
+We can move the where clause into the select clause by taking advantage
+of the `percentAcross` function's ability to restrict the data in both
+the numerator and the denominator. We use a couple of temporay results
+to keep it clear and clean:
+
+~~~
+      q←t.Query''
+      q.GroupBy←'RequestAt'
+      _←q.AddColumn'Unbanned' '(ClientID.Banned in "No") and (DriverID.Banned in "No")' 1
+      _←q.AddColumn'Cancelled' 'not Status in "completed"' 1
+      _←q.AddColumn'CancellationRate' '2 round .01 * percentAcross Status (Unbanned and Cancelled) Unbanned'
+      r←q.Execute 0
+      r.Display 0
+────────────────────────────────────────
+ ┌RequestAt───────┐  ┌CancellationRate┐ 
+ ↓2013-10-01      │  ↓0.33            │ 
+ │2013-10-02      │  │0.00            │ 
+ │2013-10-03      │  │0.50            │ 
+ └Date────────────┘  └Dec(2)──────────┘ 
+── 3 rows by 2 columns ─────────────────
+~~~
+
+The `percentAcross` function is simple yet extremely useful. For grouped queries, it answers
+the question, what percentage of X is in group Y. It's more general than a cross-tab,
+because the boolean statements may refer to any number of columns and group the horizontal axis
+in arbitrary ways.   
+
+
+
