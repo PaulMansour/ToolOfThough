@@ -1,0 +1,13 @@
+ dfn3←{
+     ⎕←'dfn 3, line 1'⊣⎕DL 3
+     ⎕←'dfn 3, line 2'⊣⎕DL 3
+     ⎕←'dfn 3, line 3'⊣⎕DL 3
+     ⎕←'dfn 3, line 4'⊣⎕DL 3
+     ⎕←'dfn 3, line 5'⊣⎕DL 3
+     ⎕←'dfn 3, line 6'⊣⎕DL 3
+     ⎕←'dfn 3, line 7'⊣⎕DL 3
+     ⎕←'dfn 3, line 8'⊣⎕DL 3
+     ⎕←'dfn 3, line 9'⊣⎕DL 3
+     ⎕←'dfn 3, line 10'⊣⎕DL 3
+     0
+ }

@@ -1,0 +1,8 @@
+ Exploration2
+⍝ Do threads switch between lines of dfns, or only on entry?
+⍝ And do threads switch between diamonds?
+ dfn4&0
+ dfn5&0
+ dfn6&0
+ trad7&0
+⍝ Answer, yes they do! Contrary to the documentation.

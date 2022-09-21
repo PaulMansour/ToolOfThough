@@ -1,0 +1,178 @@
+# [A Document Object Model in APL](/posts/a-document-object-model-in-apl)
+
+## September 22, 2022
+
+With a web browser now built-in with the interpreter, constructing and manipulating HTML
+and the DOM in a simple and consistent way has never been more important. Explicitly catenating 
+strings is no way to go through life. Lots of (my) old code looks like:
+
+~~~
+       '<h1>',t,'</h1>'
+~~~
+
+or barely better we might define tag as:
+
+~~~
+        tag←{'<',⍺,'>',⍵,'</',⍺,'>'}
+~~~
+
+And then tag this, that and the other, which all has to be catenated up. And then we enhance
+`tag` to take an argument with attributes. It doesn't get better. And when we are done,
+we have a horrific string, probably nested in various places by mistake,
+of hopefully valid HTML that we cannot manipulate in any meaningful way. 
+
+Consider instead a single simple function `New`:
+
+~~~
+   New←{
+     ⍝ ⍺ ←→ [Parent, 0 - no parent]
+     ⍝ ⍵ ←→ Tag [Content [Attributes]]
+     ⍝ ← ←→ Element
+     ⍺←0
+     s←IsString ⍵
+     t c a←s⊃(3↑⍵,⊂⍬)(⍵''⍬)
+     e←⎕NS''
+     e.Tag←,t
+     e.Parent←⍺
+     e.Content←''
+     _←a SetAttributes e
+     e⊣Add/⍺ e c
+ }
+~~~
+
+We can now create an object for an element, and produce HTML from it: 
+
+~~~
+      h←New 'h1' 'My Title'
+      DOM2HTML h
+<h1>My Title</h1>
+~~~
+
+Attributes may be specified by assignment:
+
+~~~
+      h.class←'chapter'
+      DOM2HTML h
+<h1 class="chapter">My Title</h1>
+~~~
+
+Elements can be created as children: 
+
+~~~
+      d←New 'html'
+      b←d New 'body'
+      m←b New 'main'
+      DOM2HTML d
+<!DOCTYPE html>
+<html>
+  <body>
+    <main></main>
+  </body>
+</html>
+~~~
+
+Content can be directly assigned:
+
+~~~
+      m.Content←h
+      DOM2HTML d
+<!DOCTYPE html>
+<html>
+  <body>
+    <main>
+      <h1 class="chapter">My Title</h1>
+    </main>
+  </body>
+</html>
+~~~      
+
+Producing HTML without explicit catenation is only a small part of the benefit.
+Consider the function `Elements`:
+
+~~~
+Elements←{
+     ⍝ ⍵ ←→ Element
+     ⍝ ← ←→ Vector of ⍵ and all sub elements
+     326≠⎕DR ⍵:⍬
+     ⍵,{c←{0=≢⍵:⍬ ⋄ ⍵/⍨326=⎕DR¨⍵}⍵.Content
+         0=≢c:⍬
+         ⊃,/c,¨∇¨c}⍵
+ } 
+~~~
+
+This traverses the DOM and yields a simple vector of
+all the elements:
+
+~~~
+      e←Elements d
+      e.Tag
+┌────┬────┬────┬──┐
+│html│body│main│h1│
+└────┴────┴────┴──┘
+~~~
+
+With this function in hand, various covers like `ElementByID` or `ElementsByTag` are
+trivial to write. Now its easy to find all the h1 headers and change, say, their class.
+
+Tables are especially painful to deal with without the proper tooling. With 
+a few helper functions to extract cells, we can manipulate HTML tables like an array
+programmer should:
+
+~~~
+     t←NewTable ⍕¨3 4⍴⍳12
+     c←BodyCells t
+     c[;2].class←⊂'char'
+     DOM2HTML t
+<table>                       
+  <tbody>                     
+    <tr>                      
+      <td>0</td>              
+      <td>1</td>              
+      <td class="char">2</td> 
+      <td>3</td>              
+    </tr>                     
+    <tr>                      
+      <td>4</td>              
+      <td>5</td>              
+      <td class="char">6</td> 
+      <td>7</td>              
+    </tr>                     
+    <tr>                      
+      <td>8</td>              
+      <td>9</td>              
+      <td class="char">10</td>
+      <td>11</td>             
+    </tr>                     
+  </tbody>                    
+</table>                      
+~~~ 
+
+Finally we can take HTML and get back the DOM:
+
+~~~
+       html←DOM2HTML t
+       t2←HTML2DOM html
+       html≡DOM2HTML t2
+1
+~~~
+
+Where `HTML2DOM` is:
+
+~~~
+HTML2DOM←{
+     ⍝ ⍵ ←→ HTML
+     ⍝ ← ←→ DOM
+     0=≢⍵:⍬
+     {⍵⌷⍨⍳1=⍴⍵}0{
+         m←⍵
+         0=≢m:⍺
+         b←m[;0]=0
+         p←⍺{⍺ New 3↑1↓⍵}¨↓b⌿m
+         m[;0]-←1
+         p⊣p ∇¨1↓¨b⊂[0]m
+     }⎕XML ⍵
+ }
+~~~
+
+Once you start creating HTML this way, patterns arise and utility functions fall out naturally.
+These utilities return content that can be manipulated and injected anywhere.

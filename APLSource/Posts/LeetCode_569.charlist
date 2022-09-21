@@ -94,7 +94,7 @@ twice, but it does not matter for the problem.
 
 With this in hand we can solve the problem:
 
-~~~ 
+~~~
       q←t.Query''
       q.Where←'Salary in {(floor (shape z) / 2)index each enclose(sortUp z)(sortDown z)} each by Salary (group Company)'
       q.Having←'firstOccurrence Company laminate toChar Salary'

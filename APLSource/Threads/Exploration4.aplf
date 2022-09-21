@@ -1,0 +1,5 @@
+ Exploration4
+⍝ Semaphore allow only 3 simultaneous users of a resource
+ ⎕TGET ⎕TPOOL
+ ⎕TPUT 3⍴7
+ newuser&¨⍳10

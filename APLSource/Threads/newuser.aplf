@@ -1,0 +1,11 @@
+ newuser←{
+     u←'User ',⍕⍵
+     _←work 25+?125
+     ⎕←u,' is waiting for resource...'
+     _←⎕TGET 7
+     ⎕←u,' has acquired resource.'
+     _←work 25+?125
+     _←⎕TPUT 7
+     ⎕←u,' has released resource.'
+     1:z←0
+ }

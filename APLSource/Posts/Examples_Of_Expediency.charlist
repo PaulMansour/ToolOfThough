@@ -1,0 +1,30 @@
+DRAFT
+
+[Examples of Expediencyt](/posts/examples-of-expediency)
+
+#### August 1, 2021
+
+The last post discussed the problems of using control structures because we
+are in a hurry. Here is a simple real-world example of trapping around a problem for the sake
+of expediency:
+          
+~~~
+:Trap 6
+       desc←1⌽')(',⊃⊆##.input(ns ⎕SE.⍎fn)nargs⍴⊂''
+:EndTrap    
+~~~
+
+There are no fewer than 4 names in the trapped expression that could cause a value error.
+Surely the trap is not intended to catch them all. 
+Any attempt to refactor the surrounding code could yield a value error that would never
+be noticed. But it was expedient to trap the value error rather than figure out which
+name was causing it, or to refactor the code to explictly check for the existence of the
+potentially missing value.
+
+In this case, introducing a function named, say, `GetDescription`, would allow a simple,
+explicit test for the potentially missing value (if indeed that should not be checked for earlier)
+and early exit with an empty string,
+which further simplifies things as `desc` is also assigned a dozen lines above this code 
+to be an empty string just in case the error occurs.
+Now all the logic related to defining `desc` is in one place. 
+

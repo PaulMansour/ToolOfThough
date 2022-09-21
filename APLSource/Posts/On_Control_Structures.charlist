@@ -1,0 +1,68 @@
+# [On Control Structures](/posts/on-control-structures)
+
+#### August 1, 2022
+
+The [latest episode of Array Cast](https://www.arraycast.com/episodes/episode32-control-structures)
+is on control structures. As usual, it is an excellent episode, covering history and all the options
+in the various array languages. However, the panelists raised a number of interesting questions which were
+not fully examined, let alone answered - understandable, given how much material was covered and the time
+constraints. One question was why use control structures at all?
+
+One of the main arguments made in favor of using control structures was *expediency*.
+While this argument was meant to be proscriptive, it is definitely descriptive: it is obvious from
+inspecting large APL code bases that make heavy use of control structures. But expediency
+is just another word for a shortcut. We don't have time to do it right,
+so we take the fast and easy way out. As tempting as this always is,
+it is almost never the right approach.
+
+Expediency piles on the technical debt. When hitting a bug, instead of refactoring the code,
+and perhaps extracting a new function or two, we just if-then-else or trap around the problem.
+Functions lose their focus, they get longer and longer, variables proliferate,
+control structures get nested, and nested, and nested again.
+
+Note that the issue here is not searching for an array-based solution,
+which, as noted in the podcast, may be difficult (or even impossible) and may not be worth the time.
+The issue is general refactoring, important in any language or paradigm. When there is a function that appears to require
+lots of control structure statements, it is often possible to rearrange things
+and factor out the control structures. A new function or two may need to be extracted
+to cleanly eliminate some control structures. This effort, and make no mistake, it is indeed effort,
+is well worth it.
+
+By eliminating control structures, one gains a deeper understanding of the problem,
+and the resulting code is shorter, more direct,
+and easier to debug, maintain and enhance. And by extracting more and more functions
+a domain-specfic English vocabulary arises and separates itself from the APL primitives.
+The code can become self-documenting. In the end we may still need some control structures,
+but they are separated and are above our APL primitive code. We don't have a :If keyword followed
+by a welter of primitives, a function train, and an embedded assignment. Functions are written
+at the same level of abstraction. Functions are mostly written in English, or mostly written
+in APL. As was noted in the podcast, it has been suggested that 
+control structures are sort of outside the language of APL. If it is a good idea that we
+code at the same level of abstraction, it follows that control structures should not be mixed
+with the heavy use of primitives.
+
+Most importantly, control structures provide an easy way to avoid naming things.
+Refactoring code to remove control structures requires naming new functions. 
+Naming things is important. Naming is also hard under the best of circumstances. When looking at a large rambling
+function is can be impossible to find any section that is nameable - without rewriting everything.
+When a program is a single large function full of control structures, 
+a fix or enhancement can be made with little thought to where it goes, precisely because
+there is no particular place for anything. There is only one name, the name of the big function.
+It's like a large messy room with no closet, chest of drawers, or desk. Anything can 
+just get thrown in the room with no concern for where it is. This is chaos.
+
+In a program with many small well-named functions, the place for a change must be carefully
+considered. There may be no good place for the change, and a new function may be required. Or the change
+may go in a particular function, expanding or changing its duties and making its name inappropriate. 
+A change can easily require multiple function name changes and the introduction of new functions.
+This takes work. This program is like a large neat room with appropriate storage; everything has a place,
+and everything in its place. The dirty shirt has a place in the hamper,
+the book has a place on the desk. If the room acquires a lot of books, and the desk
+becomes unmanageable, a bookshelf is installed. This is order.
+Bringing order out of chaos requires naming. Keeping things in order requires renaming.
+
+In addition to the question of why use control structures at all, the panelists pondered
+if it is possible to write large scale applications without them. These
+two questions are related, and if the answer to the first is primarily "expediency",
+the answer to the second is definitely "yes".
+

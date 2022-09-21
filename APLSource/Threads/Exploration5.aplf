@@ -1,0 +1,10 @@
+ Exploration5
+⍝ Like Exploration 2, but with global accumulator, not output to session
+⍝ Do threads switch between lines of dfns, or only on entry?
+⍝ And do threads switch between diamonds?
+ G←''
+ dfn8&0
+ dfn9&0
+ dfn10&0
+ trad11&0
+⍝ Answer,???  yes they do! Contrary to the documentation.

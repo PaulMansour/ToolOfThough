@@ -5,12 +5,12 @@
 One of the most powerful aspects of FlipDB is that we can employ APL-style solutions directly in a query.
 We can take, drop, rotate, expand, replicate, grade (and much more!), 
 doing all sorts of things with intermediate values and structures,
-and as long as as the final result is conforming (produces a table), we are good to go.
+and as long as as the final result is conforming in particular context, we are good to go.
 This makes solving LeetCode 571 not just easy, but trival.
 We are given a table of observations and their frequencies:
 
-~~~          
-   t.Display 0
+~~~
+      t.Display 0
 ── LeetCode571.Numbers 
  ┌Num─┐  ┌Frequency┐   
  ↓0   │  ↓7        │   
@@ -23,7 +23,7 @@ We are given a table of observations and their frequencies:
 
 and tasked with computing the median:
 
-~~~          
+~~~
      q←t.Query''
      _←q.AddColumn'Median' 'median Frequency replicate Num'
      r←q.Execute 0

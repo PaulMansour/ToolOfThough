@@ -1,0 +1,203 @@
+DRAFT
+
+# [Abacus Architecture](/posts/abacus-architecture)
+
+## September 12, 2022
+
+The HTMLRenderer supports web sockets, which gives us two-way asynchronous communication
+between the browser and the APL session. The browser can send a message to APL,
+and APL can send a message to the browser. However, in neither case is the sender waiting
+for a reply from the recipient. Much functionality can be achieved this way.
+  
+However, there are at least two cases when, from APL, we want to send a message to the 
+HTMLRenderer and wait for a response.
+The first is simply to execute a little general JavaScript. We might want to execute '2+2'
+or get the innerHTML from an element, or get the HTML of the entire page. 
+This should work anytime, anywhere, and specifically it must work  
+under the event handler of the WebSocketRecieve event, which is exactly where it gets tricky. 
+
+The second is when, from APL, we want to fire an event in the HTMLRenderer which has been wired
+with a event handler that calls back into APL.
+APL handles the message, presumably changing some state, and
+perhaps sending a message back to the HTMLRenderer, changing some state there. In this case
+we want to be able to wait in APL for all this to happen, and then verify the state changes.
+In other words, we want to test our HTMLRenderer GUI code in a easy, linear fashion,
+in one APL process. 
+ 
+This post attempts to explain an attempt to implement this sychronous behavior for these two cases. 
+
+The `ExecutJavaScriptSync`
+executes a snippet of Javascript and waits for a response:  
+
+~~~
+ExecuteJavaScriptSync←{
+     ⍝ ⍺ ←→ Document
+     ⍝ ⍵ ←→ Javascript
+     ⍝ ← ←→ Result                                                     
+     c←'"',⍵,'"'
+     j←'execCode(',(⍕⎕TID),',',c,')'
+     _←⍺ ExecuteJavaScript j
+     ⎕TGET ⎕TID
+ }
+~~~
+
+The left argument is the APLDOM object, the right argument is a string of Javascript.
+The thread ID is used as a message identifier.
+
+There is also a cover function that executes a string of javascript
+inside a specfic element:
+
+~~~
+ExecuteOnElementSync←{
+     ⍝ ⍺ ←→ Element
+     ⍝ ⍵ ←→ Javascript
+     ⍝ ← ←→ Result
+     i←TagIndex ⍺
+     t←⍺.Tag
+     c←'document.getElementsByTagName'
+     c,←'(''',t,''').item(',(⍕i),').',⍵,';'
+     ⍺.Document ExecuteJavaScriptSync c
+ }
+~~~
+
+The `ExecuteJavaScript` function just sends the data over the socket:
+
+~~~
+ExecuteJavaScript←{
+     ⍝ ⍺ ←→ Document
+     ⍝ ⍵ ←→ JavaScript
+     ⍺.HTMLRenderer.WebSocketSend ⍺.HTMLRenderer.WebSocketID ⍵ 1 1
+ }
+~~~
+
+Once the message is sent, we wait for a token (`⎕TGET ⎕TID`). Meanwhile, in the HTMLRenderer,
+the following Javascript is executed on receipt of the message from APL:
+
+~~~
+  function execCode(id,code) { 
+         const b = {Event: "SJSR", id: id, result: eval(code) }; 
+         const m = JSON.stringify(b); 
+         ws.send (m)
+}      
+~~~
+
+This simply evaluates the code and sends the result and the id back to APL. It also
+invents and returns an event named "SJSR" for **sychronous javascript result**.  
+
+Back in APL, we are waiting for and processing messages from the HTMLRenderer
+via the HTMLRenderer's WebSocketReceive event:
+
+~~~
+OnWebSocketReceive←{
+     h←⊃⍵
+     c←⎕JSON 3⊃⍵
+     c.Event≡'SJSR':c.result ⎕TPUT c.id
+     d←h.Document
+     q←d.StopPropagation
+     d.StopPropagation←0
+     q:0
+     c.HTMLRenderer←h
+     j←c.TargetIndex
+     k←c.CurrentTargetIndex
+     te ce←(Elements d)[j k]
+     c.Target←te
+     c.CurrentTarget←ce
+     h.LastTID←h.LastTID HandleRequest&c
+     0
+ }
+~~~
+
+This function must handle messages that are instigated by events in the browser, like clicking a button,
+as well as messages responding to synchronous calls from APL (the "SJSR" event). 
+
+We must allow `OnWebSocketReceive` to fire continuously without waiting for 
+the event handler in APL (for the click event on a button, say) to complete. Otherwise
+if event handler itself sends a synchronous request back to the browser, the system will deadlock,
+waiting for a response that will never arrive, as `OnWebSocketRecieve` can never fire as it is
+waiting for the event handler to complete, which is waiting for the response to the synchronous
+request. Thus we need to thread something, somewhere.  But this introduces a new problem.
+The moment we thread, we allow all events to be processed concurrently, when we only want
+SJSR events processed concurrently. All events initiated by the browsers 
+must be processed sequentially and exclusively, unless of course explicitly threaded in their
+own handlers.    
+
+It is possible to thread `OnWebSocketReceive` itself, but this only makes it significantly 
+more difficult to queue the events.  Instead we thread at the very end where we call
+`HandleRequest` which waits for the previous request to complete before executing:
+
+~~~
+HandleRequest←{
+     _←{6::0 ⋄ ⎕TSYNC ⍵}⍺
+     _←(⍎⍵.CurrentTarget⍎'On',⍵.Event)⍵
+     ~EventToken∊⎕TREQ ⎕TNUMS:0
+     ⍵ ⎕TPUT EventToken
+ }
+~~~
+
+If the event is "SJSR", that is if the event is the result of a sychronous JavaScript request,
+we put a token whose value is the result into the pool, signalling to the waiting thread that
+it now has its requested result. 
+
+So, we use the thread id as a token, send it with the message over to the HTMLRender,
+and then wait using `⎕TGET` for that token to appear in the token pool. By defintion,
+this technique for synchronous Javascript execution requires multi-threading. The
+`ExecuteJavaScriptSync` function and the `OnWebSocketReceive` function must be running
+in different threads so they both have time to execute.
+
+This second case for sychronous behavior is testing. We want to be in APL and 
+initiate an event in the HTMLRenderer that in turn sends a message to APL that does
+some processing. When this processing is complete, we want to verify some state change. 
+Let's look at a sample test function:
+
+~~~
+TestDecrement←{
+     d←⍵.Document
+     r←d A.ElementById'result'
+     v←⍎⊃r.Content
+     b←d A.ElementById'decrement'
+     _←b A.FireEventAndWait'click'
+     (v-1)≠⍎⊃r.Content
+ }
+~~~
+
+This function first inspects and saves the content of an element in the APLDOM as `v`.
+We then fire a click event in the HTMLRenderer and wait for response:    
+
+~~~
+FireEventAndWait←{
+     ⍝ ⍺ ←→ Element
+     ⍝ ⍵ ←→ Event
+     ⍺=0:0
+     _←⍺ ExecuteOnElement ⍵,'()'
+     ⎕TGET EventToken
+ }
+~~~
+
+The `EventToken` is just a constant, and 'ExecuteOnElement` is just a cover for `ExecuteJavaScript`:
+
+~~~
+ExecuteOnElement←{
+     ⍝ ⍺ ←→ Element
+     ⍝ ⍵ ←→ Javascript
+     i←TagIndex ⍺
+     t←⍺.Tag
+     j←'document.getElementsByTagName'
+     j,←'("',t,'").item(',(⍕i),').',⍵,';'
+     ⍺.Document ExecuteJavaScript j
+ } 
+~~~
+
+What now happens as we are waiting on to get EventToken? If we review the last 
+couple of lines of `OnWebSocketReceive`
+above we see that after any event is processed and its callback executed, we
+optionally place EventToken into the token pool: 
+ 
+~~~
+     _←(⍎ce⍎'On',c.Event)c
+     _←c ⎕TPUT{⍵×⍵∊⎕TREQ ⎕TNUMS}EventToken
+~~~
+
+
+
+
+

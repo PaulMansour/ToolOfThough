@@ -1,0 +1,5 @@
+ Exploration1
+⍝ Do threads switch between lines of dfns, or only on entry?
+ dfn1&0
+ dfn2&0
+ dfn3&0

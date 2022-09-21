@@ -1,0 +1,5 @@
+ z←work x;i
+⍝ x ←→ units of work
+ :For i :In ⍳x
+     z←÷/⍳10000000
+ :End
