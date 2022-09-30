@@ -1,8 +1,8 @@
 # [A Document Object Model in APL](/posts/a-document-object-model-in-apl)
 
-## September 22, 2022
+## September 21, 2022
 
-With a web browser now built-in with the interpreter, constructing and manipulating HTML
+With a web browser now effectively built into the interpreter, constructing and manipulating HTML
 and the DOM in a simple and consistent way has never been more important. Explicitly catenating 
 strings is no way to go through life. Lots of (my) old code looks like:
 
@@ -71,7 +71,7 @@ Elements can be created as children:
 </html>
 ~~~
 
-Content can be directly assigned:
+Content may be directly assigned:
 
 ~~~
       m.Content←h
