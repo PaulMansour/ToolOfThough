@@ -84,7 +84,7 @@ Content may be directly assigned:
     </main>
   </body>
 </html>
-~~~      
+~~~
 
 Producing HTML without explicit catenation is only a small part of the benefit.
 Consider the function `Elements`:
@@ -145,7 +145,7 @@ programmer should:
     </tr>                     
   </tbody>                    
 </table>                      
-~~~ 
+~~~
 
 Finally we can take HTML and get back the DOM:
 

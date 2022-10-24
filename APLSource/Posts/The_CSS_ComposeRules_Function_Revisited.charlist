@@ -1,0 +1,55 @@
+# [ComposeRules Revisited](/posts/composerules-revisited)
+
+## October 7, 2022
+
+In the previous post we looked at [constructing CSS programatically](/posts/constructing-css-in-apl).
+The `ComposeRules` function looked like:
+
+~~~
+ComposeRules←{
+     ⍝ ⍵ ←→ Vector of CSS Rules
+     ⍺←0
+     0=≢⍵:''
+     nl←⎕UCS 13
+     ⊃,/((⍺>0)/nl),⍺{
+         0=≢⍵.Selector:⍺ ComposeRules ⍵.Rules
+         b←(4×⍺)⍴' '
+         s←b,⍵.Selector,' {',nl
+         s,←⍺ ComposeDeclarations ⍵
+         s,←¯1↓(⍺+1)ComposeRules ⍵.Rules
+         s←s,b,'}',2⍴nl
+         s
+     }¨⍵
+ }
+~~~
+
+As is often the case when reviewing a function after a little time has passed,
+we wonder why we wrote it the way we did. Often there is a good reason,
+but also often there is not a good reason.
+
+There are at least two things that are bothersome about this 
+function. First, there is a nested dfn. I don't like to do this without a good
+reason, and I had a nagging feeling there was in fact no good reason. I was
+probably just in a hurry to enhance the function to handle nested rules. Second, and directly
+related, the main function is called recursively by explicit name, rather than using 
+self-reference (`∇`). A refactoring is in order:
+
+~~~
+ComposeRules←{
+     ⍝ ⍵ ←→ Vector of CSS Rules
+     ⍺←0
+     0=≢⍵:''
+     nl←⎕UCS 13
+     1=≡⍵:⊃,/((⍺>0)/nl),⍺ ∇¨⍵
+     0=≢⍵.Selector:⍺ ∇ ⍵.Rules
+     b←(4×⍺)⍴' '
+     s←b,⍵.Selector,' {',nl
+     s,←⍺ ComposeDeclarations ⍵
+     s,←¯1↓(⍺+1)∇ ⍵.Rules
+     s←s,b,'}',2⍴nl
+     s
+ }
+~~~
+
+Removing the nested dfn allows recursion via self-reference - the whole
+thing is much nicer.

@@ -11,15 +11,14 @@ HTML generation, and Markdown to HTML conversion. Go from DOM to HTML and back.
 HTMLRenderer framework for cross-platform desktop UI.
 Used by this site to convert Markdown to HTML.
 
+## [Exigo](http://www.github.com/the-carlisle-group/Exigo)
+
+Project documentation.
+
 ## [Rumba](http://www.github.com/the-carlisle-group/Rumba)
 
 A Web server. 
 
 ## [XL2APL](http://www.github.com/the-carlisle-group/XL2APL)
 
-Read Excel files in .xlsx format (XML) into APL. 
-
-## [Tool of Thought](http://www.github.com/paulmansour/toolofthought)
-
-The project that contains this site.
-
+Read Excel files in .xlsx format (XML) into APL.

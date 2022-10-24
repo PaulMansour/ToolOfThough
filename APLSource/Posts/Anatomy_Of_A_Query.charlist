@@ -1,0 +1,160 @@
+# [Anatomy of a Query](/posts/anatomy-of-a-query)
+
+## October 23, 2022
+
+A FlipDB query is essentially a highly structured dfn or collection of dfns;
+it is an ordered set of names and expressions.
+It is thus much less sophisticated than an SQL query.
+This simplicity, however, brings certain benefits. 
+It means that we can step through the query line by line (one name and expression at a time),
+and evaluate, inspect, or even change the code.
+In other words, the query may be traced just like a function in the Dyalog session,
+and in fact the FlipDB UI has its own tracer.
+This is not possible with SQL - an SQL query is not made up of individual,
+executable, traceable steps.
+
+A FlipDB query usually starts with a specific table, for a default context, and is 
+then composed of the following ordered sections or clauses:
+
+1. Precomputed expressions
+
+1. Where statements
+
+1. Where-not statements
+
+1. Group-by expressions 
+
+1. Select expressions
+
+1. Order-By clause
+
+1. Having statements
+
+Each section (except #6) is an ordered set of names and expressions, and may be thought of as a dfn.
+
+## Precomputed Expressions
+
+Precomputed expressions are evaluated before any *where* statements are applied, and thus
+operate on the entire table. These may be used to specify constants, computed columns and 
+aggregate values. (These latter two are especially valuable for expressions that may be
+row dependent, and thus change after the where clause is applied.) For example:
+
+|Name |Expression|
+|:=====|:==========|     
+|`YearEndTarget`|`2000000`|
+|`GrandTotalBalance`|`sum Balance`|
+|`ComputedInterest`|`Balance * Rate / 1200`|
+|`TotalComputedInterest`|`sum ComputedInterest`|
+
+The FlipDB tracer steps through these lines just like the Dyalog APL tracer steps through a function.
+At each line variables may be inspected and played around with.
+Also like a dfn, a defined name may be referenced in the following lines of the section.
+The defined names may then be referenced in subsequent sections or clauses, which is
+of course the whole point of this clause.  
+
+## Where and Where-Not Statements
+
+Next comes *where* statements, a set of zero or more Boolean valued expressions:  
+
+|Expression|
+|:=|
+|`Balance > 100000`|
+|`State in 'NY,NJ,CT'`|
+|`LTV > 80`|
+
+These expression are not named by the user, but for tracing purposes
+the system assigns them names `Where1`, `Where2`, `Where3`, etc.
+These statements could be packed into a one-liner, but there
+are significant advantages for the user in keeping the expressions as simple and short as possible,
+for tracing, debugging, and performance.
+
+The tracer steps through these line by line, allowing the user to see exactly how many
+rows are restricted by each statement, and the net effect of each statement. At the end, the statements
+are *and'ed* together:
+
+~~~
+      Where←∧/Where1 Where2 Where3 ... 
+~~~
+
+Where not statements are similar to where statements, except they are *or'ed* together:  
+
+~~~
+      WhereNot←∨/WhereNot1 WhereNot2 WhereNot3... 
+~~~
+
+The tracer steps through these as well.
+The final boolean restriction is then simply:
+
+~~~
+      Where∧~WhereNot
+~~~
+
+## Group-By Expressions
+
+If the query is to be grouped, then one or more group expressions may be applied.
+For example:
+
+|Name|Expression|
+|:=|:=|
+|`GeographicDistribtion`|`State`|
+|`Coupon`|`.5 range Rate`|
+
+These expressions are evaluated on the rows remaining after the Where and Where Not
+clauses are applied. These too are stepped through in the tracer, allowing detailed inspection.
+
+## Select Expressions
+
+After the optional grouping clause, the select expressions are evaluated. For ungrouped queries
+these will often be a simple list of column names. For grouped queries
+generally all of the expressions are aggregate expressions of one sort or another:
+
+|Name|Expression|
+|:=====|:===========|
+|`NumberOfLoans`|`count LoanID`|
+|`TotalBalance`|`sum Balance`|
+|`Percent`|`percentDown Balance`|
+|`PercentOfTable`|`TotalBalance / GrandTotalBalance`|
+     
+Note that the last expression is making use of a name defined two lines above it, as 
+well as a name defined in the first section of computed values.
+Yet again, the tracer lets us step through these expression line by line.
+
+## Order-By 
+
+The order-by clause is the only section that is not a set of names and expressions.
+Rather it is a list of names defined in the Select clause and a sort directive.
+For example:
+
+|Name|Direction|
+|:=  |:=       |
+|`TotalBalance`|`Down`|  
+
+The tracer does not step through the order-by clause line by line, as there is little
+value added. 
+
+## Having Expressions
+
+Finally, one or more *having* expressions may be defined, which are analogous to 
+*where* statements, except they are applied to the sorted result. For example:
+
+|Expression|
+|:=|:=|
+|`TotalBalance > 100000`|
+
+These expressions may be traced just like where expressions.
+
+## Conclusion
+
+A FlipDB query is an ordered set of names and expressions that both defines the query
+and also explicitly specifies how it is to be executed. 
+Whereas an SQL RDBMS might have a query optimizer that selects a query execution path, 
+FlipDB, for better or worse, just does what the user tells it, in the order the user tells it.
+While no doubt there are a number of costs to this simple model, there are also major benefits. 
+The traceability of a FlipDB query is a direct consequence of the fact that the query
+is an ordered set of names and expressions. That is, we can read the query incrementally
+from top to bottom unlike an SQL query where we must mentally process and parse the query
+to the end before we can understand what is happening at the beginning. The computer and the 
+user or author read and process the query in exactly the same way.  
+
+In a future post we will look at how FlipDB deals with joins, views, sub-queries, and all the
+complexities that arise when data is in a different table.

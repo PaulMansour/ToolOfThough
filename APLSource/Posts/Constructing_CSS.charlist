@@ -1,0 +1,182 @@
+# [Constructing CSS in APL](/posts/constructing-css-in-apl)
+
+## September 30, 2022
+
+Once we have mastered [building HTML pages](posts/a-document-object-model-in-apl),
+the next task is constructing CSS in an efficient and orderly way.
+
+While is it not as important to manipulate CSS the same way we need to be able to manipulate the DOM,
+we still want to create CSS programmatically, to allow for properties that depend on variables, to avoid
+catenating strings, specifying braces, colons and semicolons, and to not worry about getting the nesting right.
+We don't want to write CSS by hand in text files.  
+
+We can do this with 3 fairly simple functions. One for creating a new rule:
+
+~~~
+NewRule←{
+     ⍝ ⍺ ←→ [Parent]
+     ⍝ ⍵ ←→ Selector e.g. 'h1' 'h1 h2' 'header>h1', etc.
+     ⍺←0
+     r←⎕NS''
+     r.Selector←⍵
+     r.Rules←⍬
+     ⍺=0:r
+     ⍺.Rules,←r
+     r
+ }
+~~~
+
+One for composing the rules:
+
+~~~
+ComposeRules←{
+     ⍝ ⍵ ←→ Vector of CSS Rules
+     ⍺←0
+     0=≢⍵:''
+     nl←⎕UCS 13
+     ⊃,/((⍺>0)/nl),⍺{
+         0=≢⍵.Selector:⍺ ComposeRules ⍵.Rules
+         b←(4×⍺)⍴' '
+         s←b,⍵.Selector,' {',nl
+         s,←⍺ ComposeDeclarations ⍵
+         s,←¯1↓(⍺+1)ComposeRules ⍵.Rules
+         s←s,b,'}',2⍴nl
+         s
+     }¨⍵
+ }
+~~~
+
+And one subfunction for composing declarations:
+
+~~~
+ComposeDeclarations←{
+     ⍺←0
+     nl←⎕UCS 13
+     n←{⍵/⍨~(⊃¨⍵)∊⎕A}⍵.⎕NL ¯2
+     0=≢n:''
+     v←⍕¨⍵⍎¨n
+     p←'-'@('_'∘=)¨n
+     b←(4×⍺+1)⍴' '
+     ⊃,/p{b,⍺,': ',⍵,';',nl}¨v
+ }
+~~~
+
+Consider a single, simple rule:
+
+~~~
+      r←NewRule 'h1'
+~~~
+
+Specifying declarations is done by assignment:
+
+~~~
+      r.margin←'1rem'
+      r.font_size←'2rem'
+~~~
+
+The `ComposeRules` function returns the CSS:
+
+~~~
+      ComposeRules r
+h1 {
+    font-size: 2rem;
+    margin: 1rem;
+}
+~~~
+
+Of course a style sheet will contain many rules, often nested. The `NewRule` function
+takes a parent rule as an optional left argument:
+
+~~~
+      p←NewRule '@media print'
+      r←p NewRule 'h1'
+      r.font_size←'18pt' 
+      r←p NewRule 'h2'
+      r.font_size←'16pt'
+      ComposeRules p
+@media-print {
+
+    h1 {
+        font-size: 18pt;
+    }
+
+    h2 {
+        font-size: 16pt;
+    }
+}
+~~~
+
+This allows us to bury the catenation or accumulation of rules. We can also reuse the same variable name for the
+result of `NewRule`, normally a bad practice, but useful in this case, when there could be hundreds
+of rules that need to be specified, and we don't want to have to name them all.
+
+Having a parent rule is useful as it means we have only one item to explicitly name and track. But often there is
+no parent, just a list of rules with no hierarchy. We can accumulate rules using a parent rule with no selector:
+
+~~~
+      s←NewRule ''
+      r←s NewRule 'h1'
+      r.font_size←'2em' 
+      r←s NewRule 'h2'
+      r.font_size←'1.5em'
+      ComposeRules s
+h1 {
+    font-size: 2em;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+~~~
+
+This lets us avoid complicating things with a Style object. There is only one object, a rule object,
+and it can contain sub rules. And `ComposeRules` can process multiple sets of rules:
+
+~~~
+      ComposeRules s p
+h1 {                    
+    font-size: 2em;     
+}                       
+                        
+h2 {                    
+    font-size: 1.5em;   
+}                       
+                        
+@media print {          
+                        
+    h1 {                
+        font-size: 18pt;
+    }                   
+                        
+    h2 {                
+        font-size: 16pt;
+    }                   
+}                       
+~~~
+
+These rules can be injected directly into the APLDOM using the `Style` property:
+
+~~~
+       d←New'html'
+       hd←d New'head'
+       d.Style←s
+       DOM2HTML d
+<!DOCTYPE html>      
+<html>               
+  <head>             
+    <style>          
+        h1 {                 
+          font-size: 2em;  
+           }                    
+                     
+        h2 {                 
+          font-size: 1.5em;
+           }                    
+    </style>         
+  </head>            
+</html>          
+~~~
+
+HTML elements may have their own Style property, to allow for components to be delivered with their own styles.
+The idea is do something similar to [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components).
+This is an area where [Abacus](https://github.com/the-carlisle-group/Abacus) needs much more work, hopefully soon.
