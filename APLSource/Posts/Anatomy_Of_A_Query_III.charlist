@@ -1,0 +1,133 @@
+# [Anatomy of a Query, Part 3](/posts/anatomy-of-a-query-iii)
+
+## December 27, 2022
+
+In the second part of this series,
+[Anatomy of a Query, Part 2](/posts/anatomy-of-a-query-ii),
+we covered how columns from multiple tables are accessed in a single query.
+Unlike SQL, which requires joins at the table level, in FlipDB we can join
+data on a column-by-column basis, keeping our ability to trace FlipDB queries
+step-by-step, one name and one value at a time. In addition, this means pure APL
+solutions translate directly into FlipDB. The examples focused on column join syntax that
+generally requires a database with pre-specified foreign keys. In much ad hoc, real-world analysis, we have no such luxury;
+there is simply data, in a bunch of tables.
+
+There is one join syntax that does allow for complete generality, with no pre-specified keys,
+the *general join* syntax:
+
+~~~
+   T[X;Y].Z
+~~~
+
+Where, where given the context of some starting table (let's call it `S`),
+then `T` is the name of some other table in the same database,
+X is one or more column names in S, defining the key in S,
+and Y is one or more column names in T, defining the the key in T. 
+X and Y must conform in number and in type. The names may be different.
+Y may be elided if the names are the same. Z is a column name in T.
+This syntax materializes column Z from table T in the table S, by doing the lookup specified
+by the keys. The result will be simple or partitioned depending on whether the runtime relationship
+is many-to-one or not.
+
+This is useful, but there are times when we may want to explicitly do look ups, to preserve the indices
+for further computation. FlipDB provides a `getColumn` function which will directly fetch a column
+from another table:
+
+~~~
+getColumn 'Table2.ColumnA'
+~~~
+
+from another database:
+
+~~~
+getColumn 'Database2.Table2.ColumnA' 
+~~~
+
+or from the same very same table, reaching out of the current context and getting the entire column:
+
+~~~
+getColumn 'ColumnA'
+~~~
+
+Thus, in any query, at any point (in the where clause, the select clause, the having clause, etc.)
+an expression can just grab a column from anywhere. A column accessed this way is generally
+non-conforming; it's not going to line up with our starting table.
+This does not hinder its usefulness. 
+A typical use is simply to check if values exist in some list. For example, say in the Suppliers
+and Parts database we added a `Sanction` table that contains a list of cities that are sanctioned.
+In order to find existing suppliers in unsanctioned cities, starting in the Supplier table
+`S`, it's just simple APL:
+
+~~~
+not CITY in getColumn 'Sanction.CITY'
+~~~
+
+Because FlipDB queries are just sets of names and expressions,
+the expression can do virtually anything. We can get an entire
+table using the `getTable` function. So starting in the supplier table `S`, we can materialize
+the parts table:
+
+~~~
+      getTable 'P'
+── SandP.P ────────────────────────────────────────────
+ ┌PNO────┐  ┌PNAME──┐  ┌COLOR──┐  ┌WEIGHT┐  ┌CITY────┐ 
+ ↓P1     │  ↓Nut    │  ↓Red    │  ↓12    │  ↓London  │ 
+ │P2     │  │Bolt   │  │Green  │  │17    │  │Paris   │ 
+ │P3     │  │Screw  │  │Blue   │  │17    │  │Oslo    │ 
+ │P4     │  │Screw  │  │Red    │  │14    │  │London  │ 
+ │P5     │  │Cam    │  │Blue   │  │12    │  │Paris   │ 
+ │P6     │  │Cog    │  │Red    │  │19    │  │London  │ 
+ └Char(2)┘  └Char(5)┘  └Char(5)┘  └Int8──┘  └Char(10)┘ 
+── 6 rows by 5 columns ────────────────────────────────
+~~~
+
+The `transpose` function converts the table into a FlipDB *property space* (analogous 
+to a k dictionary): 
+
+~~~
+      P=transpose D.GetTable 'P'
+      P
+┌PropertySpace───────────────┐
+│ Name             Type      │
+│ -------------    --------- │
+│ TWID             Integer   │
+│ APPENDTYPE       Integer   │
+│ PNO              Char      │
+│ AUTOKEY          Integer   │
+│ PNAME            Char      │
+│ COLOR            Char      │
+│ WEIGHT           Integer   │
+│ CITY             Char      │
+│ TransDateTime    DateTime  │
+└────────────────────────────┘
+
+~~~
+
+which then provides convenient dot access to the columns:
+
+~~~
+     P.COLOR 
+┌COLOR──┐
+↓Red    │
+│Green  │
+│Blue   │
+│Red    │
+│Blue   │
+│Red    │
+└Char(5)┘
+~~~
+
+We can use the  `indexOf` and `index` functions, both analagous to their
+APL counterparts, to conform columns from one table to another. Entire tables can be
+made to line up by using the `conform` function. The full power of APL techniques and solutions
+is directly available to us in the expressions.    
+
+Because FlipDB queries are sets of names and expressions, each set applied in a certain way and in certain 
+context, and expressions, by definition, can do anything the FlipDB language can do, it follows that 
+a query can do pretty much anything. For example a query can do operating system commands
+like creating a folder, read a file, or write to a log. These are things that would normally be
+done in scripts or stored procedures. A query becomes a highly structured script, executed in the 
+context of some table in some database.
+
+In our next and final part in this series, we will look at how FlipDB allows multiple queries to run as a set
+and how each query can refer to values in previously executed queries.

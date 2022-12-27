@@ -4,9 +4,22 @@ DRAFT
 
 #### March 12, 2021
 
-Well, here in practical APL land, we don't worry about this kind of stuff.
-We are either solving problems and making money, or not.
 
+Adam:
+
+⍋ inverts a permutation.
+Instead of saying where elements should come from to become sorted, we express where elements should go to to become sorted.
+Thus, ⍋⍋X must be a permutation that has elements with values relative to each other like the relationships between the elements of X.
+ 
+And so, ⍋⍋X can be used as a stand-in for X.
+
+
+
+Adam:
+I know. Don't worry. Briefly, the tacit functions (called trains) work like this: every other function, beginning with the rightmost, is applied between arguments, and intervening functions are applied between the results of those. A lone leftmost function is just applied monadically.
+So (∊⊢⍪⍪¨) is exactly the same as {∊(⍺⊢⍵)⍪(⍺⍪¨⍵)}
+
+ 
 Nobody in their right mind would use [APL] 
 for anything other than trivial personal or academic applications.
 That's coming from someone who used APL professionally for ten years 

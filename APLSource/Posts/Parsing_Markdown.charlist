@@ -1,0 +1,150 @@
+# [Parsing Markdown](/posts/parsing-markdown)
+
+## October 24, 2022
+
+Once we have an [APL document object model](/posts/a-document-object-model-in-apl),
+it is natural to want a Markdown to DOM function.
+While there are a zillion third party markdown libraries, none of them will create an APLDOM directly,
+and, more importantly, there are advantages to having an easily modified, pure APL, no-dependency solution. 
+
+This `Parse` function takes an array of Markdown lines and returns an array of HTML elements:
+
+~~~
+Parse←{
+     ⍝ ⍵ ←→ MarkDown
+     ⍝   ←→ Array of HTML obs
+     ⍝ f ←→ Paragraph|Table|Code|Header
+     0=≢⍵:''
+     ⎕THIS.H←##.Main
+     s←InitState ⍵
+     t b←↓⍉↑s ProcessLine¨⍳≢⍵
+     ~1∊b:''
+     p←b⊆⍵
+     f←(b>¯1↓0,b)/t
+     f{(⍎⍺)⍵}¨p
+ }
+~~~
+
+It first initializes a namespace to hold the state as we step through each line:
+
+~~~
+InitState←{
+     s←⎕NS''
+     s.Lines←⍵
+     s.InParagraph←0
+     s.InTable←0
+     s.InCode←0
+     s.InList←0
+     s.InBlockQuote←0
+     s.InPullQuote←0
+     s
+ }
+~~~
+
+We toss the entire set of lines in there as well, so we can inspect a subsequent line
+if necessary (for lists , if nothing else, it appears this is needed). Then we process each line,
+to determine the type and location of top-level objects or blocks:
+
+~~~
+ProcessLine←{
+     ⍝ ⍵ ←→ Line Number
+     ⍝ ⍺ ←→ State
+     ⍝   ←→ Partition Vector
+     l←⍵⊃⍺.Lines
+     ⍺.InParagraph:''(⍺.InParagraph←l≢'')
+     ⍺.InCode:''(1⊣⍺.InCode←'~~~'≢3↑l)
+     ⍺.InTable:''(⍺.InTable←'|'=⊃l)
+     ⍺.InBlockQuote:''(⍺.InBlockQuote←'> '≡2↑l)
+     ⍺.InPullQuote:''(⍺.InPullQuote←'^ '≡2↑l)
+     ⍺.InList:''(⍺.InList←⍺ StillInList ⍵)
+     ''≡l:'' 0
+     '~~~'≡3↑l:'Code'(⍺.InCode←1)
+     '|'=⊃l:'Table'(⍺.InTable←1)
+     '> '≡2↑l:'BlockQuote'(⍺.InBlockQuote←1)
+     '∧ '≡2↑l:'PullQuote'(⍺.InPullQuote←1)
+     '#'=⊃l:'Header' 1
+     '!'=⊃l:'Image' 1
+     IsListItem l:'List'(⍺.InList←1)
+     1:'Paragraph'(⍺.InParagraph←1)
+ }
+~~~
+
+For each line, if we are not in an object already, we find out what object is starting,
+and return the type of the object and a 1 to indicate it is starting. If we are already
+in an object, then we determine whether the line being processed is still a member of that
+object. The object type is also the name of a function that will be called to convert
+the block of lines into an array of HTML element objects.
+
+Consider the following Markdown:
+
+~~~
+# MarkDown List                                         
+                                                        
+A list follows:                                         
+                                                        
+- Item 1                                                
+    This is detail on item 1.                           
+- Item 2                                                
+    This is detail on item 2,                           
+    and note there is no detail on the following item 3.
+- Item 3                                                
+                                                        
+This is a trailing paragraph,                           
+it should not be lost       
+~~~
+
+The result of `ProcessLine` tells us the type of object and flags the locations with 1-maps: 
+
+~~~
+      ↑s ProcessLine¨⍳≢⍵
+ Header     1
+            0
+ Paragraph  1
+            0
+ List       1
+            1
+            1
+            1
+            1
+            1
+            0
+ Paragraph  1
+            1
+~~~
+
+Note that this partition technique requires a blank line between objects.
+Now we can apply the appropriate function to each partition. 
+For example, the `Paragraph` function creates a new paragraph element object, and sets
+its content after adding any in-line markup:
+
+~~~
+Paragraph←{
+     l←1↓⊃,/' ',¨⍵
+     H.New'p'(InLine l)
+ }
+~~~
+
+While the `List` function, and its subfunction `ListItem`, creates a list element
+and must recursively parse the content:
+
+~~~
+List←{
+     t←↑⍵
+     p←(' '≠t[;0])⊂⍵
+     l←('-'∊t[;0])⊃'ol' 'ul'
+     H.New l(ListItem¨p)
+ }
+
+ListItem←{
+     t←{⍵↓⍨1+⍵⍳' '}⊃⍵
+     i←H.New'li't
+     1=≢⍵:i
+     i.Content,←Parse 4↓¨1↓⍵
+     i
+ }
+~~~
+
+The code above is by no means a comprehensive markdown processor. Many features
+can and will be easily added, but we are generally not concerned
+with handling every little issue or variation that may be present in Markdown files out 
+in the wild.

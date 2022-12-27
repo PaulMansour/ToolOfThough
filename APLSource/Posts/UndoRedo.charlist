@@ -1,0 +1,53 @@
+DRAFT
+
+# [A Case of Undo Redo](/posts/a-case-of-undo-redo)
+
+## November 19, 2022
+
+Consider a table where we want to do column operations, transforming
+data types, cleaning things up, scaling numbers, etc. We want to do multiple
+operations on a column and be able to easily undo and redo these operations.
+Consider the case of an account ID that must be reformated to be 16 characters wide, 
+the account ID right justified, and then filled with leading zeros.
+
+One possible approach is to apply each operation to 
+the result of the previous operation:
+
+|Name|Expression|
+|:===|:=========|
+|AccountID|16 takeChar AccountID|
+|AccountID|rightJustify AccountID|
+|AccountID|zeroFill AccountID|  
+
+What are the implications for undo/redo operations in this case?
+To undo each of the operations one at a time, we must have the previous value of AccountID at each stage,
+or we can apply all of the previous operations to the original value. The former will take
+more memory, the latter will take more processing power. The latter will also require more work processing
+the undo-redo stack, finding only those items that affect the column in question. This
+is because the undo-redo stack may have operations on different columns interleaved. 
+ 
+Another approach is to concatenate the operations in the same expression,
+always applying the operations to the original value:
+
+|Name|Expression|
+|:===|:=========|
+|AccountID|16 takeChar toChar AccountID|
+|AccountID|rightJustify 16 takeChar toChar AccountID| 
+|AccountID|zeroFill rightJustify 16 takeChar toChar AccountID|
+
+When we undo here, we just apply the previous expression to the original
+value.  By definition, each expression contains all of the previous expressions.
+This approach is more expensive on each new operation, as all the previous operations
+must be executed, but it is simpler in the sense that each row
+tells you everything you need to know to get back to that state.
+
+In either case, we need the original value of a modified column.
+If the table is saved on disk, we have all of the original values available,
+whether a column is modified or not. Similarly we could have two copies of the table in memory
+so the that the original values are always avaiable. Alternatively we could store
+as part of the undo-redo stack just the original values of those columns being modified.
+The right approach is going to depend on the application context. In an ETL scenario,
+we might want the complete source and transformation tables available at the same time.
+In a Excel-type scenario  
+
+

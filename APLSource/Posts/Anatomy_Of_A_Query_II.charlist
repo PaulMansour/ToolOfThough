@@ -1,0 +1,171 @@
+# [Anatomy of a Query, Part 2](/posts/anatomy-of-a-query-ii)
+
+## December 20, 2022
+
+In the first part of this series, [Anatomy of a Query](/posts/anatomy-of-a-query),
+we looked at how a query is an ordered collection of names and expressions,
+divided into various sections. For simplicity, we assumed all of the data was in a single table.
+Of course data may be in multiple tables, or even multiple databases,
+and perhaps in a CSV file hanging around on the disk, not even
+in the database. To explore how FlipDB handles multiple tables, we will refer to
+CJ Date's classic **Suppliers and Parts** database:
+
+~~~
+ ── SandP.S ──────────────────────────────────            
+  ┌SNO────┐  ┌STATUS┐  ┌CITY────┐  ┌SNAME───┐             
+  ↓S1     │  ↓20    │  ↓London  │  ↓Smith   │             
+  │S2     │  │10    │  │Paris   │  │Jones   │             
+  │S3     │  │30    │  │Paris   │  │Blake   │             
+  │S4     │  │20    │  │London  │  │Clark   │             
+  │S5     │  │30    │  │Athens  │  │Adams   │             
+  └Char(2)┘  └Int8──┘  └Char(10)┘  └Char(10)┘             
+ ── 5 rows by 4 columns ──────────────────────            
+                                                          
+ ── SandP.P ────────────────────────────────────────────  
+  ┌PNO────┐  ┌PNAME──┐  ┌COLOR──┐  ┌WEIGHT┐  ┌CITY────┐   
+  ↓P1     │  ↓Nut    │  ↓Red    │  ↓12    │  ↓London  │   
+  │P2     │  │Bolt   │  │Green  │  │17    │  │Paris   │   
+  │P3     │  │Screw  │  │Blue   │  │17    │  │Oslo    │   
+  │P4     │  │Screw  │  │Red    │  │14    │  │London  │   
+  │P5     │  │Cam    │  │Blue   │  │12    │  │Paris   │   
+  │P6     │  │Cog    │  │Red    │  │19    │  │London  │   
+  └Char(2)┘  └Char(5)┘  └Char(5)┘  └Int8──┘  └Char(10)┘   
+ ── 6 rows by 5 columns ────────────────────────────────  
+                                                          
+ ── SandP.SP ──────────────────────────────────────────── 
+  ┌AUTOKEY┐  ┌QTY──┐  ┌SDATE─────┐  ┌SNO────┐  ┌PNO────┐  
+  ↓1      │  ↓300  │  ↓2008-10-27│  ↓S1     │  ↓P1     │  
+  │2      │  │200  │  │2008-08-19│  │S1     │  │P2     │  
+  │3      │  │400  │  │2008-05-18│  │S1     │  │P3     │  
+  │4      │  │200  │  │2007-08-18│  │S1     │  │P4     │  
+  │5      │  │100  │  │2007-08-17│  │S1     │  │P5     │  
+  │6      │  │100  │  │2009-12-16│  │S1     │  │P6     │  
+  │7      │  │300  │  │2009-07-31│  │S2     │  │P1     │  
+  │8      │  │400  │  │2009-12-17│  │S2     │  │P2     │  
+  │9      │  │200  │  │2009-07-24│  │S3     │  │P2     │  
+  │10     │  │200  │  │2009-10-03│  │S4     │  │P2     │  
+  │11     │  │300  │  │2009-06-28│  │S4     │  │P4     │  
+  │12     │  │400  │  │2009-11-04│  │S4     │  │P5     │  
+  └Int8───┘  └Int16┘  └Date──────┘  └Char(2)┘  └Char(2)┘  
+ ── 12 rows by 5 columns ──────────────────────────────── 
+~~~
+
+A FlipDB query generally starts with a certain table, called the *starting table*. 
+Column names in this table are specified directly; there is no need to qualify them.
+If starting in the `SP` table, for example, we may specify the quantity column simply as: 
+
+~~~
+QTY
+~~~
+
+In SQL, in order to query data across multiple tables, the tables must be joined in some 
+way. Then columns and rows are selected from this combined table or view. 
+For example:
+
+~~~
+select distinct sp.pno,sname from
+supplier inner join sp using (sno)
+where supplier.city = 'London';
+~~~
+
+This gets complicated very quickly.
+
+Because a FlipDB query is an ordered set of names and expressions, we
+may directly specify a column from another table in an expression, using a number
+of different syntaxes and special functions.
+
+If we are lucky enough to have a formal database set up, with primary, alternate,
+and foreign keys, we can use a simple dot syntax to specify a column
+in a different table via a foreign key. Starting with the `SP` table, we 
+can reach into the `P` table and get the `PNAME` column:
+
+~~~
+PNO.PNAME
+~~~
+
+This is called a *simple join*. Note there is no explicit reference to the foreign table `P`. The foreign key column
+PNO implies it. The result is a simple column, as by definition there is a one-to-many
+relationship between tables `S` and `SP`. The column `PNAME` will be sorted and replicated to line up
+up with the `SP` table. A simple join can link through multiple tables,
+by specifying multiple foreign keys:
+
+~~~
+FK1.FK2.FK3.Col 
+~~~
+
+We can use foreign keys to go the other way as well. Starting in the `P` table
+we can reference a column in the `SP` table as follows:
+
+~~~
+SP[PNO].QTY
+~~~
+
+Here we make specific refence to the SP table, indicate in brackets the foreign key column in
+SP that points back to our primary table P, and finally after the dot, the name of 
+the column in SP to materialize. By definition, this value is a partitioned column,
+as there is a many-to-one relationship between tables `SP` and `P`.  This is called
+a *partition join*.
+
+Simple and partition joins may be combined to link through multiple tables:
+
+~~~
+SP[PNO].SNO.CITY
+~~~
+
+If we don't have a foreign key specified, we can do explicit look-ups:
+
+~~~
+Table2[ColA;ColB].ColC
+~~~
+
+This materializes ColC from Table2, by looking up the values of ColA from the starting
+table in ColB from table 2.
+If the ColA-ColB relationship is one-to-one, or many to one, the result is simple, while
+if the relationship is one-to-many or many-to-many, the result is partitioned. This is called
+a *general join*.
+
+Sometimes we want to access a column in another table without regard to any key:
+
+~~~
+SP[].QTY                                         `
+~~~
+
+Here the result is enclosed as it is non-conforming; there is no correlation between
+the starting table and this column. This is useful as the `where` clause has no effect.
+We can reach out of the context we are in and grab an entire column from another table,
+or even the current table. This is called an *enclosed join*.
+
+Directly accessing data from other tables is supremely useful because we want to apply APL-style solutions directly in our queries,
+avoiding the headache of SQL. Consider a query starting in the parts table `P`, with the following select clause:
+
+|Name|Expression|
+|:===|:==========|
+|`PNO`|`PNO`|
+|`SupplierIn`|`SP[PNO].SNO.CITY`|
+|`InParis`|`any 'Paris' eq SupplierIn`|
+|`IsCompetition`|`not unique SupplierIn`|
+
+Since we are starting in the parts table, we can access the part number PNO directly.
+We then foreign-key hop, first in the reverse, one-to-many direction into the suppliers
+and parts table `SP`, and then in the many-to-one direction into the suppliers table
+to get the CITY column. This yields a partitioned column showing the city for each 
+supplier that supplies that part. We can then use this to answer a myriad of questions.
+For example, what parts are supplied by suppliers located in Paris?
+Or what parts a supplied competitively, that is by two or more suppliers in the same city?
+This gives us the following table:
+
+|PNO|SupplierIn|InParis|IsCompetition|
+|:===|:===|===:|===:|
+|P1|[London,Paris]|1|0|
+|P2|[London,Paris,Paris,London]|1|1|
+|P3|[London]|0|0|
+|P4|[London,London]|0|1|
+|P5|[London,London]|0|1|
+|P6|[London]|0|0|
+
+Of course these last two Boolean expressions would most likely be placed in the `where` or 
+`having` clause, we just show them here in the `select` clause for explanatory purposes.  
+
+In Part 3 of this series we will look at additional ways to get data from other tables,
+using functions rather than column join syntax, that avoid the need to have formally specified
+keys.
