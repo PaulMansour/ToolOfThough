@@ -1,0 +1,24 @@
+DRAFT
+
+# On Documentation
+
+## February 25, 2023
+
+Nothing clarifies like writing. This is not a new observation. It has been made
+by many people, programmers and otherwise. This is why it is critical that
+programmers write their own documentation. If this task is delegated to someone else,
+this other writer is limited to documenting what **is**. And what **is**, is often a mess,
+unclear, and over-complicated. On the other hand, the programmer can document what
+**should be**, and then make it so. 
+
+Writing documentation is like writing tests. It's an interative process intimately tied to the process
+of writing the code. They cannot be separated, farmed out to different people. While it is often
+recognized that writing the documentation first can lead to a better design, it is less obvious
+that writing code can lead to insights into the problem that can in turn effect the design of the API or
+interface.
+
+     
+
+
+
+

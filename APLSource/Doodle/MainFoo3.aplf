@@ -1,0 +1,8 @@
+ MainFoo3←{
+     ⍝ 711::⎕SIGNAL⊂('EN' 11)('Message' 'The argument must be 5')
+     Test←{
+         {⍵≠5:⎕SIGNAL⊂('EN' 711)('Message' 'The argument must be 5') ⋄ 0}⍵
+     }
+     _←Test ⍵
+     'OK'
+ }

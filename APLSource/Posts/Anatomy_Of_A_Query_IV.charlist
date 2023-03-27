@@ -1,0 +1,21 @@
+DRAFT
+
+# [Anatomy of a Query, Part 4](/posts/anatomy-of-a-query-iv)
+
+## January 3, 2023
+
+This is  *italic*, with a comma. This is inline code with spaces `{⌽⍵⍷'     '}` - there should be
+5 spaces. This is inline code with greater than symbol `{<\\⍵}`. Does it work?
+And this inline code with spaces and a greater than symbol: `{<b>\\⌽⍵⍷'     '}` Does it work?
+
+One of the many nice things about Excel is that if you see a number on the screen
+you can use it an a calculation, you can reference it. A lot of in-house corporate
+analytic software does not have this ability, and it is very frustrating for users.
+
+Of course spreadsheets can also 
+
+As we seen, a FlipDB query is . Each name 
+
+A FlipDB report takes this a step further. It is an array of queries, where each query
+can reference any value computed in the previous queries in the array. Each query has
+a name, and this name is accessiblte via the Globals property space

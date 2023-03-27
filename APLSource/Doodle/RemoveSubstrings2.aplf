@@ -1,0 +1,4 @@
+ RemoveSubstrings2←{
+     b←⍺⍷⍵
+     ⍵/⍨~≠\b∨b⌽⍨-≢⍺
+ }

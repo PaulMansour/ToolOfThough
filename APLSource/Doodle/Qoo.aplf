@@ -1,0 +1,7 @@
+ Qoo←{
+     6::'Caught in parent'
+     goo←{
+         {'From inner dfn'⎕SIGNAL 6}0
+     }
+     goo 0
+ }

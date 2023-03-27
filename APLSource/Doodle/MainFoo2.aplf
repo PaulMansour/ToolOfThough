@@ -1,0 +1,9 @@
+ MainFoo2←{
+     Test←{
+         ⍵≠5:⎕SIGNAL⊂('EN' 711)('Message' 'The argument must be 5')
+         0
+     }
+     711::⎕SIGNAL⊂('EN' 11)('Message'⎕DMX.Message)
+     _←Test ⍵
+     'OK'
+ }

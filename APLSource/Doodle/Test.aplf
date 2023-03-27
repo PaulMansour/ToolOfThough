@@ -1,0 +1,4 @@
+ Test←{
+     ⍵≠5:⎕SIGNAL⊂('EN' 711)('Message' 'The argument must be 5')
+     0
+ }

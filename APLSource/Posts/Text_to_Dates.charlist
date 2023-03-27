@@ -1,0 +1,98 @@
+# [Converting Text to Date](/posts/text-to-date)
+
+## January 23, 2023
+
+Problem #6 from [Phase 2 of the Dyalog 2020 APL Problem Solving Comptetition](https://www.dyalog.com/uploads/files/student_competition/2022_problems_phase2.pdf)
+is titled ***Its a Date!*** The task was to write a function `DDN` which basically does the inverse
+of the date format function `1200⌶`. 
+
+Apparently the problem as specified was quite difficult, and no complete or even nearly complete
+solutions were submitted.
+
+This being the **APL for the Practical Man** blog, we are interested in how the problem 
+should be framed to make the solution useful in a commercial application. And of course
+the general problem is encountered all the time. Dates are common data elements.
+Data are in files. Files are often text. So here we propose a function `Text2Date`, to compare
+and contrast with `DDN`.
+
+First and foremost, in the original specification, the function `DDN` is expected to operate on a single string 
+or character vector, converting one string to one date, one at a time.
+But it will not do to use the `each` operator on millions of dates. 
+`Text2Date` must operate on a character matrix where each row represents a date.
+This has the extra benefit of making the problem more array oriented - an issue that was noted 
+in the [presentation of the contest winners](https://dyalog.tv/Dyalog22/?v=018ZUHrFSM8)
+at the recent conference in Portugal. 
+
+Second, `DDN` is expected to handle strings that do not produce a unique Dyalog Date Number,
+like `'07'`, `'Thursday'`, and  `'Feb 29th'`, all
+potential outputs from `1200⌶`. This adds complexilty but provides little to no value.
+We can only elide consecutive trailing elements in `⎕TS`, which default to `1` or `0`
+as appropriate, and no one would reasonably expect otherwise:
+
+~~~
+       ¯1 1 ⎕DT⊂,2022 
+44561
+       ¯1 1 ⎕DT⊂2022 28 
+DOMAIN ERROR: Invalid date-time
+      ¯1 1 ⎕DT⊂2022 28
+           ∧
+      ¯1 1 ⎕DT⊂2022 ⍬ 28
+DOMAIN ERROR: Invalid date-time
+      ¯1 1 ⎕DT⊂2022 ⍬ 28
+           ∧
+      ¯1 1 ⎕DT⊂2022 0 28
+DOMAIN ERROR: Invalid date-time
+      ¯1 1 ⎕DT⊂2022 0 28
+           ∧
+~~~
+
+Thus `Text2Date` should only be required to handle strings that produce a unique Dyalog Date Number,
+with the exception that 2 digit years are resolved using a fixed or sliding century window, which 
+may be provided as an optional argument.
+
+Third, the spec for `DDN` states that:
+
+> No variable length numeric fields will be placed immediately next to another numeric field.
+
+For example, `MDDYY`, `YYMD` and `MDY` would be disallowed. This is almost, but not quite,
+saying that variable length formats must be delimited. It allows, for example, `MMYY-D`.
+This constraint is both too restrictive and not restrictive enough. 
+Leading variable length elements should be allowed immediatly adjacent to a fixed element,
+but otherwise the elements in a variable length format must be strictly delimited. 
+Thus `Text2Date` should properly handle the string `'DMMYY'`, but should not handle `'YYMM-D'`. 
+The reason for the former is that undelimited dates in text files are often missing a leading zero
+due to type conversions somewhere upstream. The reason for the latter is that allowing 
+delimited variable length elements in the same format with undelimited fixed width elements 
+adds much complexity for very little if any practical gain. 
+
+If we combine the restriction that any variable length format must be fully delimited,
+with the further `DDN` restriction that:
+
+> the only alphanumeric characters will be formatted elements of the date/time
+
+then specifying a variable length format becomes merely a matter of specifying the order
+in which the elements occur. That is, there is no need to specify '`M-YY-D`' when simply `MYD` will do.
+The string must contain three separated numbers (leaving aside months as text like Jan, Feb, etc.). The particular separator
+or length of separator is immaterial. 
+
+This brings up the question of whether the format specifier for `1200⌶` is really the best
+unformat specifier. Is a true inverse really what we need? Certainly they are related,
+but in a real application we would probably want
+`'12/31/2022'`, `'1-1-2023'`, and `'7/4/21'` to all convert properly with the same format string.
+
+Thus there are at least two issues that make to-and-from text fundamentally different from all
+the other date formats.  `1200⌶` will create "invalid" dates, that is, strings that
+cannot be converted back to a unique Dyalog Date Number. And conversely, there are multiple
+strings that could only be created using multiple formats, but that should all convert back to a
+Dyalog Date Number using a single format. This may be an argument to keep `1200⌶` out of `⎕DT`.
+
+A further complication is handling bad data. To be useful, `Text2Date` must not fail when it cannot
+yield a valid Dyalog Data Number for a string.
+There are then only two options: return a value that indicates failure, or take the route
+of `⎕VFI`, and return a Boolean mask indicating valid results. A zero might be useful for a failure
+value. If not, a zero is perfect for a fill value, with the Boolean mask indicating valid results,
+just like `⎕VFI`.  If `1200⌶` is folded in to `⎕DT`, perhaps a variant could be added that changes
+the result to a `⎕VFI` style result. This might be useful for numeric-to-numeric conversions as well.
+
+
+

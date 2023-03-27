@@ -1,0 +1,7 @@
+ EmbeddedAssignmentDfn←{
+     f←+
+     f←4
+     a←2
+     z←a f w←1 2 3
+     z
+ }

@@ -1,0 +1,5 @@
+ MainFoo←{
+     711::⎕SIGNAL⊂('EN' 11)('Message'⎕DMX.Message)
+     _←Test ⍵
+     'OK'
+ }

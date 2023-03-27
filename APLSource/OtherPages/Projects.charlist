@@ -22,3 +22,12 @@ A Web server.
 ## [XL2APL](http://www.github.com/the-carlisle-group/XL2APL)
 
 Read Excel files in .xlsx format (XML) into APL.
+
+## [Provanto](http://www.github.com/the-carlisle-group/Provanto)
+
+A test framework.
+
+## [Text2Date](http://www.github.com/the-carlisle-group/Text2Date)
+
+Convert time strings to time numbers.
+

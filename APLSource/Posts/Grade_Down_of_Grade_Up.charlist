@@ -1,0 +1,48 @@
+# [Grade Up of Grade Down](/posts/grade-up-of-grade-down)
+
+## March 21, 2023
+
+One of the amazing things about old APL books is that no matter how many
+years have passed, no matter how many new language features have been added,
+there are invariably many useful nuggets to be gleaned from them.
+A lot of very smart people used APL back in the day.
+
+Consider the case of `⍒⍋` and its twin `⍒⍒`. A while back on the [APL Farm](https://aplwiki.com/wiki/APL_Farm) there
+was a discussion of the interpretation and usefulness of these combinations, which culminated
+with:  
+
+> So the conclusion is that if we are only dealing in permutations `⍒⍋` is 
+> worthless since it's simply a slower `⌽`, and if we are not dealing in 
+> permutations even Adám doesn't know what `⍒⍋` does so it is probably equally worthless.
+
+I read this at the time with an uneasy feeling that somewhere, sometime, I had a use for `⍒⍋`,
+but promptly forgot about the whole thing.
+And then just the other day I was refactoring a test
+for a function that computes the [average rank](https://support.microsoft.com/en-us/office/rank-avg-function-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a).
+And lo and behold:
+
+~~~
+      averageRankUp←{0.5×(⍋⍋⍵)+⍒⍋⌽⍵}
+~~~
+
+and its sibling:
+
+~~~
+      averageRankDown←{0.5×(⍋⍒⍵)+⍒⍒⌽⍵}
+~~~
+
+I wonder if and how average rank could be computed as efficiently or succinctly without `⍒⍋`.
+I know it can be computed using two outer products, but that is very expensive in time, space, and tokens.
+I also wonder if there are any other documented uses of these pairings.
+Given the discussion in the APL Farm where it was observed that `⍒⍋p` is `⌽p` for permutation `p`,
+it is probably no accident that this application of `⍒⍋` involves `⌽`.
+
+I was pretty sure I did not come up with these expressions on my own, and a short search of
+my library revealed that I had most likely lifted it from [APL2 in Depth](https://www.amazon.com/Depth-Springer-Statistics-Norman-Thomson/dp/0387942130/ref=sr_1_1?crid=MEY9ZS4JFYYO&keywords=apl2+in+depth&qid=1679418843&sprefix=apl2+in+depth%2Caps%2C180&sr=8-1&ufe=app_do%3Aamzn1.fos.f5122f16-c3e8-4386-bf32-63e904010ad0)
+, a 1995 text by legends [Norman Thompson](https://www.youtube.com/watch?v=jPujK-GvHGQ&list=PLYKQVqyrAEj91hZHbJiWOENHZP4JT8VFv&index=1)
+and [Ray Polivka](https://www.youtube.com/watch?v=w1VMeSzJLyE&list=PLYKQVqyrAEj91hZHbJiWOENHZP4JT8VFv&index=12).
+Don't get rid of those old APL books!
+
+
+
+ 

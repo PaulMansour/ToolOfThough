@@ -1,0 +1,7 @@
+ Hoo←{
+     500::'Caught in parent'
+     goo←{
+         'Not caught in parent'⎕SIGNAL 500
+     }
+     goo 0
+ }

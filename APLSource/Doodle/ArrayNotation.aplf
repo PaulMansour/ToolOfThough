@@ -1,0 +1,17 @@
+ ArrayNotation←{
+
+     FirstName←'Morten'
+     LstName←'Kromberg'
+
+     ns←(
+     FirstName:'Paul'
+     LastName:'Mansour'
+     Age:5
+     FullName:FirstName,' ',LastName
+     )
+
+     ns.FullName
+
+     Paul Mansour
+
+ }

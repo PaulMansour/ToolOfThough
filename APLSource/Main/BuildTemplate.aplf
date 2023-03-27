@@ -13,6 +13,6 @@
          m,←⊂'About' '/about'
          m
      }0
-     p.Footer←'Copyright 2022 Paul S. Mansour'
+     p.Footer←'Copyright 2023 Paul S. Mansour'
      H.NewSimpleSiteTemplate p
  }

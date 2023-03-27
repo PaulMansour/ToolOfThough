@@ -1,0 +1,72 @@
+# [Error Trapping](/posts/error-trapping)
+
+## February 20, 2023
+
+Once we have written some nice, succinct APL code, it is disheartening to muck it all up
+with error trapping. There are many techniques, and often we just sling `⎕TRAP`, `:Trap`,
+`⎕SIGNAL` and error guards willy-nilly.
+It would be nice have to some tried and true patterns to apply, and extract as much
+messiness as possible.
+
+The best error trapping is none at all, or rather, left to functions further up the stack.
+But if we are providing a package to be used by others, and the API consists of more
+than utility functions like deleting extraneous blanks, we should provide some minimal distinction
+between a user error and a bug. This post explores one possible pattern, used in the
+[Text2Date](https://github.com/the-carlisle-group/Text2Date) project.
+
+For some packages, there is no need to invent new error numbers and 
+event messages. However, we need a way to distinguish between, say, a length error that we
+anticipate, and one that we don't.  Two functions will suffice to extract all the needed logic:
+
+~~~
+Signal←{
+     ⎕SIGNAL⊂('EN'(⍺+500))('Message'⍵)
+ }
+~~~
+
+and
+
+~~~
+f←ReSignal
+f←⎕SIGNAL{
+    ⊂('EN'(⍵.EN-500))('Message'⍵.Message)
+}
+~~~
+
+The `Signal` function wraps `⎕SIGNAL`, and specifies the **error number** and **message**
+for `⎕DMX`. The error number is bumped up by an arbitrary multiple of 100 (from 100 to 900),
+to distinguish it from an unexpected error. So, for example, if the left argument to an API
+function requires a 1 or 0, to signal a DOMAIN ERROR we might write:
+
+~~~
+~⍺∊0 1:11 Signal 'The left argument must be 0 or 1'
+~~~
+
+Note that `Signal` reverses the arguments of `⎕SIGNAL`. This is because `⎕SIGNAL`
+is more often than not called with `⍨` as the right argument is almost always a literal scalar,
+while the left argument is often constructed. 
+
+At the top of any API function we include the error guard:  
+
+~~~
+500+⍳100::ReSignal ⎕DMX
+~~~
+
+This traps all errors in our arbitrary block of 100, and using `ReSignal` propagates
+expected errors to the calling function. Unexpected errors remain untrapped and fail where they are.
+`ReSignal` only specifies the event number `EN` and `Message` for `⎕DMX`.
+The event message `EM` is automatically provided. `ReSignal` is a niladic trad function
+that returns a function. The reason for this subterfuge is that we want to encapsulate the right side of this error guard:
+
+~~~
+300+⍳100::⎕SIGNAL ⊂('EN'(⎕DMX.EN-500))('Message'⎕DMX.Message)
+~~~
+
+as this is far too much code to be copying and pasting all over the place.
+But `⎕SIGNAL` itself cannot be wrapped inside a function (trad or dfn) or it will not break out of the
+main function. It must signal in the scope of the main API function. The code to the right of `⎕SIGNAL` could
+easily be wrapped, but it would be nice to include the whole thing. Thus the trad function `ReSignal` returns
+a function that includes the whole thing, but keeps the `⎕SIGNAL` out of the subfunction.  This encapsulation technique
+is lifted from [Adám Brudzewsky](https://github.com/abrudz/dyalog_vision/blob/main/%E2%88%86SIGNAL.aplf).                                                             
+
+

@@ -1,0 +1,65 @@
+# [How Would You Write This?](/posts/how-would-you-write-this)
+
+## March 5, 2023 
+
+This question was recently posed on the
+[APL Orchard](https://chat.stackexchange.com/rooms/52405/the-apl-orchard/)
+regarding how the following logic should or 
+could be expressed given that an `:OrIf` cannot be mixed with an `:AndIf`: 
+
+~~~
+       :If 'Linux'≡(⊃# ⎕WG'APLVersion')~'-64'
+       :AndIf ~0∊⍴⎕CMD'which git'
+       :OrIf 'Windows'≡(⊃# ⎕WG'APLVersion')~'-64'
+       :AndIf ~0∊⍴⎕CMD'where git'
+~~~
+
+Leaving aside the `:AndIf`/`:OrIf` issue, this style violates the prime 
+[Dyalog Don't](/donts) directive *Don't use control structures*,
+especially in such a situation or context.
+
+A response was immediately forthcoming, cutting the Gordian knot:
+
+~~~
+:If ~0∊⎕CMD' git',⍨⊃'which' 'where'⌽⍨'Windows'≡'-64'~⍨⊃# ⎕WG'APLVersion'
+~~~
+
+This is a much more APL-style solution as it removes all the essential control structures,
+and is also better from a general programming perspective as it removes all of the duplicated
+code. These two improvements are directly related; removing the control structures requires the 
+removal of the duplicated code. This is precisely why control structures should be avoided. 
+But dangling this much code off the end of an `:If` statement, or preceeding a dfn guard,
+still leaves a lot to be desired, and violates another *Dyalog Don't*. 
+
+Why not name a function? How much easier on 
+the reader's eyes and brain is it to see:
+
+~~~
+     :If IsInstalled 'git' 
+~~~
+
+or 
+
+~~~
+     ~IsInstalled 'git':0 
+~~~
+
+There is no need for a comment, either outside the function or inside the function. The
+name of the function and its literal argument say it all. Furthermore, by extracting `'git'` as an argument, we
+have a function that might be useful in many other places, and would make a good candiate
+for an item in a utility package.
+Even if the function is hard-coded in the application, and is only used once,
+the simple act of encapsulating and naming the code is very useful.
+
+Once we have a well-named function, we might even say, *who cares how the code is written!*
+ 
+The fact that the code is in a function, that the function has a good name and a singular purpose,
+that the arguments are well-designed-- all of these things are more important than the
+style or technique of the code inside the function itself. It would be better to have the function
+named and then coded with all sorts of control structures
+than to have the naked APL-style solution following the :If statement.
+
+The benefits of an application composed of small, well-named and designed functions cannot be
+overstated. 
+
+

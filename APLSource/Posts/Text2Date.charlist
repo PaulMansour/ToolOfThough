@@ -1,0 +1,59 @@
+# [Text2Date, a New Repository](/posts/text2date)
+
+## February 27, 2023
+
+In a [previous post](/posts/text-to-date) I discussed the problem
+of converting time strings to time numbers. I have now extracted
+this functionality from our main application, rewritten it, and made it an open
+source project, imaginatively, but prematurely, named [Text2Date](https://github.com/the-carlisle-group\\Text2Date).
+                     
+Text2Date uses a modified version of the Dyalog format pattern that is the left argument
+of `1200⌶`.
+
+One useful recent, simplifying, insight gained in the process of rewriting 
+is that differentiating between undelimited 
+and delimited fixed-width formats strings is useful. Delimited fixed-width
+time strings must line up - the elements must be in the exact positions specified
+in the format string.  
+Undelimited format strings do not require that the time strings line up.
+For example, the format string `MMDDYY` can easily 
+process the character matrix:
+
+~~~
+123124
+10125
+  72476
+011523
+~~~
+
+yielding four dates:
+
+~~~
+      'MMDDYY' Text2Date '123124' '10125' '  72476   ' '011523'
+20241231 20250101 19760724 20230115
+~~~
+
+When there are no delimiters, we don't need to worry about where an element
+starts or ends. The time string is just a text representation of a date time packed into an
+integer. A missing leading zero is no problem. Leading and trailing blanks are no problem.
+Data in this format shows up all the time in Excel and CSV files out in the wild. 
+
+In the case of undelimited formats, there is also no need that the input are time strings,
+numeric is just as good, if not better. `Text2Date` is now misnamed, as this works:
+
+~~~
+      'MMDDYY' Text2Date 123124 10125 72476 011523
+20241231 20250101 19760724 20230115
+~~~
+
+Three special format strings are also accepted: `Excel` or `Excel1900`, and `Excel1904`,
+which also work on text or numeric input:
+
+~~~
+      'Excel' Text2Date 35000 37125 41256
+19951028 20010822 20121213
+      'Excel' Text2Date '35000' '37125' '41256'
+19951028 20010822 20121213
+~~~
+
+

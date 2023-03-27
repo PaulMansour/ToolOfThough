@@ -1,0 +1,84 @@
+# [An Issue With ⎕XML Revisited](/posts/an-issue-with-xml-revisited)
+
+## January 9, 2023
+
+In a [previous post](/posts/two-issues-with-xml) I looked at a couple of issues with
+`⎕XML`. One issue was formatting when converting to XML: I wanted indentation and
+removal of whitespace for most elements, but not all. I dont know how I missed it,
+but there is a way to do this built into the XML spec and `⎕XML` supports it.
+Simply add a special attribute to the elements in question. It's right
+there [in the docs](https://help.dyalog.com/latest/index.htm#Language/System%20Functions/xml.htm):
+
+~~~
+xml:space="preserve"
+~~~
+
+Thus, if the overall variant is `'Whitespace' 'Strip'`, individual elements
+will preserve whitespace with this attribute specified.
+
+This is more than cosmetic given the differences between XML and HTML.
+A paragraph with in-line markup, like bold, code, etc., must have whitespace
+preserved when generated using `⎕XML` otherwise an additional space will be
+added due to the formatting. Of course `pre` elements should also have whitespace
+preserved. So far I apply `xml:space="preserve"` to the `p`, `pre`, and `tr` elements.
+The latter formats tables nicely, with each row on its own line.
+
+Unfortunately the generated XML has `xml:space="preserve"` littered throughout the
+character vector which provides no use, and increases the size of the array. Oddly
+enough, I don't think I have ever written code to remove all the occurrences of a given
+substring from a string - or at least I can't remember doing it. It seems like it would be a very
+common task. Let's do it without using regular expressions.
+
+First, let's find the substrings, easy with the [find](https://help.dyalog.com/latest/index.htm#Language/Primitive%20Functions/Find.htm)
+primitive. This marks the beginning of each substring `⍺` in the target string `⍵`:
+
+~~~
+     'ere'{⍺⍷⍵}'here there where'
+0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0
+~~~
+
+Next lets extend each 1 by the length of the substring, using n-wise or-reduction, fully marking
+each found substring:
+
+~~~
+      'ere'{(≢⍺)∨/⍺⍷⍵}'here there where'
+1 1 0 0 0 1 1 1 0 0 0 1 1 1
+~~~
+
+Two related problems arise. First, as always with n-wise reduction, the result
+is shorter than the right argument. Second, when a substring is found at or near the beginning
+of the string, we don't get enough 1s. We can fix this by appending the substring to the 
+target string before searching:
+
+~~~
+      'ere'{(≢⍺)∨/⍺⍷⍺,⍵}'here there where'
+1 0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
+~~~
+
+Note that it is merely a convenience to append the substring itself, as it is, by definition,
+the proper length. We could also append an appropriate number of zeros to the result of `find`
+before applying the reduction. 
+
+Now we have only one problem: the Boolean mask is too long, by 1. So we drop off the first element:
+
+~~~
+      'ere'{1↓(≢⍺)∨/⍺⍷⍺,⍵}'here there where'
+0 1 1 1 0 0 0 1 1 1 0 0 0 1 1 1
+~~~
+
+The Boolean mask flags what we want to remove, not what we want to keep, so we negate it,
+flipping 1s to 0s and vice versa: 
+
+~~~
+      'ere'{~1↓(≢⍺)∨/⍺⍷⍺,⍵}'here there where'
+1 0 0 0 1 1 1 0 0 0 1 1 1 0 0 0
+~~~
+
+Finally, we apply [compress or replicate](https://help.dyalog.com/latest/index.htm#Language/Primitive%20Functions/Replicate.htm),
+with [commute](https://help.dyalog.com/latest/index.htm#Language/Primitive%20Operators/Commute.htm)
+to avoid parentheses, to keep everything but the substrings:
+
+~~~
+      'ere'{⍵/⍨~1↓(≢⍺)∨/⍺⍷⍺,⍵}'here there where'
+h th wh
+~~~
