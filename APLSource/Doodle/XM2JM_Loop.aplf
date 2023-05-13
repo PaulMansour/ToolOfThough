@@ -1,0 +1,12 @@
+ XM2JM_Loop←{
+     ⊃⍪/{d e t a←4↑⍵
+         k←2×d
+         j←k+1
+         e≡'':⍉⍪k''t 4         ⍝ Data        1 row OR...
+         z←⊂k'' '' 1           ⍝ Object      (1 row)+
+         z,←⊂j'Tag'e 4         ⍝ Element     (1 row)+
+         z,←4,⍨¨j,¨↓a          ⍝ Attributes  (0 or more rows)+
+         z,←⊂j'Content' '' 2   ⍝ Content     (1 row)+
+         z,←(0<≢t)/⊂(j+1)''t 4 ⍝ Text        (0 or 1 row)
+         ↑z}¨↓⍵
+ }

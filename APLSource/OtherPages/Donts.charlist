@@ -39,6 +39,13 @@ r←ThisReallyBigTask x
 :EndIf
 ~~~
 
+## Don't pack control structures into a single diamondized line
+
+Don't use control structures, but if you do, don't pack them with diamonds.
+If you already have 8 levels of indentation what are you saving?  
+And don't pack them with diamonds *and* embedded assignments!
+
+
 ## Don't nest parentheses
 
 One level is fine. Even multiple non-nested pairs on a line is OK. There is nothing wrong with using parenthesis to change the order of execution (that's what they are for):
@@ -91,9 +98,28 @@ Have an static method named `New` in the class that calls `⎕NEW`.
 This forces all instances of the class to be in a known place,
 where they can find friendly classes by doing something `##.FriendlyClass.New`.   
 
-## Don't trap 0
+## Don't micro trap
 
-If you trap 0 around anything more than trivial code, you have no idea if your code works the way you think it works, and it probably does not. Minimize the amount of code wrapped in a trap. Use a specific error number (like 6 for VALUE ERROR) if you can. If you must trap, use a dfn with a specific error guard to trap trivial code. 
+Don't trap around regularly expected errors if there is a simple test that will
+do the job. Don't do:
+
+~~~
+   {6::0 ⋄ ⍺⍎⍵ }
+~~~
+
+Do instead:
+
+~~~
+   {0=⍺.⎕NC ⍵:0 ⋄ ⍺⍎⍵}
+~~~
+
+## Don't trap 0 except for top level traps
+
+If you trap 0 around anything more than trivial code, 
+you have no idea if your code works the way you think it works, 
+and it probably does not. 
+Use a specific error number (like 6 for VALUE ERROR) if you can. 
+If you must trap, use a dfn with a specific error guard to trap trivial code. 
 
 ## Don't use `⍬` as a place holder for a namespace or class 
 

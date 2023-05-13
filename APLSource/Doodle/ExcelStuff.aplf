@@ -1,0 +1,36 @@
+ ExcelStuff←{
+     ⍝ c←¯1+26⊥⍉{⍵{(+/⍵)⌽⍵×⍺}⍵≠27}1+⎕A⍳a
+     ⍝ Improvement:
+     ⍝ This won't work on tests! Because assumes no digits already!
+     ⍝ ci←¯1+26⊥⍉{⍵⌽⍨+/0≠⍵}(' ',⎕A)⍳a ⍝ Put this in!
+
+     ⍝ For single value
+     ⍝ {26⊥⎕A⍳⍵}
+
+     ColumnLookup←{
+     ⍝ ⍵ ←→ Column Index or Name
+     ⍝ ← ←→ Column Name or Index
+         n←⊃,/,¨∘.,\3⍴⊂,¨⎕A
+         2=≡⍵:n⍳⍵
+         n[⍵]
+     }
+
+
+
+
+     f4_v4←{
+         ⍺←⎕A
+         n←≢⍺
+         i←{q←0⌈¯1+⌈⍵÷n ⍝ WONT WORK: q←⌊⍵÷⍺
+             a←⍪⍵-n×q
+             ∧/q=0:a
+             a,⍨∇ q}⍵
+         (' ',⍺)[i]
+     }
+
+
+
+
+
+
+ }

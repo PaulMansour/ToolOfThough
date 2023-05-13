@@ -1,0 +1,89 @@
+# [Validating Dates](/posts/validating-dates)
+
+## March 27, 2023
+
+One of the features of `⎕DT` is that it validates timestamps and time numbers.
+
+Verifying type 60 and 61 time numbers, as well as timestamps (`⎕TS` style) takes
+a bit of computation. Leap years must be determined, there are different day counts for different months,
+no more than 12 months in a year, 24 hours in a day, etc:
+
+~~~
+      60 0 ⎕DT 20230101.235959 20010229 20000229 20231301
+1 0 1 0
+~~~
+
+For time numbers that are a (potentially fractional) number of days from some epoch, the testing is much simpler.
+In fact it is hard to come up with an invalid value when almost any input yields a valid date:
+
+~~~
+      1 0 ⎕DT ¯1 0 1 35654 12345.123456789123456789 123456789123456789.123
+1 1 1 1 1 1    
+~~~
+
+There is no need to check much of anything except perhaps the range, which appears to be somewhere near:
+
+~~~
+      1 0 ⎕DT ¯2 2*22 62
+1 1
+~~~
+
+For a relatively large array, [Text2Date](https://github.com/the-carlisle-group/Text2Date)
+is taking an inordinate amount of time using `⎕DT` to validate type
+60 time numbers. To investigate, some slighty modified old code (from the pre `⎕DT` era) that handles time numbers
+in the form `YYYYMMDD.HHMMSS`:
+
+~~~
+Val←{
+     k←(0,5⍴100)⊤⍵×10*6
+     f c←(1752 1 1 0 0 0)(4000 13 32 24 60 60)
+     l←(k[1;]=2)∧(0=4|k[0;])=(0=100|k[0;])=0=400|k[0;]
+     g←(k[2;]>0)∧k[2;]≤l+31 28 31 30 31 30 31 31 30 31 30 31[11⌊0⌈k[1;]-1]
+     (k[5;]=⌈k[5;])∧g∧∧⌿(f(≤⍤¯1)k)∧c(>⍤¯1)k
+ } 
+~~~
+
+For comparison, let's define `ValDT`:
+
+~~~
+ValDT←{
+     60 0 ⎕DT ⍵
+ }
+~~~
+
+And run on 50 million integer dates:
+
+~~~
+      d←18000000+?50E6⍴22E6
+      cmpx 'Val d' 'ValDT d'
+  Val d   → 5.2E0  |    0% ⎕⎕⎕⎕⎕⎕                                  
+  ValDT d → 3.4E1  | +552% ⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕
+~~~
+
+And `Val` has not been optimized. If we rewrite it for integers only:
+
+~~~
+ValInt←{
+     k←(0,2⍴100)⊤⍵
+     f c←(1752 1 1)(4000 13 32)
+     l←(k[1;]=2)∧(0=4|k[0;])=(0=100|k[0;])=0=400|k[0;]
+     g←(k[2;]>0)∧k[2;]≤l+31 28 31 30 31 30 31 31 30 31 30 31[11⌊0⌈k[1;]-1]
+     g∧∧⌿(f(≤⍤¯1)k)∧c(>⍤¯1)k
+ }
+~~~
+
+Then we get:
+
+~~~
+      cmpx 'ValInt d' 'ValDT d'
+  ValInt d   → 1.4E0  |     0% ⎕                                       
+  ValDT d    → 3.8E1  | +2628% ⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕
+~~~
+
+Something is not right here. Maybe there is some check I'm not doing,
+but it looks like there is more going on than that.
+
+Even more inexplicable is how long `⎕DT` takes to validate a Dyalog Date Number
+when the array gets large. Unless I'm missing something, the check should
+be almost trivial. Maybe it is some sort of memory issue rather than
+computational inefficiency.

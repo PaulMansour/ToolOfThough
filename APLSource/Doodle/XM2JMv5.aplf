@@ -1,0 +1,17 @@
+ XM2JMv5←{
+     ⍝ ⍵ ←→ ⎕XML matrix
+     ⍝ ← ←→ ⎕JSON matrix
+     (o t)←↓⍉~⍵[;1 2]∊⊂''                     ⍝ Object, text
+     l←≢¨⍵[;3]                                ⍝ Number of attributes
+     n←o*⍨3+t+l                               ⍝ Target rows per source row
+     s←0,+\¯1↓n                               ⍝ Starting index of source in target
+     j←(o∧t)/3+s+l                            ⍝ Text index
+     m←0 '' '' 1⍴⍨4,⍨+/n                      ⍝ Initialize result
+     m[o/1+s;1 2 3]←(⊂'Tag'),4,⍨⍪o/⍵[;1]      ⍝ Tag row
+     m[2+∊s+⍳¨l;1 2 3]←4,⍨⊃⍪/⍵[;3]            ⍝ Possible attribute rows
+     m[o/2+s+l;1 2 3]←(+/o)⌿⍉⍪'Content' '' 2  ⍝ Content row
+     m[j;2 3]←4,⍨⍪⍵[;2]/⍨o∧t                  ⍝ Possible Text row
+     m[s/⍨~o;2 3]←4,⍨⍪⍵[;2]/⍨~o               ⍝ Text row
+     m[;0]←(n/2×⍵[;0])+(~m[;1]∊⊂'')+2×j∊⍨⍳≢m  ⍝ Depth
+     m
+ }

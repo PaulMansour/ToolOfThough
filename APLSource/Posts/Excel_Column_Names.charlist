@@ -1,0 +1,100 @@
+# [Excel Column Names](/posts/excel-column-names)
+
+## May 8, 2023
+
+Phase I, problem 3, of the 2020 Dyalog Programming Contest,
+**Excel-lent Columns** is stated thus:
+
+> A Microsoft Excel spreadsheet numbers its rows counting up from 1. However
+> Excel's columns are labelled alphabetically — beginning with A–Z, then AA–AZ, BA–
+> BZ, up to ZA–ZZ, then AAA–AAZ and so on.
+> Write a function that, given a right argument which is a character scalar or nonempty vector representing a valid character Excel column identifier between A and
+> XFD, returns the corresponding column number
+> 
+> Hint: The Decode function `X⊥Y`.
+>
+> Examples:
+>
+> ~~~
+>       (fn) 'A'
+> 1
+>       (fn) 'APL'
+> 1104
+> ~~~
+
+
+The solution is concise:
+
+~~~
+      N2I←{26⊥⎕A⍳⍵}
+      N2I¨'A' 'Z' 'AA' 'AZ' 'BA'
+1 26 27 52 53
+~~~
+
+With such a simple solution, one would think the inverse would be fairly easy. That is, given an integer,
+return the corresponding column name. If `decode` solves it one way, certainly `encode` should solve it the other way:
+
+~~~
+      {(' ',⎕A)[1+26 26⊤⍵]}¨1 26 27 52 53 
+ A  A   AA  B   BA 
+~~~
+
+Clearly not correct. The problem is that the column names are not plain old base-26, but rather bijective base-26,
+as a recent August 22, 2022 answer to an
+[old question on Stack Overflow makes clear.](https://stackoverflow.com/questions/181596/how-to-convert-a-column-number-e-g-127-into-an-excel-column-e-g-aa)
+
+This is not handled well by `encode`. While it may be possible to post-process the result
+of `encode` to make this work, I have not found a solution in this direction. From the referenced question and answer
+we can use recursion to compute the correct answer: 
+
+~~~
+      I2N←{
+           ⍺←⎕A
+           n←≢⍺
+           i←{q←¯1+⌈⍵÷n
+              a←⍵-n×q
+              q=0:,a
+              a,⍨∇ q}⍵
+           ⍺[i]
+       }
+
+       I2N¨1 26 27 52 53
+ A  Z  AA  AZ  BA  
+~~~
+
+Both of these functions are fairly easy to convert to work on vectors,
+but it does get a little messy.
+
+The function `I2N` works for any number of digits, which is nice.
+But this being APL for the practical programmer, we note that Excel columns don't exceed ZZZ (in fact much less) so it
+is easy to generate all possible Excel column names:
+
+~~~
+      n←⊃,/,¨∘.,\\3⍴⊂,¨⎕A
+      10↑n
+ A  B  C  D  E  F  G  H  I  J 
+      ¯10↑n
+ ZZQ  ZZR  ZZS  ZZT  ZZU  ZZV  ZZW  ZZX  ZZY  ZZZ 
+~~~
+
+With this in hand, and precomputed if we are worried about performance,
+we can trivially solve both the original problem and its inverse, with a single self-inverse function:
+
+~~~
+      ColumnLookup←{
+          ⍝ ⍵ ←→ Column Index or Name
+          ⍝ ← ←→ Column Name or Index
+          ⍺←⊃,/,¨∘.,\\3⍴⊂,¨⎕A
+          2=≡⍵:⍺⍳⍵
+          ⍺[⍵]
+          }   
+
+       ColumnLookup 1 26 27 52 53
+ A  Z  AA  AZ  BA 
+       ColumnLookup ColumnLookup 1 26 27 52 53
+1 26 27 52 53
+~~~
+
+If we precompute the column names, this will be the fastest and the simplest solution, though all the solutions are petty fast,
+even with an `each`. 
+

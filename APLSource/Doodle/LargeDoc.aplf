@@ -1,0 +1,8 @@
+ LargeDoc←{
+     v←25000 20⍴⍕¨⍳500000
+     t←A.NewTable v
+     c←A.Cells t
+     c.class←⊂'cell'
+     c.id←v
+     t
+ }

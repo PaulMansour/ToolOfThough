@@ -1,0 +1,11 @@
+ SimpleDoc←{
+     A←#.Abacus.Main
+     d←A.New'section'
+     d.class←'post'
+     d.id←'p20230411'
+     h←d A.New'h1' 'Simple Doc'
+     l←d A.New'ul'
+     l.Content←{A.New'li'⍵}¨'One' 'Two' 'Three'
+     _←(A.Elements d).⎕EX⊂'Parent'⍝ Not good for JSON
+     d
+ }

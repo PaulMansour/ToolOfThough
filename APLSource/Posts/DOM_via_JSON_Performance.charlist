@@ -1,0 +1,81 @@
+# [DOM via JSON Performance](/posts/dom-via-json-performance)
+
+## April 12, 2023
+
+In the [previous post](/posts/the-dom-via-json) we looked at
+building an APL DOM from a `⎕XML`-style matrix using `⎕JSON` rather than
+recursively creating namespaces by hand. Now let's look at some performance
+characteristics.
+
+First let's create a relatively large document and convert it to HTML:
+
+~~~
+      A←#.Abacus.Main
+  
+      LargeDoc←{
+            v←25000 20⍴⍕¨⍳500000
+            t←A.NewTable v
+            c←A.Cells t
+            c.class←⊂'cell'
+            c.id←v
+            t
+       }
+      
+      d←LargeDoc 0
+      h←A.DOM2HTML d 
+      ≢h
+20127817
+~~~
+
+Now let's convert the HTML to a `⎕XML` matrix, and test the performance of
+the two techniques from the previous post for converting a `⎕XML` matrix
+to a ⎕JSON matrix: 
+
+~~~
+  xm←⎕XML h
+      cmpx 'XM2JM_NoLoop xm' 'XM2JM_Loop xm'
+  XM2JM_NoLoop xm → 5.2E¯1 |    0% ⎕⎕⎕⎕⎕⎕⎕⎕                                
+  XM2JM_Loop xm   → 2.4E0  | +372% ⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕
+
+
+~~~
+
+While it's no surprise that the non-looping algorithm is faster,
+it is remarkable that the looping technique is not that bad. In addition
+no attempt has been made to sqeeze any more performance out of the non-looping
+function, other than the initial act of removing the loop, so there may be
+more speed to be had.   
+
+Of more interest is the relative performance of the complete task of
+using `⎕JSON` verses recursion to build the DOM:
+
+~~~
+      HTML2DOMviaJSON←{
+                ⎕JSON(⎕JSON⍠'M')XM2JM ⎕XML ⍵
+            }
+      
+      
+      cmpx 'HTML2DOMviaJSON h'  'A.HTML2DOM h'
+  HTML2DOMviaJSON h → 9.4E0  |   0% ⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕                   
+* A.HTML2DOM h      → 1.8E1  | +91% ⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕
+~~~
+
+Note that the results of these two functions don't match as they are namespaces
+not arrays. Note further that `⎕JSON` creates a tree where the child namespaces
+are true children of the parent, as opposed to the (this particular) recursive technique:  
+
+~~~
+        d1←HTML2DOMviaJSON h
+        d2←A.HTML2DOM h 
+        ⊃⊃⊃d1.Content.Content.Content
+#.[JSON object].[JSON object].[JSON object].[JSON object]
+        ⊃⊃⊃d2.Content.Content.Content
+#.Abacus.Main.[Namespace]
+~~~
+
+Recursion is clearly slower, but more testing should be done on reasonably
+sized and more realistic documents, especially docs with more depth.
+
+
+
+

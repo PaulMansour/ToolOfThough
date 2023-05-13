@@ -1,0 +1,4 @@
+ HTML2DOMviaJSON←{
+     ⍝ HTML to DOM via JSON
+     ⎕JSON(⎕JSON⍠'M')XM2JM_NoLoop ⎕XML ⍵
+ }

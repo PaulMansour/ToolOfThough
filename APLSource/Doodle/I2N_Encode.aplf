@@ -1,0 +1,6 @@
+ I2N_Encode←{
+     ⍝ Most ints
+     ⎕IO←0
+     (' ',⎕A)[⍉0 26 26⊤⍵]
+
+ }

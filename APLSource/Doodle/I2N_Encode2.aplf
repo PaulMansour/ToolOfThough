@@ -1,0 +1,6 @@
+ I2N_Encode2←{
+     ⍝ With "zeros" ints
+     ⎕IO←0
+     (' ',⎕A)[⍉0 27 27⊤⍵]
+
+ }

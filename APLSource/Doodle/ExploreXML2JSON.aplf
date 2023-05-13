@@ -1,0 +1,77 @@
+ ExploreXML2JSON←{
+   ⍝ Explore converting an XML matrix to a JSON matrix
+     A←#.Abacus.Main
+   ⍝ First, a document
+     d←A.New'div'
+     d.class←'mydiv'
+     d.id←'div1'
+     _←d A.Add A.New'ul'({A.New'li'⍵}¨'One' 'Two' 'Three')
+     p←A.New'p' 'Good'
+     p.class←'para1'
+     _←d A.Add p
+     _←p A.Add A.New'b' ' morning '
+
+     _←p A.Add'world!'
+     _←d A.Add A.New'footer' 'The end'
+     ⍝ Cleanup
+     e←A.Elements d  ⍝ Circular reference in Parent (why?)!
+     _←e.⎕EX⊂'Parent'
+     ⍝ And the XML matrix:
+     h←A.DOM2HTML d
+     xm←⎕XML h
+     jm←(⎕JSON⍠'M')⎕JSON d
+
+     jm2←XM2JM xm
+     jd←⎕JSON(⎕JSON⍠'M')jm2
+
+
+     xm jm
+
+     ⍝ xm to jm
+     xm[;1]
+
+
+
+
+
+
+
+
+
+
+
+
+
+     ⍝ Large Doc
+     t←A.NewTable⍕¨10000 10⍴⍳100000
+     b←A.BodyCells t
+     b.class←⊂'myclass'
+     b.id←10000 10⍴⍕¨⍳100000
+     h←A.DOM2HTML t
+     xm←⎕XML h
+     e←A.Elements t  ⍝ Circular reference in Parent (why?)!
+     _←e.⎕EX⊂'Parent'
+     jm←(⎕JSON⍠'M')⎕JSON t
+
+     jdom←⎕JSON(⎕JSON⍠'M')jm  ⍝ JSON matrix to DOM
+
+     mydom←A.HTML2DOM h
+
+
+     ⍝ Now what does the equivalent JSON mat look like?
+     ⍝ Ah DONT MAKE BY Hand!
+     j←⊂0 '' '' 1                ⍝ Object  (type 1)
+     j,←⊂1 'Tag' 'div' 4         ⍝   String  (type 4)
+     j,←⊂1 'class' 'mydiv' 4     ⍝   String
+     j,←⊂1 'id' 'div1' 4         ⍝   String
+     j,←⊂1 'Content' '' 2        ⍝   Array   (type 2)
+     j,←⊂2 '' '' 1               ⍝      Object
+     j,←⊂3 'Tag' 'ul' 4          ⍝        String
+     j,←⊂3 'Content' '' 2        ⍝        Array
+     j,←⊂4 '' '' 1
+
+
+
+     jm←↑j
+
+ }

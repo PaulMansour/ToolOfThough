@@ -1,0 +1,43 @@
+# [Don't Trap When You Can Verify](/posts/dont-trap-when-you-can-verify)
+
+## May 11, 2023
+
+The other day I turned trapping off:
+
+~~~
+      600⌶1
+2 
+~~~
+
+And attempted to run a user command:
+
+~~~
+      ]display ⍳10
+VALUE ERROR: Undefined name: exact
+findCmdPos[1] exact←{6::⍵ ⋄ exact}~ASN ⍝ exact match?
+~~~
+
+...which fails due to a **micro trap**.
+
+I'm not picking on user commands here, my apps do this all over the place and it's a bad
+idea. With trap control set to 1, virtually no aspect of my apps will run. I don't think that
+should be. Error guards are seductive because they are terse. It's a little annoying to write: 
+
+~~~
+      {0=⎕NC 'exact':⍵ ⋄ exact}
+~~~
+
+But the explicit test is a better practice. Sure, we can turn trap control on and off,
+we can put a stop flag in a function to get us to the point where we can safely
+turn trapping off to proceed to the error we are looking for, but it's all messy.
+
+There is virtually no scenario during development where we want a micro trap like this
+to not work. We are abusing the error guard. 
+
+Many times we can avoid micro traps and even guards by refactoring. 
+Micro traps are often a sign of technical debt: we have no idea how or why a certain
+state arises, but it does, so we trap around it. Regardless, if we must handle the case instead
+of finding and eliminating the root cause, it is better to explicitly test for it.
+
+So this proscription is now added to the [Dyalog APL Dont's](/donts) 
+

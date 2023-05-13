@@ -1,0 +1,40 @@
+DRAFT
+                                                                                           ##
+# [Trap Classification](/posts/trap-classification)
+
+
+## The Micro Trap
+
+{6::0 ⋄ ⍺⍎⍵}
+
+Routine, expected errors. No notication to API user or major cutting back of state or control flow.
+The application or code does not stop. Should be avoided. If the errors are expected, they should not be errors.
+Code appropriately.
+
+
+
+## Can tests run in "debug" mode?
+
+In "debug" mode, specific traps are not set. If there is any significant regular application
+code in the case of error
+
+We can't turn off trapping during tests, as we need to trap
+
+
+
+
+
+
+## The API Trap
+
+Propagating expected errors to the programmer. 
+
+
+## Global Application Trap
+
+For unknown errors. A broad trap, trap 0 for the entire app, cutback to main DQ for a GUI app.
+Maybe shut down and restart for a server app. Possibly shutdown.
+
+
+
+

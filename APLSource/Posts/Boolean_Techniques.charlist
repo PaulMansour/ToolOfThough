@@ -1,0 +1,79 @@
+# [Boolean Techniques](/posts/boolean-techniques)
+
+## May 13, 2023
+
+In a recent post titled [Suggestivity and Idioms in APL](https://www.sacrideo.us/suggestivity-and-idioms-in-apl/)
+on his blog [Fastidious Elegance](https://www.sacrideo.us/tag/apl/) Arron Hsu
+enumerates all the permutations and combinations of
+logical pairwise reductions on Boolean vectors.
+There are 10 scalar dyadic relational functions and Aaron throws in `⊣` and  `⊢` as well for
+total of 12 functions. With the catenation of 1 or 0 on the front or the back,
+to keep the result the same shape as the input, there are `12×2×2` or `48` possible combinations. 
+
+It would be convenient to be able to describe in short terms what each of
+these Boolean transformations does. If we can't meaningfully name them, we probably cannot
+effectively use them. If we are going to search for these expressions on, say, [APL Cart](https://aplcart.info),
+we need to have some way to describe them.
+
+In his 1987 book **APL - Advanced Techniques and Utilities**, Gary Berquist uses the terms *maps* and 
+*poles* to facilitate discussion of Boolean vectors and techniques: 
+
+> A "maps" vector is a Boolean vector which consists of sets of contiguous 1s (1-maps)
+> separated by one or more 0s, (0-maps). For example, the following bit vector contains 3
+> 1-maps and 4 0-maps:
+>
+> ~~~
+> 0 0 1 1 1 1 0 0 0 1 1 0 0 1 1 1 1 1 0 0
+> ~~~
+>
+> A "leading" 1-poles vector is a Boolean vector which consists of pairs of 1s 
+> separated by zero or more 0s. The 1's are called "poles".  The left pole in each
+> pair may be viewed as the starting element of a set of contiguous elements. 
+> The right pole in each
+> pair may be viewed as the next element beyond the ending element of the set.
+> For example, the following bit vector contains 3 pairs of leading 1-poles:
+>
+> ~~~
+> 0 0 1 0 0 0 1 0 0 1 0 1 0 1 0 0 0 0 1 0  
+> ~~~
+>
+> Notice that 1-maps and leading 1-poles are alternative means of conveying the 
+> same information. Basically they identify spans of contiguous elements. 1-maps
+> do so by using 1s to flag the elements within the spans. Leading 1-poles do so
+> by using 1s to flag the starts of spans and the starts of non-spans (hence the 
+> word "leading").
+
+We can of course flip the bits and discuss 0-maps and leading 0-poles as well. 
+With this terminolgy in hand, we can interpret  `≠\\` as converting leading 1-poles to
+1-maps, and `=\\` as converting leading 0-poles to 0-maps.
+
+How many of Aaron's 48 permutations can be succinctly described with this lexicon?
+Gary defines and names 6 transformations, using shift-and-compare techniques that pre-date
+the introduction of n-wise reduction. We can find the corresponding 6 transformations in Aaron's 48
+by inspection:  
+
+|            |            |                               |
+|:===========|:===========|:==============================|
+| `R≠¯1↓0,R` | `{2≠/0,⍵}` | 1-maps to leading 1-poles     |
+| `R=¯1↓1,R` | `{2=/1,⍵}` | 0-maps to leading 0-poles     |
+| `R>¯1↓0,R` | `{2</0,⍵}` | 1-maps to first 1 bits        |
+| `R≥¯1↓1,R` | `{2≤/1,⍵}` | 0-maps to first 0 bits        |
+| `R∨¯1↓0,R` | `{2∨/0,⍵}` | extend 1-maps to right by 1   |
+| `R∧¯1↓1,R` | `{2∧/1,⍵}` | extend 0-maps to right by 1   |
+
+From these, six related ones jump right out:
+
+|            |            |                                |
+|:===========|:===========|:===============================|
+| `R≠1↓R,0`  | `{2≠/⍵,0}` | 1-maps to trailing 1-poles     |
+| `R=1↓R,1`  | `{2=/⍵,1}` | 0-maps to trailing 0-poles     |
+| `R>1↓R,0`  | `{2>/⍵,0}` | 1-maps to last 1 bits          |
+| `R≥1↓R,1`  | `{2≥/⍵,1}` | 0-maps to last 0 bits          |
+| `R∨1↓R,0`  | `{2∨/⍵,0}` | extend 1-maps to left by 1     |
+| `R∧1↓R,1`  | `{2∧/⍵,1}` | extend 0-maps to left by 1     |
+
+Aaron may be a bit optimistic when he writes that
+*almost all of the binary relations that we can imagine in use here find some meaningful interpretation*,
+but here we have 12 simple, visually suggestive, well-named expressions using the language of
+maps and poles. That's a good start. Can we find more?
+
