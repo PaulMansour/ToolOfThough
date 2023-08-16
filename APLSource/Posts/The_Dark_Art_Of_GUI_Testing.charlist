@@ -1,0 +1,42 @@
+DRAFT
+
+# [The Dark Art of GUI Testing](/posts/the-dark-art-of-gui-testing)
+
+## August 4, 2023
+
+Nowhere is the principle of Test Driven Development (TDD) more important than
+with GUI programming and `⎕WC`. Writing GUI code without forethought will invariably yield
+code that is simply untestable. Of course we don't have forethought until we have written
+a bunch of GUI code first, and then attempted to write test code, 
+so we are generally doomed to have untestable GUI code that must be rewritten.
+
+The first problem that arises is that in order to present a GUI to a user in a runtime interpreter
+we must use `⎕DQ` (or the `Wait` method). Furthermore, most GUI applications will have modal forms
+to one extent or another, sometimes stacked a couple of levels deep, leading to more uses of `⎕DQ`
+sprinkled around the code. But the minute we use ⎕DQ, it becomes impossible to
+interact with the GUI programmatically, which is precisely what needs to done to write automated GUI
+tests. With the interpreter waiting in `⎕DQ`, we can't even run a test function, let alone fire events
+programmaticilly using `⎕NQ`. Threading with `&` won't help here. And starting a separate process and
+using some other tool to act on the GUI graphically is out of the question. 
+Explicit `⎕DQs` are thus the mortal enemy of automated tests.
+The only real purpose of `⎕DQ` is to prevent a runtime interpreter from exiting,
+and to make forms modal, neither of which are needed when running automated tests.
+So let's not execute `⎕DQ` when running tests.
+
+But this leads to a second problem. `⎕DQ` seductivley produces a result, which is often analyzed
+and used to take a specific action. If during tests we don't execute `⎕DQ`,
+we certainly cannot use the result of `⎕DQ`. Therefore, there can be no code after `⎕DQ`.
+How is this accomplished? By moving all code that might seem to be necesary based
+on the result of `⎕DQ` into callback functions. 
+
+Now that we have eliminated `⎕DQ` when running tests, we can begin driving the GUI programmatically.
+We want to simulate the user clicking on buttons, entering text, navigating grids, etc. 
+Along the way, we want to check the state of the application, making assertions.
+
+We want to write test  
+    
+
+
+
+
+

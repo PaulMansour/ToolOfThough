@@ -1,0 +1,127 @@
+# [Testing GUIs](/posts/testing-guis)
+
+## August 14, 2023
+
+I'm currently in the process of extracting a GUI testing framework from a private project 
+and adding it to [Provanto](https://github.com/the-carlisle-group/provanto). 
+Writing automated GUI tests for `⎕WC` applications is somewhat of a dark art.
+Nowhere is the principle of Test Driven Development (TDD) more important than
+with GUI programming and `⎕WC`. Writing GUI code without forethought will invariably yield
+code that is simply untestable. Of course we don't have forethought until we have written
+a bunch of GUI code first, and then attempted to write test code, 
+so we are generally doomed to have untestable GUI code that must be rewritten.
+
+Future posts will explore the underlying framework code in detail.
+Here we just take a look at the overall basics, what a test function looks like,
+and how to write one. Once the dark art is mastered and buried in the framework,
+and we learn how to write testable GUI apps, the tests themselves are clean, neat, and
+simple to write, read, and maintain.
+
+Testing a GUI starts with a reference to the primary form object of an application.
+The `Init` function takes this form, instantiates a few properties in it,
+and then injects a few functions back into the test namespace:
+
+~~~
+Init←{
+     ⍵.on999←1
+     ⍵.DequeueTimes←4
+     ⍵.ActionDelay←0
+     ⍵.KeyPressDelay←0
+     t←⊃⎕RSI
+     t.Keys←KeySpace 0
+     t.G←⎕THIS
+     _←⍵ Fix¨API 0
+     0
+ }
+~~~
+
+In addition to `Assert` and `Try` (the functions that Provanto injects into the test space),
+we now will have two more reserved words: `Enter` and `Get`. Both of these functions are bound
+with the reference to the form, so it is not needed as an argument.
+
+The `Init` function may be called in the `Startup` function for a suite of tests, or 
+directly in a test function.  
+
+Provanto includes a sample GUI application and a few tests to show how it is done.
+A typical GUI test fires events on objects, then inspects the state of the GUI and the application
+and makes assertions. Let's take a look at one:
+
+~~~
+TestAllowDigitsProperty←{
+     s←GetAppState 0
+     e←Get'Name'
+     Assert~s.AllowDigits:
+     Enter'Name' 'A12B345C':
+     Assert e.Text≡'ABC':
+     Enter'AllowDigits':
+     Assert s.AllowDigits:
+     Enter'Name' '12345':
+     Assert e.Text≡'ABC12345':
+     Enter'AllowDigits':
+     Assert~s.AllowDigits:
+     0
+ }
+~~~
+
+This function assumes that `Init` has already been called.
+`GetAppState` is an application specific helper function that returns a namespace
+with a few variables representing the state of the application. 
+Of course in a real application, the application state may be represented by a complex object model,
+or a folder on disk, or both and more. 
+
+The `Get` function takes the name of a GUI object and returns a reference to it,
+providing access to the state of the GUI.
+
+The `Enter` function allows us to fire events at the GUI. 
+To click on a push button or menu item, or to change the state of a radio button or check box,
+we simply call the `Enter` function with the name of the object.
+To enter text in an edit box, we call `Enter` with both the name of the object
+and the text to enter.
+
+We can also fire specific events. For example, to double click on the `Name` edit object:
+
+~~~
+Enter 'Name' (⊂'MouseDblClick')
+~~~
+
+A full event message may be provided as well:
+
+~~~
+Enter 'Name' ('KeyPress' 'RC' 0 39 0) 
+~~~
+
+`KeyPress` events are very common, so a namespace with `KeyPress` events is provided,
+to make it easy to fire specific keys on objects:
+
+~~~
+Enter 'Name' Keys.RightCursor  
+~~~
+
+The above test is implement as a dfn, and thus naked guards are necessary to prevent
+the function from exiting on the lines that lack an assignment, specifically the lines
+calling `Enter`. We could of course assign a useless result instead, but it adds a lot of clutter.
+The naked guard is already used on the lines making assertions, so it's not that much
+of stretch, but some might find it objectionable. I'm not entirely sure how I feel about it.
+A trad function works just as well, arguably cleaner if there are not too many local variables:
+
+~~~
+ z←TestAllowDigitsProperty x;s;e
+ s←GetAppState 0
+ e←Get'Name'
+ Assert~s.AllowDigits
+ Enter'Name' 'A12B345C'
+ Assert e.Text≡'ABC'
+ Enter'AllowDigits'
+ Assert s.AllowDigits
+ Enter'Name' '12345'
+ Assert e.Text≡'ABC12345'
+ Enter'AllowDigits'
+ Assert~s.AllowDigits
+ z←0 
+~~~
+
+The main point is that both of these functions, the dfn and trad fn, have little to no extraneous code.
+The functions are easy to write and read. The two API functions `Enter` and `Get` provide almost
+all that is needed. The test functions are also easy to trace, and you can see exactly
+what the GUI is doing while stepping through them.
+

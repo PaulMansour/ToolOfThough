@@ -98,6 +98,13 @@ Have an static method named `New` in the class that calls `⎕NEW`.
 This forces all instances of the class to be in a known place,
 where they can find friendly classes by doing something `##.FriendlyClass.New`.   
 
+## Don't use `⎕NEW` for GUI objects
+
+Use `⎕WC`, which creates named objects, not `⎕NEW` which creates unnamed objects.
+Other than returning a reference, which can easily be obtained by executing the result
+of `⎕WC`, there are no advantages to using `⎕NEW`, and plenty of disadvantages to not
+being able to reference objects by name.
+
 ## Don't micro trap
 
 Don't trap around regularly expected errors if there is a simple test that will

@@ -28,9 +28,20 @@
          (' ',⍺)[i]
      }
 
+⍝     Better:!
+⍝        RubenVerg
+⍝RubenVerg
+⍝673
+⍝12:39
+⍝@PaulMansour wat
+⍝I thought I tested it
+⍝okay this works
+⍝ {⍵<1:''⋄(∇¯1+⌈⍵÷26),⎕ucs 65+26|⍵-1}
 
 
-
-
+⍝ And look at ovs
+⍝ @Adám ⎕A∘dfns.adic :P
+⍝
+⍝
 
  }

@@ -15,7 +15,7 @@ these Boolean transformations does. If we can't meaningfully name them, we proba
 effectively use them. If we are going to search for these expressions on, say, [APL Cart](https://aplcart.info),
 we need to have some way to describe them.
 
-In his 1987 book **APL - Advanced Techniques and Utilities**, Gary Berquist uses the terms *maps* and 
+In his 1987 book **APL - Advanced Techniques and Utilities**, Gary Bergquist uses the terms *maps* and 
 *poles* to facilitate discussion of Boolean vectors and techniques: 
 
 > A "maps" vector is a Boolean vector which consists of sets of contiguous 1s (1-maps)
@@ -43,7 +43,11 @@ In his 1987 book **APL - Advanced Techniques and Utilities**, Gary Berquist uses
 > by using 1s to flag the starts of spans and the starts of non-spans (hence the 
 > word "leading").
 
-We can of course flip the bits and discuss 0-maps and leading 0-poles as well. 
+We can flip the bits and discuss 0-maps and leading 0-poles as well.
+These terms do not represent any inherent properties of Boolean vectors,
+but rather an interpretation of what the 1's and 0's mean. The same Boolean
+vector could be a 1-maps vector in one context and a 1-poles vector in another context.  
+This, however, does not lessen the usefulness of the terms.
 With this terminolgy in hand, we can interpret  `≠\\` as converting leading 1-poles to
 1-maps, and `=\\` as converting leading 0-poles to 0-maps.
 

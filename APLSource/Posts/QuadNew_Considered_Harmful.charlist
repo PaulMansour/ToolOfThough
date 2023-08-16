@@ -1,0 +1,74 @@
+DRAFT
+
+# [`⎕NEW` Considered Harmful](/posts/quadnew-considered-harmful)
+
+## August 7, 2023
+
+GUI objects created using `⎕WC` may also be created using `⎕NEW`.
+However there is a fundamental difference between the two techniques.
+From the documentation:
+
+~~~
+   Note that as `⎕NEW` provides no facility to name a GUI object...
+~~~
+
+Objects created with `⎕WC` are **named** while objects created with `⎕NEW` are unnamed.
+This difference is a big difference, with implications for how an application is coded,
+structured and tested. In other words it changes everything.
+
+
+Consider creating a form using each technique:
+
+~~~                 
+      f1←⍎'form1' ⎕WC 'Form'
+      f2←⎕NEW ⊂'Form'
+      )obs
+f1      f2      form1   
+      f1
+#.form1
+      f2
+#.[Form]
+~~~ 
+
+As with unnamed namespaces, we cannot store a character vector that points to the object,
+we must always have a referecne in hand.
+
+
+Because f1 is a named form, we can identify it in the workspace heirarchy. 
+
+Now consider placing an OK button on the form using both techniques:
+
+~~~                 
+      b1←⍎'OK' f1.⎕WC 'Button' 'OK'
+      b2←f2.⎕NEW 'Button' (⊂'Caption' 'OK')
+~~~ 
+
+
+
+
+In the first case we have created a  We can ask the form for the names of its children
+  
+In the second case, b2 is the only way we can access the button, if we keep only a refence 
+There is no way to ask the form for the names of its children:
+
+~~~
+        f2.⎕nl 9
+        f2.⎕WN ''
+~~~
+
+
+ If we let the variable b2 go out
+of scope, there is no way to to find out what is on the form.
+
+Now, it should be noted, the Dyalog documentation for ⎕NEW suggests creating a child object 
+in the following way:
+
+~~~
+      f2.(OK←⎕NEW 'Button' (⊂'Caption' 'OK'))
+~~~
+
+This solves the problem of keeping a reference to the button in its proper place in the GUI tree,
+albeit at the expense of a horrific embedded and parenthesised assingment. However, we still
+cannot ask the form f2 what its children are. We can ask with are the objects that are under it,
+but these may or may not be GUI children of the form. 
+

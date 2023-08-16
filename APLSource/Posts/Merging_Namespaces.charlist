@@ -1,0 +1,297 @@
+DRAFT
+
+# [Getting and Setting Names in Namespaces](/posts/merging-namespaces)
+
+## May 25, 2023
+
+For a long time I have worked around the fact the `⎕NS` does not take
+a reference as a left argument, or return a reference. So lots of quotes and executes.
+And of course injecting names and values into namespaces when the names are themselves
+are variables is a pain. We've all done something like:
+
+~~~
+      n s.{⍎⍺,'←⍵'}¨v
+~~~
+
+And getting names out requires execute, and so on and so on. 
+
+Adám Brudzewsky of Dyalog has a (3 year old!) [repository](https://github.com/abrudz/ns)
+that proposes enhancements to `⎕NS`, and two new system functions `⎕NG` and `⎕NV`.
+These are modelled respectively as `∆NS`, `∆NG`, and `∆NV`. Let's dive
+in and see what they do, if there are any holes in the design,
+and what the implications are.
+
+> There is nothing new in what follows. It is simply a restatement
+> of Adám's work in the repository and a series of email exchanges with Adám and others.
+                                                                                               
+`∆NS` allows, in addition to the current funtionality of `⎕NS`: 
+
+### Enhancements to `⎕NS`                                                                      
+1. The left argument to be a reference, 
+
+2. The result to be a reference if the left argument is a reference
+
+3. The right argument to be name/value pairs in various forms
+
+The first two items are trivial and obvious enhancements, that have
+been applied to many other functions already, and are long overdue for `⎕NS`.
+Together they make it much easier to apply `⎕NS` and use the result, especially
+for repeated application on multiple spaces. 
+
+The third item may be thought of as a general case of the current 
+functionality of `⎕NS`, which takes a list of names to instantiate
+in a new or existing namespace:
+
+~~~
+     One←1
+     Two←2
+     Three←3
+     r←⎕NS 'One' 'Two' 'Three'
+~~~
+
+With `∆NS`, we can do:
+
+~~~
+     ∆NS ('One' 1) ('Two' 2) ('Three' 3)
+~~~
+
+The former can be thought of as a special case of the latter, where ommited values
+default to the value of the name in the current space.
+And, for what it is worth, the two forms can be mixed:
+
+~~~
+    ∆NS ('One' 1) ('Two') ('Three' 3)
+~~~
+
+Additionally ∆NS allows for two more forms of name/value pairs, as a 2 column matrix of names
+and values, and as a matrix of names and a vector of values:
+
+~~~
+     n←'One' 'Two' 'Three' 
+     v←1 2 3
+     ∆NS n,⍪v
+     ∆NS (↑n) v
+~~~
+
+The only minor drawback is that we cannot do:
+
+~~~
+    ∆NS n v
+~~~
+
+because of the ambiguity of:  
+
+~~~
+     ∆NS 'ABC' (1 2 3)
+~~~
+
+Is this 1 name and 1 value, or 3 names and 3 values?
+
+
+### New System function `⎕NG`
+
+`∆NG`, or "name get", gets the values from a namespace. Like `∆NS`, it can take
+simple names, or name/value pairs. In this case, the value is a default value to
+be returned if the name does not exists.
+
+~~~
+               s ∆NG  'Balance'
+               s ∆NG  ('Balance') ('Rate' 3.5) ('Term' 360)
+~~~
+
+Like ∆NS, various forms of the name/default-value pairs may be provided:
+
+~~~
+ ... put something here
+
+~~~
+
+### New System function `⎕NV`
+
+∆NV, or "name value", takes a right argument like `⎕NL` and gets names and values
+from a namespace: 
+
+~~~
+          a ∆NG 2
+          a ∆NG ¯2
+~~~
+
+### Merging Namespaces
+
+Consider a set of namespaces `a`, `b` , `c` and `d` that we want to merge into a single
+namespace:
+
+~~~
+     a ∆NS b ∆NS c ∆NS d
+~~~
+
+or: 
+
+~~~
+     ∆NS/a b c d
+~~~
+
+This copies `d` into `c`, and then `c` into `b`, and finally `b` into `a`. The result is namespace `a`, and all
+namespaces except `d`, the final one, are modified as a side effect. To avoid the side effects,
+and to get a new instance as a results, there are at least a couple of possible approaches.
+
+One crude way is to simply clone each namespace first:
+
+~~~
+      ∆⎕NS/∆NS¨a b c d
+~~~
+
+Or, saving one clone:
+
+~~~
+      {(⎕NS ⍺)⎕NS ⍵}/a b c d
+~~~
+
+Which for the tacitly inclined is: 
+
+~~~
+      ⎕NS⍨∘⎕NS⍨/a b c d
+~~~
+
+Lets call this function `Merge1`:
+
+~~~
+      Merge1←∆NS⍨∘∆NS⍨/
+~~~
+
+Another way is to create a new empty namespace, and then successively copy `a`, `b`, `c`, and `d`
+into that new empty namespace:
+
+~~~
+      ∆NS⍨/⌽(∆NS ''),a b c d
+~~~
+
+Let's call this function `Merge2`:
+
+~~~
+      Merge2←{∆NS⍨/⌽⍵,⍨∆NS''}
+~~~
+
+Note the order of copying is reversed, and all spaces are copied into
+the same new namespace (thus the commute operator), rather than the cascading effect of the
+simple reduction above. This has no cloning at all, and much less copying, for whatever performance
+gain that is worth.
+
+Both of these solutions allow the argument items to be not just namespaces,
+but any array of names and values that `∆NS` will accept. Thus we may write:
+
+~~~
+     Name←'Hello World'
+     Pair←'NVP' 1
+     PairVector←('Name1' 1)('Name2' 2)
+     Space←∆NS (Alpha 7) ('Beta' 8)
+     PairMatrix←3 2⍴'One' 1 'Two' 2 'Three' 3
+     r←Merge2 Name Pair PairVector Space PairMatrix 
+     r ∆NV 2
+~~~
+
+Starting with `Merge2`, eliminating the reverse, and post-pending the new empty space,
+yields a "no overwrite copy": 
+
+~~~
+      ∆NS⍨/a b c d,∆NS''
+~~~
+
+Here the result is a new space with the values of `a`, with the values in `b` not found in `a`, with the values
+in c not found in `a` or `b`, etc.
+
+
+### Other Merging Techniques
+
+Consider two namespacees, `a` and `b`.
+There are various ways we might want to merge or combine them.
+The simplest is to copy items from one into the other, overwriting
+target names if they exist:
+
+~~~
+      a ∆NS b
+~~~
+
+If we want a new instance, and want to leave a and b untouched:
+
+~~~
+      (∆NS a) ∆NS b
+~~~
+
+or: 
+
+~~~
+      b ⎕NS⍨⎕NS a
+      a ⎕NS⍨∘⎕NS⍨ b  
+~~~
+
+Or we can clone each first, which performs an unecessary but harmless clone of `b`:
+
+~~~
+      a ∆NS⍥∆NS b
+~~~
+
+For a (real world) example, we might want to keep the instance `a`,
+and add all names in `b` not found in `a` to `a`.
+If we dont care about `b` after the operation, we can write:
+
+~~~
+      ∆NS/a b a
+~~~
+
+This first copies all names of `a` into and over names in `b`, giving `a` priority.
+It then copies all names in `b` into `a`, preserving the instance of `a`.
+Obviously this technique has the side effect of modifying `b`, which may
+well be acceptable if `b` is a transient space, which it often is.
+
+If `b` must remain untouched, we need another approach:
+
+~~~
+      a ∆NS a ∆NS⍨∆NS b
+~~~
+
+or:
+
+~~~
+      a ∆NS b ∆NS⍥∆NS a
+~~~
+
+
+### Other Design Options
+
+Other options might be 
+
+⎕SET and ⎕GET
+
+with values on the left, and 
+
+Two issues arise. First, there is no place to specify the namespace, so only option is the
+current namespace, and dotting in (which is the same thing). So if we have a namespace name in
+hand, and not a referecne we need to do 
+
+   (⍎n).⎕SET
+   
+And we are back to more executes.
+
+More importantly, the namespace has to exist already, or we have to explicity create it,
+        
+        v (⎕NS '').⎕SET n
+
+granted not so bad with array notation:
+
+~~~
+   v ().⎕SET n
+~~~    
+   
+However the biggest drawback is that we cannot use a single function, `⎕NS` to deal with
+creating, cloning, and merging namespaces.
+We now have two function and two syntaxes to deal with.
+
+
+
+
+
+
+      
+     
+
