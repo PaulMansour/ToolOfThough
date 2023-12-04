@@ -1,0 +1,145 @@
+# [Towards a Chart Wizard](/posts/towards-a-chart-wizard)
+
+## September 20, 2023
+
+What might a good, embeddable, re-usable chart wizard, wrapping the
+[SharpPlot library](https://sharpplot.com), look like?
+This wizard should be easy to add to an application, and could be used in the Dyalog APL session
+as well. Before designing a GUI for a chart wizard, however, we must design an appropriate,
+lower-level wrapper for the library.
+
+SharpPlot is powerful, comprehensive, and well designed.
+Despite this fact, we still need a thin layer over the top of it to insulate us from
+the details and idiosyncrasies of .NET, to have a clearer separation of source data
+and chart properties, and to provide a more declarative language for defining charts.   
+For example, there are many "set" methods like `SetMargins` and `SetPenWidth` that are 
+conceptually just properties. We should be able to specify them as such.
+There are also draw methods for each chart type, and we should be able to specify a
+chart type property rather than call a method. Finally, there is often overlap of the 
+the primary data of a chart with the argument to the draw method and some additional 
+properties. For example, the `DrawBarChart` method requires one or more vectors of bar heights.
+The corresponding categories, however, are specified via the `SetXLabels` method.
+The vast majority of the time, the categories and the corresponding values will be 
+provided to us as two or more columns in a table,
+and we should be able to specify the data as such, and have our chart language take care of the rest.  
+
+For the sake of simplicity, we assume the data is provided in a
+namespace enclosing a vector of names, and a corresponding vector (of vectors) of
+values. The particular form of this data is not important. What is important is that it
+is essentially a table, with named and ordered columns.
+Using the data from the first example in the SharpPlot [tutorial on bar charts](https://sharpplot.com/BarCharts.htm) 
+we can construct the data space `d`:
+
+~~~
+      v←⊂'Project'('A2' '18' 'Q5' 'T6' 'T8' '32')
+      v,←⊂'Last Year'(6 18 27 31 40 43)
+      v,←⊂'This Year'(17 33 42 54 71 78)
+      d←⎕NS''
+      d.(Names Values)←↓⍉⊃v
+~~~
+
+Defining a chart is then an exercise in specifying properties:  
+
+~~~
+      c←New 0
+      c.ChartType←'BarChart'
+      c.Heading←'Comparative Spend 2004-5'
+      c.BarChartStyle←'TicksBetween,ValueTags,ForceZero'
+      c.XAxisStyle←'XAxisStyles.MiddleLabels,XAxisStyles.GridLines'
+      c.ValueTagStyle←'Vertical,Inside,SectorValues,RecolorOutside'
+      c.ValueFont←'"Arial" 10 FontStyle.Bold Color.LightYellow'
+      c.ValueTagFormat←'###0 Units'
+      c.Gap←0
+      c.GroupGap←0.5
+      c.Colors←'Color.Green Color.Maroon'
+      c.XLabelFormat←'Proj-XX'
+      c
+~~~
+
+Where `New` just creates a namespace with a few default properties:
+
+~~~
+New←{
+     p←⎕NS''
+     p.Size←360 240
+     p.Multi←0
+     p.Scale←'Shadowed'
+     p.Select←''
+     p
+ }
+~~~
+
+Which produces: 
+
+![Bar chart sample](#.ToolOfThought.SVGs.BarChart1)
+
+Let's note a few things about this chart definition, comparing it 
+to the [C# definition](https://sharpplot.com/BarCharts.htm). 
+
+First, all property values are simple numeric or text vectors or scalars.
+
+Second, SharpPlot methods like `SetValueFont` and `SetColors` are called by setting
+the properties `ValueFont` and `SetColors`.
+
+Third, a text vector will be evaluated if the property it is defining is a cover
+for an underlying SharpPlot method, as is the case for for `ValueFont`. 
+
+Fourth, in evaluated property values, double quotes are replaced by single quotes
+before evaluation. 
+
+Fifth, the various style properties that are normally specified as 
+the sum of one or more enums, like `BarChartStyle` and `YAxisStyle`,
+are specified as comma or space delimited strings. In addition, the dot-qualifying name may be
+elided if it refers to the name as the property itself.
+
+Finally, the `ChartType` property determines which draw method is executed.  
+
+Now, given the chart definition space `c` and the data space `d`, we can create the SVG `v` with:
+
+~~~
+      v←c BuildChart d
+~~~
+
+Note that the `ChartType` property defines how the data is interpreted, and how specific properties
+will be automatically set. Any property set by default for the chart type by may also be set by the chart definition.
+For example, for a bar chart, the `XLabels` (cover for `SetXLabels` method) property is automatically set
+using the values from the first column of the data. Nothing prevents the user from specifying the `XLabels`
+property explicitly in the chart definition, overiding the default behavior.
+
+## The Input Data Table and the Chart Type
+
+In the example above, the input data table consisted of 3 columns, `Project`, `Last Year`, and `This Year`.
+Each `ChartType` processes the input data table by default in a certain way. For a bar chart, the first column
+is taken to be the category, and all subsequent columns are taken to be values passed to the `DrawBarChart` method.
+Thus, in the case above we get a multi-bar chart, with two bars per category. Most of the time it is easy enough to
+simply pass the proper table with the proper columns in the proper order to the `BuildChart` function, from the calling
+application.
+Sometimes, however, we have certain columns we want to ignore, or that will be used to split or group data inside
+SharpPlot. Alternatively the columns may not be in correct order. To facilitate this, we provide a `Select` method that specifies a list
+of column names. This is used to select, re-order, and by definition, omit, columns from the input data table for
+the default processing of the chart type.     
+
+## Multi Charts
+
+One nice feature of SharpPlot is the ability, for certain chart types, to do [multiple mini charts](https://sharpplot.com/Multiples.htm)
+in one go. We add a Boolean property `Multi` to cover this. If set to `1`, then each series is drawn on it's own chart. 
+
+## A Fly in the Ointment
+
+The chart definition outlined above is just a set of name/value pairs. They can be executed in any order,
+as they just set the state of the SharpPlot chart object before the appropriate draw method is executed.
+But there are times when we may want to draw additional things on charts, additional graphs, or lines,
+perhaps in different colors, and it is important that additional properties are set after the draw method
+is executed, and then we need to specify the next draw method. Order becomes an issue here.
+One solution is for `BuildChart` to accept a list of name/value pairs rather than a namespace.
+As a chart definition needs to be stored to disk somehow, and a namespace is no good for that,
+we will need this feature anyway. Now we will have order. The namespace is then just a convenience
+for writing charts in code, rather than defining the chart in an array of name/value pairs.
+The result of the wizard should be this array. 
+
+
+## Next Steps
+
+Now that we have a tidy way of defining charts in code or as an array, we can think about a GUI to make it really
+easy. This is perhaps a good opportunity to look at the HTMLRenderer for a cross-platform solution. 
+

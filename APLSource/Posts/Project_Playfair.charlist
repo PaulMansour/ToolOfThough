@@ -1,0 +1,83 @@
+# [Project Playfair](/posts/project-playfair)
+
+## September 27, 2023
+
+[Playfair](https://github.com/the-carlisle-group/Playfair) is a new project
+for exploring the features, pros, and cons of [SharpPlot](https://sharpplot.com/),
+and how it compares to the big popular projects like
+[Vega-Lite](https://vega.github.io/vega-lite/), [ggplot2](https://ggplot2.tidyverse.org/)
+and [plotly](https://plotly.com/).
+
+Playfair is also for exploring and what needs to be done to to cover SharpPlot 
+to make it as easy and consistent to use as possible. 
+
+It should be noted the main concern is with
+statistics and business graphics, so the focus is on bar charts,
+line charts, and scatter plots.  3D plots and the like are not particularly relevant  
+though SharpPlot clearly has some of that capability.
+
+Also it is assumed that a sophisticated database and query language is available to
+produce the data ready to be plotted. There is little need for the chart library
+to summarize data, compute totals and averages, and do general analytics, even though
+SharpPlot and the rest can in fact do this to some degree. However,
+it can be useful to delegate splitting and grouping data to the chart library in certain
+circumstances.
+
+There are three completely superficial (but to the casual observer often fatal) 
+cons of SharpPlot which need to to be noted but dispensed with: the SharpPlot website/help,
+the Wizard provided in the Dyalog Windows IDE, and the default color scheme.
+The website and CHM help both display charts as fuzzy, out-of-focus, pixelated png
+files. (That's not good for a graphics package!) The wizard is unusable,
+the default color palette hideous.
+
+A primary pro of SharpPlot is that it is delivered as a single dll (or even APL workspace) with no
+dependencies. It is hard to overestimate the benefit of this. This feature is so important that it can make up for many, many cons
+of the library that may exist. Vega-Lite is a JavaScript library that depends on Vega, which in turn depends
+on D3 and who knows how many other libraries. And of course it takes a web browser or some JavaScript
+interpreter to run it. Despite the existence of the HTMRenderer, a JavaScript solution is not ideal. 
+
+## The Grammar of Graphics
+
+The primary difference between SharpPlot and Vega-Lite and ggplot2 is that the latter two 
+are based on [The Grammar of Graphics](https://www.amazon.com/Grammar-Graphics-Statistics-Computing/dp/0387245448/ref=as_li_ss_tl).
+This means things are ... abstract. To see how abstract, this quote from the home page of ggplot2 should suffice:
+
+> It’s hard to succinctly describe how ggplot2 works because it embodies a deep philosophy of visualisation.
+> However, in most cases you start with ggplot(), supply a dataset and aesthetic mapping (with aes()).
+> You then add on layers (like geom_point() or geom_histogram()),
+> scales (like scale_colour_brewer()), faceting specifications (like facet_wrap()) and coordinate systems (like coord_flip()).
+
+Now there is nothing wrong with deep philosophy, abstractions and generalizations, and for those who design and create charts for a living,
+or better yet, those who design systems that design charts, having the power this ultimately delivers is no doubt a good thing.
+Plotly and SharpPlot both fly a little closer to the ground, and provide specific functions that 
+directly create bar charts and scatter plots and so on.
+Of course, given a grammar of graphics, the first thing we want to do is completely hide it from 
+our end users, so it remains to be seen if it really is an advantage for basic business graphics. 
+
+One potential con of SharpPlot compared to the other packages (those based on GoG or not), is that the SharpPlot draw methods
+do not take a consistent specification for the data on the `x` and `y` axes. For example, the SharpPlot `DrawBarChart` method
+takes a vector of values for the quantitativive axis, usually `y`. The categorical axis is not defined and must be manually labeled.
+To get a horizontal bar chart, the bar-chart-specific `Horizontal` property must be specified, instead of just switching the specification of the
+data feeding the `x` and `y` axes. A little more generalization would help here. Be that as it may, end users are probably 
+more comfortable selecting chart type `BarChart` and then clicking a check box for a `Horizontal` option, without thinking much about axes.
+
+In future posts we will be putting SharpPlot through its paces, comparing and contrasting with the other charting libraries.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

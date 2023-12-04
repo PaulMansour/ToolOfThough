@@ -1,0 +1,57 @@
+# [Testing GUIs: Wrestling with Events](/posts/testing-guis-wrestling-with-events)
+
+## August 18, 2023
+
+GUI applications are complicated. Callbacks are attached to events and processed by `⎕DQ`.
+Events can get queued up by their nature. For example, a single user
+action on a grid can fire a `GridKeyPress` event, followed by a `CellChange`
+event followed by a `CellChanged` event. Events can also get queued up
+because a callback explicitly calls `⎕NQ` adding another event to the queue.
+During the normal course of using the application, this all just
+works (hopefully!). However, the moment we try to write automated tests
+that exercise the GUI, the complexity manifests itself.
+
+The first problem that arises is that when testing, we cannot run `⎕DQ` at all.
+If we `⎕DQ` the main form, we cannot then run a test function.
+
+> Note that it is possible to either write your tests into the application
+> itself, so that they run under the main `⎕DQ` of the application, or to run 
+> each test under a temporary invocation of `⎕DQ` - by using `⎕NQ` to put
+> a test into the queue. But these techniques are overly complicated and add nothing useful.
+> They make writing and tracing tests more difficult, and they don't solve 
+> a secondary problem of modal subforms like dialog boxes.
+   
+This is easy to solve. We just use the implicit `⎕DQ` that runs when the session is wait mode.
+We should also avoid all uses of `⎕DQ` to wait on modal forms. A simply `TestMode`  flag in our application
+facilitates this. 
+
+The second and more difficult problem to solve is that in a GUI test function we want to
+fire events and make assertions, and fire more events and make more assertions, and this must behave exactly as it does in a runtime situation under `⎕DQ`.
+But firing a single event can stack up multiple events, and these will not fire in real time during the execution of
+the test function. This is because when the test function runs, there is no opportunity for queued up callbacks to execute.
+When the interpreter drops into immediate execution mode, then the queued up events can be processed by the session's implicit
+`⎕DQ`. We have the strange situation where an assertion fails and the test stops, and then the assertion can be re-executed
+and it passes, as the very fact of failure has allowed the interpreter to pause and process the queued up events.
+How then is this problem solved? We must have a way of giving the interpreter an opportunity on every line of the test function,
+or at least on every line that fires an event, to process all of the events that may occur as a result of the
+primary event that was fired.
+
+The magic that does this is:
+
+~~~
+Fire←{
+     _←⎕NQ ⍵
+     0⊣{⎕DQ ⍵⊣⎕NQ ⍵ 999}¨⍺.DequeueTimes⍴⍺ 
+ }  
+~~~
+
+`⍺` is the primary form.    
+
+We fire the primary event with `⎕NQ`. We then enter and exit an explict `⎕DQ` as many times as necessary to process
+the queued up events right on the spot. The `⎕NQ` fires a 999 event which is set to exit `⎕DQ`.  It is not always clear   
+how many times we must enter and exit `⎕DQ` to clear the queue. And of course it is different for different primary events.
+Luckily it appears we can set it to an arbitrarily high number, say 10, with no performance penalty.
+
+The sample GUI app in Provanto contains an example of explicitly using `⎕NQ` in callbacks to create a chain of 7 events.
+It can be observed that we must enter and exit `⎕DQ` exactly 7 times to process all the events. In a real-life large
+GUI application the magic number appeared to be 4. 

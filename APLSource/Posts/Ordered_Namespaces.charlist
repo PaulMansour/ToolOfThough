@@ -1,0 +1,43 @@
+# [Ordered Namespaces](/posts/ordered-namespaces)
+
+## September 26, 2023
+
+It is useful to be able to retrieve the names and values in a namespace in the order
+in which they were assigned, especially when designing DSLs where users are writing
+scripts.  For example, we may want to assign vectors into a namespace
+and then display the vectors as columns in an Excel spreadsheet in the same order. 
+
+One way to do this is with global triggers. Here is `QNSO`, for *quad namespace, ordered*:
+
+~~~
+QNSO←{
+     s←⎕NS''
+     s.∆nl←''
+     f←⊂'∆T x' ':Implements Trigger *' '{}2007⌶1' '∆nl,←⊂x.Name' '{}2007⌶0'
+     f,←⊂'z←∆NL' 'z←⌽∪⌽∆nl∩⎕NL ¯2'
+     s⊣s.⎕FX¨f
+ }
+~~~
+
+Now we can do:
+
+~~~
+      s←QNSO ''
+      s.Zebras←5
+      s.Apples←8
+      s.Eggs←12
+      s.∆NL
+ Zebras  Apples  Eggs 
+      s.Zebras←7
+      s.⎕EX 'Apples'
+      s.∆NL
+ Eggs  Zebras 
+~~~
+
+
+The trigger function `∆T` is called on every assignment to a global variable in the namespace.
+The assigned names are accumulated in the variable `∆nl`. We have to be careful to use
+`2007⌶` to turn global triggers off and then back on, or else we will end up in an endless loop.
+
+
+

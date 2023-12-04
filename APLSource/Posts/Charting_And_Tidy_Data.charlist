@@ -1,0 +1,188 @@
+# [Charting and Tidy Data](/posts/charting-and-tidy-data)
+
+## September 28, 2023
+
+[Tidy data](https://vita.had.co.nz/papers/tidy-data.pdf) is mostly just an informal term
+for what in database theory is called 3rd (or there abouts) normal form. If data is not *tidy*,
+it is considered *messy*. Another pair of terms for the same concept, but less judgmental,
+is *long-form* and *wide-form*. 
+Often wide-form or messy data is simply report data or secondary data. That is, it is the
+result of some report generated from the primary data in a DBMS. "Messy" in this case
+is in the eye of the beholder. Long-form data can also be composed of secondary data;
+it can be the result of a grouped query for example.
+
+[Altair](https://altair-viz.github.io/user_guide/data.html#long-form-vs-wide-form-data)
+strongly prefers long-form data, while [plotly](https://plotly.com/python/wide-form/)
+is happy to handle either format. 
+
+To explore this issue with SharpPlot we will use the well known 1930's barley experiment data set,
+beloved by statisticians. The data ranges over 6 farms, 10 varieties of barley, and 2 years,
+for a total of 120 observations on yields. Here are the first 10 rows:
+
+|Year  |Farm             |Variety           |Yield  |
+|=====:|:====            |:=======          |======:|
+|`1931`|`University Farm`|`Manchuria`       |`27.00`|
+|`1931`|`Waseca`         |`Manchuria`       |`48.87`|
+|`1931`|`Morris`         |`Manchuria`       |`27.43`|
+|`1931`|`Crookston`      |`Manchuria`       |`39.93`|
+|`1931`|`Grand Rapids`   |`Manchuria`       |`32.97`|
+|`1931`|`Duluth`         |`Manchuria`       |`28.97`|
+|`1931`|`University Farm`|`Glabron`         |`43.07`|
+|`1931`|`Waseca`         |`Glabron`         |`55.20`|
+|`1931`|`Morris`         |`Glabron`         |`28.77`|
+|`1931`|`Crookston`      |`Glabron`         |`38.13`|
+
+Consider now aggregating the yield for farm and year, effectively
+eliminating the variety column. We can compute and display
+this as a multi-level grouping, grouping by the unique combinations
+of year and farm, and summing the yields: 
+
+|Year  |Farm             |Yield   |
+|=====:|:====           |=======:|
+|`1931`|`University Farm`|`358.28`|
+|`1931`|`Waseca`         |`543.47`|
+|`1931`|`Morris`         |`292.88`|
+|`1931`|`Crookston`      |`436.60`|
+|`1931`|`Grand Rapids`   |`290.54`|
+|`1931`|`Duluth`         |`302.94`|
+|`1932`|`University Farm`|`295.07`|
+|`1932`|`Waseca`         |`418.70`|
+|`1932`|`Morris`         |`415.12`|
+|`1932`|`Crookston`      |`311.79`|
+|`1932`|`Grand Rapids`   |`208.09`|
+|`1932`|`Duluth`         |`257.01`|
+
+This is long-form data (despite being the result of a query).
+We can also compute and present the same data as a crosstab
+of yields by farm and year:
+
+|Farm             |1931    |1932    |
+|:====            |=======:|=======:|
+|`University Farm`|`358.28`|`295.07`|
+|`Waseca`         |`543.47`|`418.70`|
+|`Morris`         |`292.88`|`415.12`|
+|`Crookston`      |`436.60`|`311.79`|
+|`Grand Rapids`   |`290.54`|`208.09`|
+|`Duluth`         |`302.94`|`257.01`|
+
+This is wide-form data. In this particular case, we have the same number of columns,
+but if we had more years of data, the crosstab would get wider,
+and of course the multi-level grouping in long-form would get longer.
+
+In the case of a bar chart, SharpPlot accepts the wide form data
+with a minimum of fuss. The [DrawBarChart](https://sharpplot.com/SharpPlot-DrawBarChart.htm)
+method accepts a vector of vectors (in this case, one for year 1931 and one for the year 1932).
+  
+Playfair assumes the first column of data is the category and all remaining columns are 
+`y` axis or quantitative values so the chart definition for the wide-form data above is simply: 
+
+~~~
+     p←##.Main.New''
+     p.ChartType←'BarChart'
+     p.Heading←'Barley Yields from Wide-Form Data'
+     p
+~~~
+
+and the result is:
+
+![Bar chart sample 1](#.ToolOfThought.SVGs.BarleyBarChart1)
+
+There is nothing wrong with wide-form data as a report format,
+or as the result of applying a query to long-form data, particularly
+when we are immediately using it as the input to a charting function,
+and particularly for bar charts.
+The wide-form data, like the bar chart we are creating, makes it easy
+to compare values between years. The long-form data is not conducive to this.
+Furthermore, we may well want to display the graph and the data side by side,
+and there is no reason to compute the values twice, once in the DBMS and
+once in the chart library.
+
+On the other hand, long-form data does not need placeholders for empty
+or missing or non-existent data. If there was no observation for Grand Rapids
+in 1931, the long-form data simply would not have this row. But the wide-form
+data needs a cell for it. This becomes important for scatter plots, where
+the x axis can have different values for different groups. We will explore
+this in a future post. 
+  
+SharpPlot will also accept long-form data, but we must also specify
+the [GroupBy](https://sharpplot.com/SharpPlot-GroupBy.htm)
+and [SplitBy](https://sharpplot.com/SharpPlot-SplitBy.htm) methods.  
+While these are methods that take actual column values in SharpPlot,
+in Playfair we have converted them to properties that take the name
+of the column of the input table. Using the long-form data above
+we can define the chart as:
+
+~~~
+     p←##.Main.New''
+     p.ChartType←'BarChart'
+     p.Heading←'Barley Yields from Long-Form Data'
+     p.Select←'Farm,Yield'
+     p.GroupBy←'Farm'
+     p.SplitBy←'Year'
+~~~
+
+Note that in Playfair we must set a `Select` property to specify the
+columns for the axes, if the the table has more columns or the columns
+are not in the proper order for the default behavior. 
+
+And this produces the exact same chart as the wide-form example:
+
+![Bar chart sample 2](#.ToolOfThought.SVGs.BarleyBarChart2)
+
+Now let's look at the same chart in [Vega-Altair code](https://altair-viz.github.io/gallery/grouped_bar_chart.html)
+The data used here is the original, ungrouped barley data. The Altair code is:
+
+~~~
+import altair as alt
+from vega_datasets import data
+
+source = data.barley()
+
+alt.Chart(source).mark_bar().encode(
+    x='year:O',
+    y='sum(yield):Q',
+    color='year:N',
+    column='site:N'
+)
+~~~
+
+Which compiles to the Vega-Lite code:  
+
+~~~
+{
+  "config": {"view": {"continuousWidth": 300, "continuousHeight": 300}},
+  "data": {"name": "data-093ece8c35bb2d41094cfb6138ec810b"},
+  "mark": {"type": "bar"},
+  "encoding": {
+    "color": {"field": "year", "type": "nominal"},
+    "column": {"field": "site", "type": "nominal"},
+    "x": {"field": "year", "type": "ordinal"},
+    "y": {"aggregate": "sum", "field": "yield", "type": "quantitative"}
+  },..
+   ...all the data inlined here...
+   ...
+~~~
+
+I will spare you the Vega code that the Vega-Lite code compiles to.
+
+Some observations: 
+
+1. The data used here is the primary barley data, so the specification must 
+    include aggregating the yield column with a sum function. 
+2. Both the Altair and Vega code show the abstract
+    nature of the grammar of graphics.
+3. The `x` and `y` axes are explicitly specified, as opposed to SharpPlot's bar chart
+    definition, and Playfair, which takes a table and assumes the first column is the 
+    categorical axis, the remaining columns are quantitative. (We could specify axes specifically
+    in Playfair, but I'm not sure what benefit there is.)
+4. The `x` axis is specified as year, not site (farm). This seems a little strange.
+    It appears Vega treats the chart as a collection of mini barcharts each with year as the axis,
+    rather than one chart with site as the x axis, where each tick mark has multiple values.  
+5. The `color` and `column` properties somehow specify the multi-level grouping by year
+    and by site (farm). It's not clear to me at all why these terms are used or how exactly
+    this works. I'm sure there is a good reason, but it is certainly... abstract.
+    
+
+Clearly Vega-Lite and Vega
+require a little more study.
+

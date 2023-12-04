@@ -141,6 +141,21 @@ Compare:
 0 1 0
 ~~~
 
+## Don't write operators that never take functions as operands
+
+Don't do:
+
+~~~
+{⍵⊃⍨⍵⍵⍳⊂⍺⍺}
+~~~
+
+If you must, just do something like: 
+
+~~~
+{n v←⍵ ⋄ v⊃⍨n⍳⊂⍺}
+~~~
+
+
 ## Don't abbreviate names
 
 In the proper circumstances, the letter `d` is an excellent name. Again, in the proper circumstances, the string `NextRateAdjustmentDate` may be an excellent name, as is the string `NRADate`. These names have in common the following property: they may be spoken over the phone, and the hearer has a reasonable chance of understanding what is being communicated. The string `NxtRtAdjDt` is _never_ a good name. It sows confusion. It is the Voldemort of names by force: it must not be spoken because it cannot be spoken. 

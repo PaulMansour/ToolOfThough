@@ -1,0 +1,7 @@
+ QNSO_2←{
+     s←⎕NS''
+     s.∆nl←''
+     f1←'∆T x' ':Implements Trigger *' '{}2007⌶1' '∆nl,←⊂x.Name' '{}2007⌶0'
+     f2←'z←∆NL' 'z←⌽∪⌽∆nl∩⎕NL ¯2'
+     s⊣s.⎕FX¨f1 f2
+ }

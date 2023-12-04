@@ -1,0 +1,6 @@
+ New←{
+     s←⎕NS''
+     _←s.⎕FX'_Trigger x' ':Implements Trigger *' 'xxxx ⍝ ⎕←123'
+
+     s
+ }

@@ -1,0 +1,48 @@
+# [High-Rank Arrays](/posts/high-rank-arrays)
+
+## November 15, 2023
+
+A [recent episode](https://www.arraycast.com/episodes/episode66-tali-beynon)
+of Array Cast discussed high-rank arrays and the concept of named axes.
+(I vaguely remembered that Brother Steve had done a paper on this very topic some 20 odd years ago,
+and sure enough [he did](https://dl.acm.org/doi/10.1145/570475.570494).)
+ 
+One use or application of high-rank arrays covered in the podcast was essentially multidimensional OLAP. That is,
+the construction of high rank arrays from some other source, usually a relational database, precomputing ranges, bins,
+categories and various measures. For example, in some health care application, you might end up with a rank 6 array that contains
+record counts by age, sex, marital status, income range, smoker, and drinks-per-day. This application of high-rank arrays
+is a very bad idea, that has been around a long time, and like many bad ideas, refuses to die.
+
+Voluminous books have been written, endless jargon coined, complex software designed,
+and vast fortunes made consulting, all selling this bill of goods. All because SQL is viewed
+as virtually synonymous with the relational database model, and the vast majority of commercial
+RDBMS implementations use row-based storage. In other words, it's hard and time consuming to write analytic queries
+that require full table scans in Oracle or SQL Server, and then they run slow.
+This is no reason to jettison the relational database model.
+
+The name "multidimensional" in this context is completely misleading. It implies that the relational model is
+somehow not multidimensional. But of course it is. The very fact that an OLAP "data cube" can be constructed from 
+a single relational database table proves this. It is true that a table or matrix has two dimensions, rows and columns.
+But it is also true that a vector of length n represents a point in n-space. And a matrix is just a collection of row vectors,
+or a collection of points in n-space.  So what then is a matrix? Is it a two dimensional thing or an n-dimensional thing?
+The answer is that it is both, often at the same time; it simply depends on what's in it, and how we interpret it.
+But whatever is in it, and however we interpret it, it never ever makes sense to explode the thing into a high-rank array,
+taking a lot of time and trouble in the process, losing tons of information along the way, and blowing out your workspace to boot.
+
+Also discussed in the podcast was another idea, at best equally bad, probably worse; high-depth arrays and dependent types as an alternative to the relational model.
+The example presented was storing data about planets and their moons, where a table of planets has a moons column that contains nested tables
+of moons for each planet. This leads to more complexity, more difficulty in querying, more
+problems in efficient storage, and all sorts of other problems. Imagine you then want to store the elements that have been found on each moon.
+You can see where that leads, and it's no where good. The relational model solved this problem simply and elegantly
+something like 60 years ago. 
+
+With the right design (column oriented), and a query language based on APL, the relational model is the right way to organize your data
+in the examples above. Like the core concepts of APL, the relational model cannot be improved upon. 
+High-rank arrays and nested tables are useful and appropriate in some cases, but not here. 
+       
+
+ 
+
+    
+
+

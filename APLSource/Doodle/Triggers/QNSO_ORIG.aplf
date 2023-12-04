@@ -1,0 +1,13 @@
+ QNSO_ORIG←{
+     s←⎕NS''
+     s.∆nl←''
+     f1←⊂'∆T x'
+     f1,←⊂':Implements Trigger *'
+     f1,←⊂'{}2007⌶1'
+     f1,←⊂'∆nl,←⊂x.Name'
+     f1,←⊂'{}2007⌶0'
+     f2←⊂'z←∆NL'
+     f2,←⊂'z←⌽∪⌽∆nl∩⎕NL ¯2'
+     _←s.⎕FX¨f1 f2
+     s
+ }
