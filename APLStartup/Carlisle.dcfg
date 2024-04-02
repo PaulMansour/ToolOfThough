@@ -1,0 +1,30 @@
+{ 
+  Settings: {
+             Default_IO: 0,
+             Default_ML: 3, 
+             ClassicMode: 1,
+             ClassicModeSavePosition: 1,
+             SingleTrace: 1,
+             AutoPW: 1, 
+             SessionOnTop: 1,                          
+             Log_Size: "8M",
+             MaxWS: "4G",
+             PropertyExposeRoot: 1,
+             Load: "startup.apln",   
+             AutoDPI: 1,
+             DYALOG_PIXEL_TYPE: "ScaledPixel",
+             DYALOG_DISCARD_FN_SOURCE: 1,
+             APLFormatBias: 1,
+             DadoProjectsFolder: "C:/APLProjects",
+             SALT: {
+                    CommandFolder: "c:/APLStartup/;[dyalog]/SALT/spice",                 
+                   },
+             Colours: {
+                       SchemeName: "Nord",  
+                      },
+            }
+}
+
+
+
+

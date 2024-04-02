@@ -1,0 +1,109 @@
+# [Making SharpPlot Charts Interactive](/posts/making-sharpplot-charts-interactive)
+
+## December 21, 2023
+
+Now that we know how to make attractive charts in [SharpPlot](https://sharpplot.com),
+the next step is add interactivity. SharpPlot has a [brief tutorial](https://sharpplot.com/Links.htm)
+on this topic, and provides various methods for making charts interactive. 
+The [AddHyperlinks](https://sharpplot.com/SharpPlot-AddHyperlinks.htm) method
+will add a hyperlink to any bar or point in a chart. 
+The [AddAttributes](https://sharpplot.com/SharpPlot-AddAttributes.htm) method allows
+an arbitrary attribute and value to be inserted into 
+[various elements](https://sharpplot.com/ScriptTarget.htm)
+
+However, much of the techniques used are outdated given where CSS and SVG are 
+now and the existence of the HTMLRenderer. In addition, using SharpPlot itself
+to add interactivity might be useful if we were to rely on different output formats
+but our only concern is SVG. All we need to do is to be able to identify and address
+the elements of interest. One option to accomplish this is to use the `AddAttributes` 
+method to add an id to the elements. Unfortunately, `AddAttributes` adds an additional 
+`<rect>` element for every `<text>` element, (and then adds it own id as well). 
+For example, here is a snippet of SVG from a basic bar chart: 
+
+~~~
+<desc>for X-axis labels</desc>
+ <g font-family="Times New Roman" font-size="80" text-anchor="middle" >
+  <text x="793" y="2096" >North</text>
+  <text x="1548" y="2096" >South</text>
+  <text x="2303" y="2096" >East</text>
+  <text x="3058" y="2096" >West</text>
+ </g>
+~~~
+
+We want to be able to identify and manipulate these `<text>` elements, but when we add an id
+using the `AddAttributes` method we get:
+
+~~~
+<desc>for X-axis labels</desc>
+ <rect x="699" y="2024" width="187" height="88" fill="none" pointer-events="visible" id="chart1_XLabels_1" myid="xlabel0" > </rect>
+ <rect x="1454" y="2024" width="187" height="88" fill="none" pointer-events="visible" id="chart1_XLabels_2" myid="xlabel1" > </rect>
+ <rect x="2209" y="2024" width="187" height="88" fill="none" pointer-events="visible" id="chart1_XLabels_3" myid="xlabel2" > </rect>
+ <rect x="2964" y="2024" width="187" height="88" fill="none" pointer-events="visible" id="chart1_XLabels_4" myid="xlabel3" > </rect>
+ <g font-family="Times New Roman" font-size="80" text-anchor="middle" pointer-events="none" >
+  <text x="793" y="2096" >North</text>
+  <text x="1548" y="2096" >South</text>
+  <text x="2303" y="2096" >East</text>
+  <text x="3058" y="2096" >West</text>
+ </g>
+~~~
+
+I'm sure there was a reason in the past for having the `<rect>` element, probably just to 
+apply the `pointer-visible` attribute, but I don't think there is any need for it today.
+This gets in the way of, say, making the text of one x axis value bold using CSS. 
+We need to identify the `<text>` element, not some associated `<rect>` element.  
+
+Luckily we can use [Abacus](https://github.com/the-carlisle-group/Abacus) to create an APL DOM of the SVG text emitted by SharpPlot. Then
+we can easily manipulate elements, add attributes, and so on. The problem is that the
+SVG is full of largely unidentifiable `<text>` and `<rect>` elements. But there are comments
+embedded using the `<desc>` element, as can be seen above. We can do some crude coding and sort of find out where
+things are. For example, here is a function that identifies the basic elments of a single series
+bar chart, adding id and class attributes: 
+
+~~~
+AddIdsToDOM←{
+     ⍝ ⍵ ←→ DOM
+     ⍝ Crude Technique that relies on comments
+     ⍝ Will not work if AddAttributes is used in certain circumastances
+     ⍝ ... as additional elements are inserted.
+     ⍝ Works only on basic bar chart with one series
+     A←#.Abacus.Main
+     e←A.Elements ⍵
+     n←'xlabel' 'ylabel' 'value' 'point'
+     v←'for X-axis labels' 'Y-axis labels' 'Data value labels ...'('Start of Barchart ',11⍴'=')
+     ⍵⊣n{
+         p←⊃e A.ElementsWhere'Content'⍵
+         c←(e⊃⍨1+e⍳p).Content
+         c.class←⊂⍺
+         c.id←⍺∘,¨⍕¨⍳≢c
+         0
+     }¨v
+ }
+~~~
+
+Which yields:
+
+~~~
+<desc>for X-axis labels</desc>
+    <g font-family="Times New Roman" font-size="80" text-anchor="middle">
+      <text class="xlabel" id="xlabel0" x="793" y="2096">North</text>
+      <text class="xlabel" id="xlabel1" x="1548" y="2096">South</text>
+      <text class="xlabel" id="xlabel2" x="2303" y="2096">East</text>
+      <text class="xlabel" id="xlabel3" x="3058" y="2096">West</text>
+    </g>
+~~~
+
+Now we can easily identify and manipulate all the relevant elements.
+(Of course SharpPlot knows exactly where and what everything is when it generates the SVG,
+and it would be much better if it added the id and class attributes itself.)
+Now we can construct a bar chart that operates like a pick list, allowing the user to scroll up
+and down, highlighting the current selection by placing a border around the bar and bolding
+and increasing the font size of the associated labels: 
+
+![Bar chart sample 1](#.ToolOfThought.SVGs.HighlightedBarChart)
+
+Note that if you inspect the source of this chart, it is not as it would appear in an application.
+Here, for convenience in a static web site, we simply do the highlighting by using
+the `style` attribute. In an application, classes
+are used with external style sheets. Scrolling up and down will change the class of the bar, for
+example, from `unselected` to `selected`.   
+

@@ -1,0 +1,5 @@
+ GenerateKey←{
+     ⍝ ⍺ ←→ Population size
+     ⍝ ⍵ ←→ Number of keys
+     'ZI10'⎕FMT?⍵⍴⍺
+ }

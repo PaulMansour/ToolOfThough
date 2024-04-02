@@ -1,0 +1,82 @@
+ OccurrencesVariations←{
+  ⍝ ALL MISPELLED!!!
+     OldSchool←+⌿∘.=⍨
+
+
+     Occurrances←{
+         (⊂⍵⍳⍨∪⍵)⌷{≢⍵}⌸⍵
+     }
+     Occurrances0←{
+         (⊂⍵⍳⍨∪⍵)⌷⊢∘≢⌸⍵
+     }
+
+     Occurrances1←{
+         |-⌿(2,≢⍵)⍴⍋⍋⍵⍪⍵
+     }
+
+     Occurrances2←{
+         u c←⊃¨↓⍉{⍺(≢⍵)}⌸⍵
+         c[u⍳⍵]
+     }
+     Occurrances3←{
+         c←{≢⍵}⌸⍵
+         c[⍵⍳⍨∪⍵]
+     }
+
+     Occurrances99←{
+         (⊂∪⍳⊢⌷⊢∘≢⌸)⍵
+     }
+
+     OccurrancesCAS←{
+         g←⍋⍵
+         b←≠⍵[g;]
+         i←⍸b
+         n←i-⍨1↓i,≢b
+         (n/n)[⍋g]
+     }
+
+     OccurrancesTable1←{
+         m←5
+         c←1+⍳m
+         o←m⌊|-⌿(2,≢⍵)⍴⍋⍋⍵⍪⍵
+         n←+⌿o∘.=c
+         ⍉⊃c(n÷c)n
+     }
+     OccurrancesTable2←{
+         m←5
+         c←1+⍳m
+         f←⊢∘≢⌸
+         n←¯1+f c,m⌊f ⍵
+         ⍉⊃c n(n×c)
+     }
+
+     OccurrancesTable3←{
+         m←5
+         c←1+⍳m
+         o←m⌊|-⌿(2,≢⍵)⍴⍋⍋⍵⍪⍵
+         n←¯1+{≢⍵}⌸c,o
+         ⍉⊃c(n÷c)n
+     }
+     OccurrancesTable4←{
+         m←5
+         c←1+⍳m
+         g←(⊂∪⍳⊢)⌷⊢∘≢⌸
+         o←g ⍵
+
+         n←+⌿o∘.=c
+         ⍉⊃c(n÷c)n
+     }
+     OccurrancesTable5←{
+         m←5
+         c←1+⍳m
+         g←(⊂∪⍳⊢)⌷⊢∘≢⌸
+         o←g ⍵
+         n←¯1+⊢∘≢⌸c,m⌊o
+         ⍉⊃c(n÷c)n
+     }
+
+     Occurrences←{
+         (⊂⍵⍳⍨∪⍵)⌷{≢⍵}⌸⍵    ⍝ Tacit: (⊂∪⍳⊢)⌷⊢∘≢⌸
+     }
+
+ }

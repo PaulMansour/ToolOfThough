@@ -1,0 +1,9 @@
+          :Namespace startup
+          ⎕SE.FontObj[1]←28
+          ⎕SE.State←2
+          Run←{
+                #.⎕EX 'startup'
+           }
+           ⍝ For installing user commands after startup....
+           ⍝ ]set or ⎕SE.SALT.Set and reset with ]ureset or ⎕SE.SALTUtils.ResetUCMDcache
+          :EndNamespace

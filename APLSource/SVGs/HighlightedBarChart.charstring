@@ -1,0 +1,52 @@
+<svg baseProfile="full" ev="http://www.w3.org/2001/xml-events" height="262.67" tabindex="0" version="1.1" viewBox="0 0 6290 1970" width="838.67" xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+  <desc>Created by Causeway SVG engine - SharpPlot v3.71.0</desc>
+  <g stroke-miterlimit="100">
+    <rect fill="silver" height="1910" width="6210" x="80" y="60"></rect>
+    <rect fill="white" height="1905" stroke="black" stroke-width="5" width="6205" x="43" y="33"></rect>
+    <desc>Paint the paper =====</desc>
+    <g fill="White">
+      <rect height="1900" width="6200" x="45" y="35"></rect>
+    </g>
+    <desc>Border =====</desc>
+    <desc>for X-axis labels</desc>
+    <g font-family="Times New Roman" font-size="140" text-anchor="middle">
+      <text class="xlabel" id="xlabel0" x="1653" y="1646">1,000</text>
+      <text class="xlabel" id="xlabel1" x="2160" y="1646">2,000</text>
+      <text class="xlabel" id="xlabel2" x="2668" y="1646">3,000</text>
+      <text class="xlabel" id="xlabel3" x="3175" y="1646">4,000</text>
+      <text class="xlabel" id="xlabel4" x="3683" y="1646">5,000</text>
+      <text class="xlabel" id="xlabel5" x="4190" y="1646">6,000</text>
+      <text class="xlabel" id="xlabel6" x="4698" y="1646">7,000</text>
+      <text class="xlabel" id="xlabel7" x="5205" y="1646">8,000</text>
+    </g>
+    <desc>Heading, subheading and footnotes =====</desc>
+    <desc>Region =====</desc>
+    <desc>Y-axis labels</desc>
+    <g font-family="Times New Roman" font-size="140" text-anchor="end">
+      <text class="unselectedlabel" id="ylabel0" onclick="sendAPLRequest(event)" x="1013" y="1265">Cash-Out</text>
+      <text style="font-weight:bold;font-size:larger" class="selectedlabel" id="ylabel1" onclick="sendAPLRequest(event)" x="1013" y="925">Refinance</text>
+      <text class="unselectedlabel" id="ylabel2" onclick="sendAPLRequest(event)" x="1013" y="585">Purchase</text>
+    </g>
+    <desc>X-Axis Ticks =====</desc>
+    <desc>X-Axis tickmarks</desc>
+    <path d="M1149 1456L1149 1505M1399 1456L1399 1505M1653 1456L1653 1505M1906 1456L1906 1505M2160 1456L2160 1505M2414 1456L2414 1505M2668 1456L2668 1505M2921 1456L2921 1505M3175 1456L3175 1505M3429 1456L3429 1505M3683 1456L3683 1505M3936 1456L3936 1505M4190 1456L4190 1505M4444 1456L4444 1505M4698 1456L4698 1505M4951 1456L4951 1505M5205 1456L5205 1505" fill="none" stroke="DarkGray" stroke-width="8.94"></path>
+    <desc>Y-Axis Ticks =====</desc>
+    <desc>Y-Axis tickmarks</desc>
+    <path d="M1084 1221L1047 1221M1084 885L1047 885M1084 545L1047 545" fill="none" stroke="DarkGray" stroke-width="8.94"></path>
+    <desc>Start of Horizontal Barchart ===========</desc>
+    <g fill="SteelBlue" stroke="SteelBlue" stroke-width="20">
+      <rect class="unselectedbar" height="272" id="point0" onclick="sendAPLRequest(event)" ondblclick="sendAPLRequest(event)" width="508" x="1145" y="1089"></rect>
+      <rect style="stroke:orange" class="selectedbar" height="272" id="point1" onclick="sendAPLRequest(event)" ondblclick="sendAPLRequest(event)" width="558" x="1145" y="749"></rect>
+      <rect class="unselectedbar" height="272" id="point2" onclick="sendAPLRequest(event)" ondblclick="sendAPLRequest(event)" width="4009" x="1145" y="409"></rect>
+    </g>
+    <desc>Axes =====</desc>
+    <path d="M1084 1395L1084 368M1145 1456L5212 1456" fill="none" stroke="DarkGray" stroke-width="14.9"></path>
+    <desc>Data value labels ...</desc>
+    <g fill="Gray" font-family="Times New Roman" font-size="140">
+      <text class="unselectedlabel" id="value0" onclick="sendAPLRequest(event)" x="1709" y="1281">1,000</text>
+      <text style="font-weight:bold ;font-size:larger" class="selectedlabel" id="value1" onclick="sendAPLRequest(event)" x="1760" y="941">1,100</text>
+      <text class="unselectedlabel" id="value2" onclick="sendAPLRequest(event)" x="5211" y="601">7,900</text>
+    </g>
+    <desc>Reset to original origin</desc>
+  </g>
+</svg>

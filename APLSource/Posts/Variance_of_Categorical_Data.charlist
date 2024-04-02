@@ -1,0 +1,92 @@
+DRAFT
+
+# [Variance of Categorical Data](/posts/variance-of-categorical-data)
+
+## December 16, 2023
+
+In the previous post, we discussed issues arising with the 
+presentation of categorical data columns in a database table. 
+When there are many unique values, a second-order frequency distribution
+can be be more useful than a first-order distribution. The question then
+becomes how do we determine which distribution is more useful. We know it 
+when we see it, but is there a formal measure? In a paper 
+[Variability for Categorical Variables](http:/...) Kader and Perry
+provide just such a measure. Consider a column or array of values:
+
+~~~
+     c←'ABCAAABCDE'
+~~~
+
+And then comparing each value to every other value, where they
+are not equal:
+
+~~~
+     ∘.≠⍨c
+0 1 1 0 0 0 1 1 1 1
+1 0 1 1 1 1 0 1 1 1
+1 1 0 1 1 1 1 0 1 1
+0 1 1 0 0 0 1 1 1 1
+0 1 1 0 0 0 1 1 1 1
+0 1 1 0 0 0 1 1 1 1
+1 0 1 1 1 1 0 1 1 1
+1 1 0 1 1 1 1 0 1 1
+1 1 1 1 1 1 1 1 0 1
+1 1 1 1 1 1 1 1 1 0
+~~~
+
+Then simply compute the proportion of 1s in the matrix to yield the variance: 
+
+~~~
+      (+/÷≢),∘.≠⍨c
+0.74
+~~~
+
+It is easily observable that if the values are all the same, the variance is 0:
+
+~~~
+    (+/÷≢),∘.≠⍨'AAAAAAAAAAAAA'
+0
+~~~
+
+and if the values are all different the variance approaches 1:
+
+~~~
+    (+/÷≢),∘.≠⍨⎕A
+0.9615384615
+~~~
+
+Fortunately we can compute the variance from the frequency distribution of the values
+rather than using an outer product. First we get the frequency counts, then normalize
+them to get the proportions of each category:
+
+~~~
+      ⊢∘≢⌸c
+4 2 2 1 1
+      (⊢÷+/)⊢∘≢⌸c
+0.4 0.2 0.2 0.1 0.1
+~~~
+
+Next square the proportions, then sum them, and finally subtract from 1:  
+
+~~~
+  2*⍨(⊢÷+/)⊢∘≢⌸c
+0.16 0.04 0.04 0.01 0.01
+  +/2*⍨(⊢÷+/)⊢∘≢⌸c
+0.26
+  Variance←{1-+/2*⍨(⊢÷+/)⊢∘≢⌸⍵}
+  Variance c
+0.74
+~~~
+
+This will of course be much more space efficient solution than the outer product.
+Now the question is will this measure suffice for our purposes?
+Unfortunately, no.  
+and if so, what cutoff value that qualifies for **high-variance** for our purposes?
+  
+             
+
+
+
+   
+
+

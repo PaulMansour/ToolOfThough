@@ -1,0 +1,61 @@
+# [On Categorical Data](/posts/on-categorical-data)
+
+## December 6, 2023
+
+Consider getting a useful first impression and understanding of a single column in a database table,
+(or a vector of values all of the same type). If there are only a few unique values in the column,
+say a dozen or less, then a frequency distribution is appropriate. We get an immediate,
+informative overview of the data, regardless of the type. This is easily displayed in a bar chart.
+Here we have the distribution of *stints* for major league baseball players in 2019. A stint
+is a period of time with a particular team. We can see that most players spent the entire season
+with one team, while 12 players played for 3 teams:  
+
+![Categorical chart 1](#.ToolOfThought.SVGs.BaseballStintFreq)
+
+However, as the number of unique values grows, a frequency distribution becomes less and less useful.
+When every value is unique, the distribution degenerates into the entire original column catenated with a vector of 1's.
+For quantitative or temporal data, this problem is easily solved by grouping into 
+bins or buckets, reducing the number of categories. Here we have the number of games played
+per player for 2019: 
+
+![Categorical chart 2](#.ToolOfThought.SVGs.BaseballGamesPlayedFreq)
+
+However, if the data is categorical, it is generally not possible to meaningfully group the data.
+One option is to produce a frequency distribution that shows only the top 10 (say) categories,
+grouping the remainder into an "other" category.
+This works well when there are many categories, and the categories are of varying sizes,
+keeping the "other" category relatively small:
+
+![Categorical chart 3](#.ToolOfThought.SVGs.CityFreq)
+
+If there are many categories and they are similar-sized, this breaks down.
+Here we have a distribution of the `PlayerID` column, which is mostly unique, except for 
+players that have done multiple stints in the season:
+
+![Categorical chart 4](#.ToolOfThought.SVGs.CatData1)
+
+What, then, is to be done in the case of a categorical column with many evenly distributed unique values?
+If a frequency distribution is inadequate how about a frequency distribution of the frequency distribution?
+That is, a table displaying the number of values that occur once, the number of values that occur twice,
+the number of values that occur three times, etc.: 
+
+|Value Occurs|Unique Count|Total Rows|
+|:=====|=====:|=====:|
+|Once|1,264|1,264|
+|Twice|134|268|
+|Three times|12|36|
+|Four times|0|0|
+|Five +|0|0|
+|Total|1,410|1,568|
+
+This table is a much more useful first look at **high-variance categorical** data. 
+For example, it is immediately apparent if
+the values are unique and suitable for a key column.
+It is easy to identify outliers, that is duplicate values or triplicate values.
+Let's call this a *second-order* frequency distribution.  
+
+By inspection we can tell whether a first-order or second-order distribution will be more useful, and come up with some back-of-the-envelope
+algorithm to make the choice, which may well be sufficient. But is there a way to actually compute the variance of a categorical column
+and  use that measure to determine what exactly is "high-variance" categorical data?  
+That question and some APL code will be explored in a future post.    
+

@@ -1,0 +1,22 @@
+ Variance_Options←{
+ ⍝ For categorical data
+
+
+ ⍝ ⍺ ←→ is frequency data, else raw data
+     varChar←{⍺:1-+/2*⍨(⊢÷+/)⍵[;1]      ⍝ Variability for Categorial Variables
+         (+/,∘.≢⍨⍵)÷(≢⍵)*2}             ⍝   (Kader and Perry 2007)
+
+ ⍝ Can we compute from occurrences data?
+
+     Raw←8 8 8 8 9 9 10 5 5 5 8 8 12
+
+     Freq←6 2 1 3 1 ⍝ Matters not what the unique values are, just how many of each
+                  ⍝ Use key for this
+
+     FreqOnFreq←2 1 1 0 0 1 ⍝ 2nd order
+
+
+
+     Occurrences←6 6 6 6 2 2 1 3 3 3 6 6 1
+
+ }

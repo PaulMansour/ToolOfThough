@@ -1,0 +1,5 @@
+ Occurrences3←{
+     v←⍳⍨⍵
+     u c←↓⍉,∘≢⌸v
+     (⊂u⍳v)⌷c
+ }
