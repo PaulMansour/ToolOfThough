@@ -1,0 +1,143 @@
+# [Modal Dialog Boxes 4: ProgressBar](/posts/modal-dialog-boxes-progressbar)
+
+## May 14, 2024
+
+
+Implementing a general purpose, easy-to-use progress bar presents some challenges.
+Let's look at an attempt. The Abacus [ProgressBar](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/ProgressBar)
+is designed to handle 
+iterative processes where the number of iterations may or may not be known ahead of time.
+In either case, we want to provide some feedback on each iteration
+as well as the ability to cancel the process.
+
+Rather than providing a *Cancel* button on the progess bar element, which would
+arguably require an "are-you-sure" confirmation, we provide a *Pause* button, which 
+pauses the operation between two iterations. This gives us the opportunity to add a bit more
+functionality, without additional complexity in the UI. 
+When *Pause* is clicked, the user is then offered two choices, *Cancel* and *Resume*,
+and optionally a 3rd choice: *Truncate*. 
+The *Cancel* option cancels the entire operation without further ado.
+The *Resume* option restarts the process at the next iteration.
+The *Truncate* option treats the last completed iteration as the final iteration
+and continues the operation. It simply ignores and does not process the remaining iterations.
+This option is only relevant for certain types of
+operations. For example, when importing a CSV file, the user may decide that
+reading a few million rows from a large file is sufficient for his purposes.
+
+The progress bar is implemented with a monadic operator, `Run`. This operator 
+puts up a progress element with a *Pause* button, runs the iterations, allows
+the user to cancel the operation, and provides a useful result when control returns
+to the calling function. Here is the syntax:  
+
+~~~
+      R←Y F ProgressBar.Run X
+~~~
+
+The left argument `Y` is the document object.
+The left operand `F` is a function that implements the looping task at hand.
+`X` is a namespace provided as a right argument to `F`. 
+
+The namespace `X` must contain 3 properties: `Caption`, `Iterator` and `Status`. The `Caption`
+is a string specifying the title of the progress bar dialog box. The `Iterator` property is
+a vector. If the iteration vector is empty, the process is deemed *indeterminate*.
+We don't know how many iterations there may be. Otherwise the length of `Iterator` is the number
+of iterations, known ahead of time, and the process is deemed *determinate*.
+In the determinate case, the `Status` property is a vector of char vectors the same length
+as `Iterator`. In the indeterminate case, `Status` is a simple vector that should be reset
+inside `F` on every iteration.   
+
+The namespace `X` may, and often will, contain all sorts of other variables and references that
+are needed to support the execution of `F`. 
+
+The iteration vector may be an array of any type of values. Associated with
+the iteration values are iterations numbers, given by `⍳≢X.Iterator`.
+For the determinate case, the iteration *number* (not the value)
+is provided as the left argument to `F`. 
+
+In the indeterminate case the result of `F` is a return code of `0` if another iteration is required,
+or `1` if it is not. There is no other return value. Data accumulation is accomplished
+by either writing to file or by accumulating an array inside `X`.
+In the determinate case, the result of `F` may be any useful value. 
+
+The result `R` (of `ProgressBar.Run`) is a scaler for the indeterminate case,
+and a two item vector for the determinate case. In both cases the first element
+of `R` is `0` if all itererations are executed, `1` if cancelled, and `2` if truncated.
+For determinate processes, the second element is an array of the result of each call to `F`.
+
+Let's go to the code:
+
+~~~
+Run←{
+     p←New ⍵.Caption ⍵.Iterator
+     _←⍺ A.ShowModal p
+     op←⍎(0=≢⍵.Iterator)⊃'Determinate' 'Indeterminate'
+     r←p ⍺⍺ op ⍵
+     r⊣A.DeleteElement p
+ }
+~~~
+
+In the `Run` operator, the first thing we do is create the dialog element (`New`) and display it
+(`ShowModal`). Next we have to pick the appropriate sub-operator. The techniques are different
+for the two cases. For the determinate case, we use the `each` operator (`¨`) to execute
+iteration:
+
+~~~
+Determinate←{
+     b r←↓⍉↑(⊂⍺ ⍵)⍺⍺{
+         p w←⍺
+         p.Cancel:1 0
+         c←p Pause 0
+         c≡'Cancel':1 0⊣p.Cancel←1
+         c≡'Truncate':2 0⊣p.Cancel←1
+         _←p Update ⍵⊃w.Status
+         r←⍵ ⍺⍺ w
+         0 r
+     }¨⍳≢⍺.Iterator
+     (⌈/b)(r/⍨b=0)
+ }
+~~~
+
+First we check if *Cancel* has been previously pressed. If so, there is nothing to do, and
+we get out. (Note that we always run the inner function N times if there are N iterations,
+even if the user has canceled). Next we run the `Pause`
+function to see if the user has pressed *Pause*:
+
+~~~
+Pause←{
+     ~⍺.Pause:'Resume'
+     ⍺.Pause←0
+     t←'Process paused'
+     c←''
+     b←'Cancel' 'Resume' 'Truncate'
+     ⍺.Document A.ConfirmBox.Show t c b
+ }
+~~~
+
+If the user has not clicked *Pause*, we exit, resuming the iterations. If the user has
+pressed Pause, we put a confirmation box and wait. Back in the `Determinate` operator
+we inspect what the user has selected in the confirmation box, exiting
+if *Cancel* or *Truncate*. Otherwise we update the status and execute the iteration function,
+the left operand of `Run`.
+
+The indeterminate operator is a bit simpler (hmm, why is that?):
+
+~~~
+Indeterminate←{
+     _←⍺ Update ⍵.Status
+     c←⍺ Pause ⍵
+     c≡'Cancel':1
+     c≡'Truncate':2
+     ⍺⍺ ⍵:0
+     ⍺ ∇ ⍵
+ }
+~~~
+
+Here we update the status before checking if the user clicked *Pause*. This is because
+in the indeterminate case, the status of an iteration is known after the iteration completes,
+while in the determinate case the status is known before the iteration is executed - usually.
+We check for `*Pause* etc., just as in the determinate case. We then run the iteration function,
+exiting if it returns a `1`, and continuing on to the next iteration via recursion otherwise.
+
+Regardless of the iteration technique, be it looping, recursion, or the each operator, the
+fact that the argument to `F` is a namespace allows us to easily maintain and update state,
+and accumulate results, between iterations.

@@ -1,0 +1,80 @@
+# [The Abacus Threading Model](/posts/abacus-threading-model)
+
+## April 28, 2024
+
+Way back in September 2022 we looked 
+at [threading the HTMLRenderer](/posts/threading-the-htmlrenderer).
+A few changes have happened since then including some additional requirements around
+modal dialogs, progress bars, and confirmation boxes. Let's take a look.
+
+To review, Abacus uses websockets for two-way asynchronous communication between the browser
+(whether the `HTMLRenderer` or a remote, independent client browser) and an APL session.
+
+There are four different types of client-server interaction that must be considered.  
+
+The first two types of interaction originate on the client side, from the user taking action in the browser.
+These interactions are asynchronous - the client sends
+a message to the server and goes on its merry way. The server may send back 0 or more messages at some point.
+
+The 1st interaction type is the normal case of handling basic user actions like clicking a button, entering text in an input
+field or scrolling though a datagrid. These messages are **threaded and queued**.
+Each message executes an APL handler function in its own thread, but each thread
+must wait for the previous thread to complete before it starts. This queue is managed
+by `⎕TSYNC`. Why are these messages threaded only to be queued and run sequentially? 
+Because we always want the websocket messages to be handled immediately (thus the threading),
+but in the normal case we want user generated events handled in order (thus the queue).
+The APL handler function will in this case almost always send some HTML back to the browser.
+
+Note that these threaded-and-queued messages can, if they need to, kick off long-running processes in
+yet another thread and report back immediately to the client, and avoid tying up the server.
+
+> There is at least one other technique for handling threaded and queued messages.
+> There is no reason that we need a new thread for each message. Messages must be dispatched
+> in a thread other than 0, but since they are queued they do not need to be in different threads
+> from each other. Thus, when the app starts,
+> we could create one permanent thread with `⎕TGET` in a loop, and have the main thread chuck messages
+> into it using `⎕TPUT`. You would think this might be more efficient than creating a
+> new short-lived thread for every single message. But you might be wrong.
+
+The 2nd interaction type is the case of handling user actions that control or modify a previous user action.
+Consider a confirmation dialog box. This is Modal with a capital M - that is a function
+executing in APL is paused on a particular line, waiting for the user in the browser to take
+some action, like *Continue* or *Cancel*. This message cannot wait
+for the previous request to finish, because the previous request is asking the user if he
+wants to continue or cancel the previous request. Therefore it must execute immediately and
+without delay on the server. Or consider a progress bar dialog that must let the server 
+know that the process kicked off by the previous message should be canceled or paused.
+This too cannot wait for the previous message to complete.
+These messages are **unthreaded and unqueued**. These messages generally do not send
+any HTML back to the client - that is done by the message they are modifying.  
+
+> There are also modal dialog boxes with a lower case m. These are modal
+> only in the sense that the user cannot interact with the rest of the page
+> until the modal is dismissed. There is no pendant or waiting APL function over
+> on the server. Generally modal dialogs should be avoided, and Modal dialogs with a
+> capital M avoided even more,
+> but they both have their proper place, and it is important that we can
+> create them and have automated tests that exercise them.
+
+The 3rd and 4th types of interaction originate on the server and simulate synchronous behavior.
+That is, a function on the server sends a message to the client and waits, using `⎕TGET`, for a response.
+Both of these types are generally used only for automated testing. There is generally no reason for
+an application to need this functionality in the normal course.    
+
+The 3rd type is the case of handling synchronous JavaScript. The server
+sends a JavaScript snippet to the client for execution and waits for a response. The server
+will send the `TID` with the request as an identifier, and the client will send it back. This
+allows the server to use `⎕TGET` and `⎕TPUT` to implement synchronous behavior. The prime use of
+synchronous JavaScript requests is testing: the server needs to get the `innerHTML` of some element
+to inspect the state of the client. The result message from the client is not threaded or queued,
+and requires no real processing of any sort; it is simply chucked to the waiting server thread using `⎕TPUT`.
+
+The 4th type of interaction is the server firing an event on the client, which in turn is handled by
+the server. When a function on the server sends an event to be fired back on the client,
+it must wait (in a thread, so as not to block) for the client to send a request back,
+and for that request to complete. Then, and only then, can the server function inspect the state 
+of the server and/or the client to make sure the intended thing actually happened. 
+When the server handles the message that the server has asked the client to send,
+it handles it just as if the user initiated the event, with the exception that when the task
+completes, the thread handling the task must notify the waiting thread of completion. 
+Again, this is generally only used for automated testing.

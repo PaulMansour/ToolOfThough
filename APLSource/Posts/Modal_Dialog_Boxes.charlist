@@ -1,0 +1,96 @@
+# [Modal Dialog Boxes 1: Alert](/posts/modal-dialog-boxes-1)
+
+## April 29, 2024
+
+JavaScript provides at least three methods for small, utility, modal dialog boxes:
+[alert](https://developer.mozilla.org/en-US/docs/Web/API/Window/alert),
+[confirm](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm),
+and [prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
+
+While handy, these methods have limitations. At a minimum we want to be able
+to style these dialog boxes, and that cannot be done as they are implemented by
+the underlying operating system. More importantly, we need additional behaviors.
+For example, the `confirm` method provides two buttons, *Yes* and *No*,
+and we may want different labels or more than two choices. In addition, we
+may want to be able to pause an APL function mid execution,
+server-side, waiting for the response to a set of choices from the user.
+
+Abacus thus provides 3 analogous components:
+[AlertBox](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/AlertBox),
+[ConfirmBox](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/ConfirmBox),
+and [PromptBox](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/PromptBox).
+These are all built with the native HTML `<dialog>` element. All three of these components
+are modal from the perspective of the user - that is, the use cannot access any other part of the
+page or app until the dialog box is closed. However, from the programmer's perspective, they behave
+very differently.
+
+The simplest is the `AlertBox` component. It provides a message to the user in a modal dialog
+that may dismissed by pressing the `OK` button or the `Esc` key. 
+
+> Abacus components are not formally classes, just a few functions in a namespace, inlcuding
+> `New` to create a new instance and `CSS` to define the styling. Depending on the component,
+> additional functions like `Show`, `Run`, or `Init` may be defined.
+
+The AlertBox is called using its `Show` method:
+
+~~~
+      d A.AlertBox.Show 'Hello world!'
+~~~
+
+The important thing to note about this is that your code does not wait here.
+The alert box is displayed, and the calling APL function keeps on running. So you cannot
+use alerts as a debugging tool to pause and display state, as you might have done with
+`MsgBox` using `⎕WC`. The behavior of `AlertBox` is in contrast to,
+as we shall see in the next post, the way the `ConfirmBox` component behaves.
+It would be easy enough to make the alert box modal with a capital M and to wait in the APL code
+for the user to click `OK`. However, as far as I can tell, there is no real use case for this,
+other than perhaps debugging, for which we already have much better tools. Furthermore, the confirm
+box with a single button works this way, so it can be used to pause and display state if necessary.
+
+The left argument `Show` is the application document, the right argument is the message to display.
+The `Show` method calls the `New` method to construct the component, and then the `ShowModal`
+function to insert it into the document and to display it:
+
+~~~
+Show←{
+     ⍺ A.ShowModal New ⍵
+ }
+
+
+New←{
+     ⍝ ⍵ ←→ Message
+     ⍝ ← ←→ New dialog element
+     m←⍵
+     A←##
+     d←A.New'dialog'
+     d.class←'alert-box'
+     p←d A.New'p'm
+     b←d A.New'button' 'OK'
+     b.Onclick←A.FQP'OnOK'
+     d.Onclose←A.FQP'OnOK'
+     d
+ }
+
+ShowModal←{
+     ⍝ ⍺ ←→ Document
+     ⍝ ⍵ ←→ dialog element
+     b←GetBody ⍺
+     _←⍺ SetDefaultId Elements ⍵
+     _←b AppendChild ⍵
+     ⍵ ExecuteOnElement'showModal()'
+ }
+~~~
+
+In Abacus, dialog boxes are created and disposed of every time they are called on to appear.
+So, for the alert box, we use the same callback for the click event and the close
+event, which deletes the component from the DOM:
+
+~~~
+OnOK←{
+     d←⍵.CurrentTarget ##.GetNearest'dialog'
+     ##.DeleteElement d
+ }
+~~~
+
+The alert box is a simple component. It has no knowledge of the state of the server, or the client for that matter.
+It puts a message on the screen and forces the user to acknowledge it for continuing to use the app. 

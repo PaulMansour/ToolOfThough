@@ -1,0 +1,4 @@
+ ThreadQueue←{
+     v←⊃⎕TGET ⎕TID
+     ∇ ⍵
+ }

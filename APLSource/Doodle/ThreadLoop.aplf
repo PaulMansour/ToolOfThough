@@ -1,0 +1,5 @@
+ z←ThreadLoop x;i;r
+ :For i :In ⍳x
+     r←{1:z←0}&0
+ :EndFor
+ z←'Done'

@@ -1,0 +1,44 @@
+# [Uncle Bob and The Primeagen](/posts/uncle-bob-and-the-primeagen)
+
+## May 7, 2024
+
+Recently the genial Robert "Uncle Bob" Martin sat down with the always entertaining Primeagen
+for an [interview](https://www.youtube.com/watch?v=UBXXw2JSloo). 
+Given The Primeagen's well-known aversion to TDD and short functions, it was
+bound to be a spirited conversation, and indeed it was.
+
+I'm fully sympathetic to the idea that it's hard and often counterproductive (if not impossible) to do full
+TDD on a new project.  What I don't get is The Primeagen's gripe about 100% code coverage. He asks Uncle Bob about
+testing the summing of the elements of an array. Uncle Bob explains that he would not write a specific test for that,
+but that the code would be tested indirectly; there would be a test on a method or function that 
+has the line that sums the array. Or even a test higher up the stack. But the line would get
+executed in the test suite somewhere. In the interview, the Primeagen doesn't seem to understand that.  
+
+In response to The Primeagen's repeated questions about "what to test", Uncle Bob brings up Kent Beck:
+test anything and everything that can break. In APL, that's pretty much every line of every function.
+I assume a similar situation in any interpreted language.
+
+Consider the line: 
+
+~~~
+      c←a+b
+~~~
+
+This can fail in at least 5 different ways, including `VALUE ERROR`, `DOMAIN ERROR`, `RANK ERROR`, and `LENGTH ERROR`. 
+Heck, consider:
+
+~~~
+      v←1   
+~~~
+
+This line can fail!
+
+Now, as Uncle Bob points out, it would be silly to write a test for every line of code. But every line
+of code should be executed in the tests, because every line of code can break. There is no excuse for
+less than 100% code coverage. 
+
+Please note that I have written a lot of code that has a lot less than 100% coverage, even 0% coverage, and I have no excuse.  
+
+
+
+

@@ -1,0 +1,65 @@
+# [Modal Dialog Boxes 3: Prompt](/posts/modal-dialog-boxes-prompt)
+
+## May 6, 2024
+
+The Abacus [PromptBox](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/PromptBox) 
+component allows the user to enter a string, and then select `OK` or `Cancel`. This dialog behaves like the 
+`AlertBox` dialog as opposed to the `ConfirmBox` dialog; it does not suspend or wait. It takes action
+via a handler function attached to the `OK` button. Let's go to the code:
+
+~~~
+Show←{
+     ⍺ ##.ShowModal New ⍵
+ }
+  New←{
+     ⍝ ⍵ ←→ Title, Label, Value, OKHandler
+     ⍝ ← ←→ new dialog element
+     tv lv iv cb←⍵
+     d←A.New'dialog'
+     d.class←'prompt-box'
+     d.OnOK←cb
+     h1←d A.New'h1'tv
+     l←d A.New'label'lv
+     i←d A.New'input'
+     i.id←'Prompt'
+     i.value←iv
+     i.Oninput←A.FQP'OnInput'
+     m←d A.New'menu'
+     b←m A.New¨{'button'⍵}¨'OK' 'Cancel'
+     b.id←'OK' 'Cancel'
+     b.Onclick←A.FQP¨'OnOK' 'OnCancel'
+     d
+ }
+ OnInput←{
+     i←⍵.CurrentTarget
+     i.value←⍵.Value
+     0
+ }
+ OnOK←{
+     t←⍵.CurrentTarget
+     d←t A.GetNearest'dialog'
+     i←d A.ElementByTag'input'
+     v←i.value
+     f←⍎d.OnOK
+     r←⍵.Document f v
+     r:0
+     A.DeleteElement d
+ }
+ OnCancel←{
+     d←⍵.CurrentTarget A.GetNearest'dialog'
+     ##.DeleteElement d
+ }
+
+~~~
+
+The `OnOK` function covers the handler supplied as an argument to `Show`. If the supplied handler returns 
+a `0`, it is considered a success, and the prompt box is deleted. If it returns a `1`, it is considered
+a failure and the prompt box is left up for the user to interact with.
+
+The prompt box functionality could be implemented to wait and suspend the calling APL function,
+just like we do with `ConfirmBox`, but there is generally no need to maintain state, and suspending
+the calling function is more complex and makes testing more difficult. The same is true for more general
+dialog boxes, with many more controls. It is better to have callback or handler functions to take action
+rather than inspecting the result of a `Show` function to see what action to take.
+ 
+

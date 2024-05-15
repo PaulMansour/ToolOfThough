@@ -1,0 +1,72 @@
+# [Modal Dialog Boxes 2: Confirm](/posts/modal-dialog-boxes-confirm)
+
+## April 30, 2024
+
+The Abacus [ConfirmBox](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/ConfirmBox) 
+component displays a message and one or more buttons,
+allowing the user to make a choice and for the programmer to control the flow 
+of execution of an APL function. To implement this, on the server-side APL, Abacus must be able
+to wait in a suspended function, while over in the client browser, the user is pondering
+a modal dialog box with multiple choices. When the user makes a choice, the suspended APL
+function must be notified of the choice and allowed to continue execution.
+
+Let's look at some code:
+
+~~~
+Show←{
+     ⍺ ##.ShowModalAndWait New ⍵
+ }
+ 
+ ShowModalAndWait←{
+     ⍝ ⍺ ←→ Document
+     ⍝ ⍵ ←→ dialog element
+     b←GetBody ⍺
+     _←⍺ SetDefaultId Elements ⍵
+     _←b AppendChild ⍵
+     _←⍵ ExecuteOnElement'showModal()'
+     ⊃⎕TGET ⎕TID
+ }
+
+  New←{
+     ⍝ ⍵ ←→ Title Caption [Options]
+     ⍝ ← ←→ new dialog element
+     t c o←3↑⍵,⊂'Yes' 'No'
+     d←A.New'dialog'
+     d.class←'confirm-box'
+     d.Onclose←A.FQP'OnClose'
+     d.Unqueued←1
+     d.Tid←⎕TID
+     h1←d A.New'h1't
+     p←d A.New'p'c
+     m←d A.New'menu'
+     b←m A.New¨{'button'⍵}¨o
+     b.Name←o
+     b.Onclick←⊂A.FQP'OnSelect'
+     b.Unqueued←1
+     d
+ }    
+ 
+OnSelect←{
+     d←⍵.CurrentTarget ##.GetNearest'dialog'
+     _←##.DeleteElement d
+     v←⍵.CurrentTarget.Name
+     0⊣v ⎕TPUT d.Tid
+ }
+~~~
+
+The `New` function takes a title, caption, and optional list of one or more 
+button captions, which defaults to `Yes` and `No`. The thread ID is noted in the dialog
+element. This will be used as a token when the user clicks on one of the choices.
+The button elements are flagged as being *Unqueued* (as is the parent dialog, which 
+has an onclose event handler). This is critical. Normally browser events are handled serially 
+on the APL server side. If `Unqueued` is not to set to `1`, then the `OnSelect` (and `OnClose`) handler
+will wait until the handler function that called `ShowModalAndWait` is complete, which is waiting
+for token from `OnSelect`, which is waiting for... well you get the idea, and it's not good. Setting
+`Unqueued` to `1` tells Abacus to execute the APL event handler immediately.
+This allows it to put the token into the pool that satisfies the `⎕TGET` in `ShowModalAndWait`.
+The token value, the name or caption of the button, is returned by `ShowModalAndWait`.
+
+Note the advantage of having an APL DOM that can store all kinds of useful info like 
+`Tid`, `Unqueued`, and `Name` - none of which are in the browser DOM.   
+
+
