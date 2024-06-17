@@ -1,0 +1,83 @@
+# [Modal Dialog Boxes 5: More on ProgressBar](/posts/modal-dialog-boxes-progressbar-more)
+
+## May 18, 2024
+
+The `ProgressBar.Run` operator, so far, handles iterative processes; we effectively
+have a loop, whether implemented using the each operator or recursion. This gives us the opportunitiy
+to check for a *Pause* click on each iteration, to cleanly pause the process,
+and clean up if the operation is canceled.
+
+Sometimes we have a potentially long running process that is not itererative,
+or it is iterative but we don't want to bother with refactoring it to fit
+the needs of the `Progress.Run` operator. We want to put up a spinner
+or [loader](https://www.w3schools.com/howto/howto_css_loader.asp) -
+and provide a cancel button to kill the process.
+
+The HTML [progress element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress)
+provides an oscillating bar when no `max` attribute is set, giving us a JavaScript-free and CSS-free
+spinner.
+
+For this case we can wrap our long running code
+with the `Start` and `Stop` functions: 
+
+~~~
+_←d Progress.Start ''
+...
+... your code here
+...
+_←d Progress.Stop ''
+~~~
+
+The `Start` function puts up a modal dialog, but does not wait:    
+
+~~~
+Start←{
+     c←⍵,(0=≢⍵)/'Working...'
+     e←A.New'dialog'
+     e.class←'progress-bar'
+     e.id←'progress-bar'
+     e.TID←⎕TID
+     h1←e A.New'h1'c
+     p←e A.New'progress'
+     p.id←'progress'
+     b←e A.New'button' 'Cancel'
+     b.id←'Cancel'
+     b.Unqueued←1
+     b.Onclick←A.FQP'OnCancel'
+     _←⍺ A.ShowModal e
+     0
+ }
+~~~
+
+And `Stop` just closes the dialog:
+
+~~~
+Stop←{
+     d←⍺ A.GetElementById'progress-bar'
+     ⍺ A.DeleteElement d
+ }
+~~~
+
+In the `Start` function the thread id of the current process is noted in the component,
+so when *Cancel* is pressed, we can kill it:
+
+~~~
+OnCancel←{
+     d←⍵.CurrentTarget A.GetNearest'dialog'
+     _←⎕TKILL d.TID
+     ⍵.Document A.DeleteElement d
+ }
+~~~
+
+This is a fairly crude technique, but useful in some circumstances.
+
+There is another progress bar case that we have not handled.
+Consider a process of N discrete but non-iterative steps. As the code is running through these N steps,
+we want to provide feedback to the user about where we are in the process,
+and allow the process to be cancelled. For this we will need something like
+`Begin`, `Update` and `End` functions to sprinkle throughout our code.  
+
+In addition we may want to consider what happens if and when these various processes are scripted
+and have no user interaction. 
+
+

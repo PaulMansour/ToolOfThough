@@ -1,0 +1,7 @@
+ Task←{
+     ⍝ First Critical Sections
+     _←TGET 0     ⍝ Lock
+     ⎕THIS.Log,←⊂'Thread'⎕TID'gets mutex'
+     _←⎕DL 3      ⍝ Do some work
+     _←TPUT 0     ⍝ UnLock
+ }

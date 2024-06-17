@@ -1,0 +1,64 @@
+# [How to Center a Dialog Element](/posts/how-to-center-a-dialog-element)
+
+## May 29, 2024
+
+How to center a *modal* dialog box to be precise.
+
+TL;DR:
+
+~~~
+     
+~~~
+
+Yes, that's right. Nothing. Nada. Zero. Zilch.
+
+Now for the full story.
+
+I have been using a [ubiquitous but archaic and problematic technique](https://www.toolofthought.com/posts/beware-the-blur)
+to center a modal dialog box in the viewport. On this morning's drive listening to the [current episode](https://syntax.fm/show/775/components-we-need-on-every-project)
+of the excellent web dev podcast [Syntax](https://syntax.fm/), the hosts hinted at another method for centering using the
+CSS [inset](https://developer.mozilla.org/en-US/docs/Web/CSS/inset) property, which I was unfamiliar with. It turns out this property is just shorthand for top, right, bottom and left.
+Looking for more information, I stumbled on this [video short](https://www.youtube.com/shorts/9cSL5dP4rgM).
+Could it be that simple? All we need is `inset:0` and `margin:auto`? It turns out it is even simpler!
+
+It is useful to inspect the user-agent styling for `<dialog>` (in Chrome):
+
+~~~
+  dialog:-internal-modal {
+    position: fixed;
+    top: 0px;
+    bottom: 0px;
+    max-width: calc((100% - 6px) - 2em);
+    max-height: calc((100% - 6px) - 2em);
+    overflow: auto;
+}    
+  dialog {
+    display: block;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    width: fit-content;
+    height: fit-content;
+    color: -internal-light-dark(black, white);
+    margin: auto;
+    border-width: initial;
+    border-style: solid;
+    border-color: initial;
+    border-image: initial;
+    padding: 1em;
+    background: -internal-light-dark(white, black);
+}
+~~~
+
+Note the default values for the `<dialog>` element properties `position`, `left`, `right`, and `margin`. Further note that that when the `<dialog>` element
+is opened in a modal state, additional properties are defaulted, and some are overridden. The net result is that for a modal dialog box, the default value of `inset` is `0`,
+and the default value of `margin` is `auto`. Therefore, to center a modal dialog, ***nothing needs to be done***.
+  
+But it is likely you have a CSS reset that sets all margins to `0`. In that case you will need: 
+
+~~~
+    margin:auto;
+~~~
+
+I don't think it likely that `inset` will have a different value than `0`, so no need to explicitly set it. 
+

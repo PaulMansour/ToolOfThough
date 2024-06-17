@@ -1,0 +1,5 @@
+ TGET←{
+     ⎕THIS.Log,←⊂⍕'Thread'⎕TID'requests mutex, waiting on'(⊃⌽⎕THIS.Queue)
+     ⎕THIS.Queue,←⎕TID
+     ⎕TGET⊃⌽⎕THIS.Queue
+ }

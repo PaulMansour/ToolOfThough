@@ -1,0 +1,188 @@
+# [A High Performance Data Grid in HTML](/posts/a-high-performance-data-grid-in-html)
+
+## May 20, 2024
+
+A first-rate data grid control is essential for many business applications.
+For decades we have relied on the venerable `⎕WC` grid, but we need to look
+at [something new](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/DataGrid)
+for the browser. There are many data grid controls out there:
+free ones, expensive ones, headless, full-featured, stripped down, open source, closed source,
+you name it. Most of them are way too complicated, trying to be all things to all people.
+We have APL, so we don't need a grid that implements calculations and formulas, or sorting,
+or a bunch of other things we can easily do ourselves. We are specifically *not* trying
+to implement a spreadsheet.
+We also don't need to support different data types in the same column. Nor do we need
+nested column titles, nor do we need different row heights; we don't need or want the data grid to be a reporting vehicle. 
+Our data grid will be designed for the efficient display, manipulation, and editing of tables, large and small.
+We can simplify, simplify, simplify.
+
+Let's look at what we *do* need:
+
+1. Fast, Excel-like scrolling. There should be no partial cell on the left when we scroll right, and no partial cell on the top when we scroll down.
+
+1. Relatively large capacity; millions of rows with hundreds of columns should be no problem. If the table can fit in the workspace, the data grid should be able to handle it. 
+
+1. Sticky column headers.
+
+1. Optional row numbers.
+
+1. Optional freeze panes for columns (we don't care about freezing rows).
+
+1. Editing
+
+1. Selection, cut, copy and paste 
+
+There are many different ways to tackle this problem. Everything from using a `<div>` for every cell, to drawing
+cells and borders on `<canvas>`. One thing you can't do is naively create a `<table>` with millions of rows,
+or even hyndreds of rows, and expect to efficiently render it or scroll around in it. However, the `<table>`
+element is, in the end, the right way go. It's for tabular data, and we have tabular data. It does
+a lot for us. Any other approach is going to require much more work and much more code.
+And, for what it's worth, which may not be much in an SPA, it is also semantically correct.
+
+We must also completely take over scrolling from the browser. 
+
+How then do we make it work? Let's assume we have a table that fits comfortably in our APL workspace (our grid should handle
+both inverted and non-inverted data). At any one time, we are only going to display as much data
+as fits on the screen or window. Actually, a little more... we want the data to overflow a
+little bit down and to the right. This is not to make scrolling faster (as we shall see)
+by pre-drawing some out-of-sight content, but rather for two other reasons. There will almost
+always be a partial row on the bottom and a partial column on the right, so we certainly need
+at least one extra row and column. We also want to be able to resize the grid's container
+exposing more rows and columns, within reasonable limits, without having to resize the `<table>`,
+get more data, etc. Resizing a grid always results in more or less rows and columns at the bottom
+and right, never top and left. So given our screen size, and general limits to the size of the parent
+container, we can compute these dimensions. We will call this **`TableOverSize`**. This is a fairly
+fudgeable value. There is no precise way to compute it. If we make it too big, performance
+will suffer, if we make it too small, then the act of resizing will expose empty space, to be
+filled only when the resize is complete, which looks a little hokey.
+
+On the APL side, in the APL DOM, we will want to create a `<table>` element and all of its children
+elements once and only once. It will be the size specified by `TableOverSize`. We also need custom code to set the content and generate the innerHTML
+as this will be done repeatedly as we scroll around the grid. It must be as fast as possible.
+If a user is holding down a cursor key, scrolling through the grid, on every key press event we will be
+getting some data from the data source, constructing the innerHTML,
+and then sending it back to the browser.
+
+Next, we need to know exactly how many full rows and columns can be displayed at any given
+moment. This we call this the **`WindowSize`**, which is always smaller than `TableOverSize`. 
+If we scroll outside the `WindowSize` in any direction,
+we reset the `innerHTML` of the entire `<table>`, headers and all.  Resetting the headers
+very time we scroll solves the problem of 
+sticky headers, which you would think CSS `position: sticky;` solves, but it does really doesn't.
+
+Complicating `WindowSize` are optional row numbers and frozen columns. Let's define the
+scalar Boolean **`RowNumbers`** to be row numbers on or off, and the scalar integer **`FreezeColumns`**
+to be the number of frozen columns. Let's call the sum of these two properties **`FixedColumns`**.
+When computing `WindowSize`, which is only the scrollable area, we need to leave room for these
+fixed columns. We define **`TableSize`** to be the number of rows and columns we can display 
+including fixed columns, while `WindowSize` is the number of rows and columns we can display that will
+scroll. The relationship between the two is: 
+
+~~~
+      TableSize ←→ WindowSize+0,FixedColumns
+~~~
+
+If row numbers are off, and there are no frozen columns, then `TableSize` equals `WindowSize`.
+
+How do we compute `WindowSize`? The number of rows is easy. We know the height of our element,
+we know the height of our rows, we do the division. This value is fixed as long as there
+is not a resize event. Columns are another story. Each column can have a different width,
+so the number of columns we can display varies with the column that is currently displayed
+on the far left.  Let's first define ar few more names: 
+
+ **`Values`** is the data, like the `⎕WC` grid more or less.
+ 
+ **`DataSize`** is the shape of `Values`.
+
+ **`DataCell`** is analogous to `⎕WC`'s `CurCell` - an index into `Values`, representing the current cell. 
+
+ **`WindowCell`** is the index of the current cell in the window.  
+
+ **`TableCell`** is the index of the current cell in the table, which is just the window plus the number of fixed columns.
+
+ **`WindowIndex`** is the location of upper left corner of the window in `Values`, similar to `⎕WC`'s `Grid.Index`.   
+
+In our DataGrid, we insist that the current cell is visible. This is unlike Excel or the `⎕WC` grid. 
+This means the following relationship holds:
+
+~~~
+      DataCell ←→ WindowIndex+WindowCell
+~~~
+
+The number of columns that can be displayed at any given time is a function of the `WindowIndex`,
+the width of all the columns, and the available space.
+For each column, when it is in the left-most position, we need to know how many columns
+we can display. We call this vector **`ColumnsPerIndex`**, and it can be computed with:
+
+~~~
+  ComputeColumnsPerIndex←{
+     s←+\\¨(⍳≢⍵)↓¨⊂⍵
+     1+s⍸¨⍺
+ }   
+~~~
+
+Where `⍵` is vector of column widths, and `⍺` is the available space.
+This value is useful when scrolling left. We know the column that will be the left-most column,
+and can then easily pick out the number of columns that can be displayd. By definition,
+when scrolling left, one new column comes into view on the left.
+A slightly different problem arises scrolling right. In order to get one new column 
+to come into view on the right, one or more columns may move off on the left,
+which in turn may actually bring more than one column in on the right. To make this easy
+it would be nice to know what column should be the left-most column when a given
+column is being scrolled into view on the right. We call this the **`ScrollIntoViewIndex`** given by:   
+
+~~~
+   ComputeScrollIntoViewIndex←{
+     n←⍳≢⍵
+     (⍵/n)[n⍳⍨∊n+⍳¨⍵]
+ }
+~~~
+
+where `⍵` is the `ColumnsPerIndex` vector. With these two vectors in hand, we can
+scroll left and right with ease. 
+
+When are grid is created, or anytime a grid is resized, most of these values must
+be recomputed. This is done with the `Resize` function:
+
+~~~
+ Resize←{
+     t←⍺
+     p←t.Parent
+     t.AvailableWidth←p.Width-+/t.FixedColumns↑t.FullWidths
+     t.ColumnsPerIndex←t.AvailableWidth ComputeColumnsPerIndex t.RowNumbers↓t.FullWidths
+     0∊t.ColumnsPerIndex:0
+     t.ScrollIntoViewIndex←ComputeScrollIntoViewIndex t.ColumnsPerIndex
+     t.RowsToDisplay←p.Height ComputeRowsToDisplay 0
+     t.WindowSize←t.RowsToDisplay,(1⊃t.WindowIndex)⊃t.ColumnsPerIndex
+     ∨/t.WindowSize<1:0
+     t.WindowCell←t.WindowCell⌊t.WindowSize-1
+     t.DataCell←t.WindowIndex+t.WindowCell
+     t.TableCell←t.WindowCell+0,t.FixedColumns
+     Refresh t
+ } 
+~~~
+
+With these values in hand, scrolling around is straight forward. For example, scrolling to the right
+is done as follows:
+
+
+~~~
+MoveWindowRight←{
+     t←⍵
+     c←1⊃t.DataCell
+     i←c⊃t.ScrollIntoViewIndex
+     t.WindowIndex[1]←i
+     t.WindowSize[1]←i⊃t.ColumnsPerIndex
+     t.WindowCell[1]←c-i    
+     t.TableCell←t.WindowCell+0,t.FixedColumns
+     _←Refresh t
+     0
+ }
+~~~
+
+Once we have mastered scrolling one row or column at a time, up or down, left or right,
+then Page Up, Page Down, Home, End, etc., are all easy. 
+
+In a future post we will look at editing, and various edit modes that mimic Excel behavior.
+We are also going to have to figure out how to put scroll bars on this thing.
+

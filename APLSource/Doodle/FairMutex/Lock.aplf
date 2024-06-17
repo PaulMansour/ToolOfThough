@@ -1,0 +1,4 @@
+ Lock←{
+     ⎕THIS.Queue,←⎕TID
+     ⎕TGET⊃⌽⎕THIS.Queue
+ }

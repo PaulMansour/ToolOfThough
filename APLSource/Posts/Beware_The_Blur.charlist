@@ -1,0 +1,47 @@
+# [Beware the Blur, and More](/posts/beware-the-blur)
+
+## May 24, 2024
+
+Modal dialog boxes are trivial now with the `<dialog>` element and the JavaScript `showModal` method.
+Almost all of the demos and introductions to this functionality love to show off the associated
+CSS [backdrop pseudo-element](https://developer.mozilla.org/en-US/docs/Web/CSS/::backdrop),
+which allows us to style the background of the dyalog when it is being shown in a modal state.
+              
+Usually we see some CSS like:
+
+~~~
+dialog::backdrop {
+  backdrop-filter: blur(2px);
+}
+~~~
+
+Which blurs out the background. This looks really nice. However, it turns out that it is
+a [ridiculously expensive effect](https://github.com/thirdweb-dev/dashboard/issues/703). If you have any changes to the dialog while it is open,
+the repaint is very slow. In our app, we have modal dialogs that contain small tables
+for editing. A background blur makes them unusable. 
+
+Another thing to watch out for is using `transform` to center a dialog element.
+It's a cute technique: put the upper left corner in the center, and then move it
+back and to the left by 50 percent. In Abacus-style CSS:
+
+~~~
+     s.position←'fixed'
+     s.left←'50%'
+     s.top←'50%'
+     s.transform←'translate(-50%, -50%)'
+~~~
+
+All well and good, but there is a side-effect of using `transform` that affects
+positioning. Elements with fixed position on a dialog box that is centered this way
+will be [fixed relative to the dialog, not the viewport](https://dev.to/salilnaik/the-uncanny-relationship-between-position-fixed-and-transform-property-32f6),
+which is what you would normally expect. We have autocomplete elements that pop up on dialogs, and this makes positioning them much harder.
+For now I have taken to fixing the size of the dialog, so I can center it directly with using `transform`.
+
+To sum up, on <dialog> elements:
+
+> Don't use `backdrop-filter: blur`
+
+> Don't use `transform`. 
+
+Time to start a CSS Don'ts page perhaps.
+

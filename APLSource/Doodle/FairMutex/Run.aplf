@@ -1,0 +1,18 @@
+ Run←{
+
+
+     ⍝ Maybe? NO !! ⎕THIS.Queue←{}&0    ⍝ Init Mutex
+     _←⎕TPUT{}&0  ⍝ Burner thread
+
+
+     ⎕THIS.Log←''
+     _←Task&0
+     ⎕DL 0.5
+     _←Task&0
+     ⎕DL 0.5
+     _←Task&0
+     ⎕DL 0.5
+     _←Task&0
+     _←⎕TSYNC ⎕TNUMS
+     ↑⎕THIS.Log
+ }

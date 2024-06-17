@@ -1,0 +1,5 @@
+ NewMutex←{
+     m←⎕NS''
+     m.Queue←{}&0
+     m
+ }

@@ -1,0 +1,5 @@
+ UnLock←{
+     _←⎕TPUT ⎕TID
+     ⎕THIS.Queue←↓⍨1
+     0
+ }

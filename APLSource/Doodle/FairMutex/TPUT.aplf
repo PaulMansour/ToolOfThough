@@ -1,0 +1,6 @@
+ TPUT←{
+     ⎕←'Thread'⎕TID'releases mutex'
+     _←⎕TPUT ⎕TID
+     ⎕THIS.Queue←↓⍨1
+     0
+ }

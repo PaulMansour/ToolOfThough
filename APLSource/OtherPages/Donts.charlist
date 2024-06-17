@@ -61,7 +61,11 @@ Does anyone know exactly what these things really are?
 
 ## Don't use `⎕CS`
 
-I have forgotten exactly why, but I'm pretty sure there is simply no need to.
+I have forgotten exactly why, but I'm pretty sure there is simply no need to, and bad things happen when you do.
+
+## Don't use `:With`
+
+Don't use control structures, but if you do, don't use `:With`. 
 
 ## Don't use `⎕PATH`
 
@@ -79,7 +83,7 @@ Unless you are doing code golf.
 
 ## Don't use classes
 
-Don't use classes unless you intend to properly encapsulate. That is, if your class definition begins with 50 public fields, and you can't be bothered to write the getters and setters to that would make them properties, what's the point? This would eliminate 99.9 percent of all classes ever written in Dyalog APL. Use regular functions in a (named) namespace to act as methods of a class. Use unnamed namespaces for instances. Pass the the instance to the method as the left argument. Thus, instead of writing;
+Don't use classes unless you intend to properly encapsulate. That is, if your class definition begins with 50 public fields, and you can't be bothered to write the getters and setters that would make them properties, what's the point? This would eliminate 99.9 percent of all classes ever written in Dyalog APL. Use regular functions in a (named) namespace to act as methods of a class. Use unnamed namespaces for instances. Pass the the instance to the method as the left argument. Thus, instead of writing;
 
 ~~~
   i.MethodName x
