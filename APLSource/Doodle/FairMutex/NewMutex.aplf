@@ -1,5 +1,5 @@
  NewMutex←{
      m←⎕NS''
-     m.Queue←{}&0
-     m
+     m.Key←{}&0
+     m⊣⎕TPUT m.Key
  }

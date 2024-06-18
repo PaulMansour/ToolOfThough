@@ -1,6 +1,6 @@
  TPUT←{
-     ⎕←'Thread'⎕TID'releases mutex'
+     ⎕THIS.Log,←⊂'Thread'⎕TID'releases mutex'
      _←⎕TPUT ⎕TID
-     ⎕THIS.Queue←↓⍨1
+     ⎕THIS.Queue←1↓⎕THIS.Queue
      0
  }

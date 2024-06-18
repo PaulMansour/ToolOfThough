@@ -1,0 +1,13 @@
+ Task2x←{
+     ⍝ First Critical Sections
+     m←⍵
+     _←Lock m     ⍝ Lock
+     ⎕THIS.Log,←⊂'Thread'⎕TID'gets mutex'
+     _←⎕DL 3      ⍝ Do some work
+     _←Unlock m   ⍝ UnLock
+     _←Lock m     ⍝ Lock
+     ⎕THIS.Log,←⊂'Thread'⎕TID'gets mutex for a second time'
+     _←⎕DL 3      ⍝ Do some work
+     Unlock m
+
+ }

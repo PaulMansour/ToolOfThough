@@ -1,5 +1,6 @@
  TGET←{
-     ⎕THIS.Log,←⊂⍕'Thread'⎕TID'requests mutex, waiting on'(⊃⌽⎕THIS.Queue)
-     ⎕THIS.Queue,←⎕TID
-     ⎕TGET⊃⌽⎕THIS.Queue
+     w←⊃⌽⎕THIS.Queue ⍝ Waiting for guy in fornt of you
+     ⎕THIS.Log,←⊂⍕'Thread'⎕TID'requests mutex, waiting on'w
+     ⎕THIS.Queue←⎕THIS.Queue,⎕TID
+     ⎕TGET w
  }

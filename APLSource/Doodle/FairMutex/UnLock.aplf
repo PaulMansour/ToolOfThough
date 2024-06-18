@@ -1,5 +1,4 @@
- UnLock←{
-     _←⎕TPUT ⎕TID
-     ⎕THIS.Queue←↓⍨1
-     0
+ Unlock←{
+     ⎕THIS.Log,←⊂'Thread'⎕TID'releases mutex'
+     0⊣⎕TPUT ⎕TID
  }

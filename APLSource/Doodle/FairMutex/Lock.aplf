@@ -1,4 +1,7 @@
  Lock←{
-     ⎕THIS.Queue,←⎕TID
-     ⎕TGET⊃⌽⎕THIS.Queue
+     ⎕THIS.Log,←⊂⍕'Thread'⎕TID'requests mutex, waiting on'⍵.Key
+     (⍵.Key k)←⎕TID ⍵.Key
+     ⍝ k←⍵.Key
+     ⍝ ⍵.Key←⎕TID
+     ⎕TGET k
  }

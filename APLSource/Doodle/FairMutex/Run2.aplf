@@ -1,0 +1,13 @@
+ Run2←{
+     m←NewMutex 0
+     ⎕THIS.Log←''
+     _←Task&m
+     _←⎕DL 0.5
+     _←Task&m
+     _←⎕DL 0.5
+     _←Task2x&m
+     _←⎕DL 0.5
+     _←Task&m
+     _←⎕TSYNC ⎕TNUMS~0
+     ↑⍕¨⎕THIS.Log
+ }
