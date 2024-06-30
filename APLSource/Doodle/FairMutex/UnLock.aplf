@@ -1,4 +1,6 @@
  Unlock←{
      ⎕THIS.Log,←⊂'Thread'⎕TID'releases mutex'
-     0⊣⎕TPUT ⎕TID
+     ⍝ 0⊣⎕TPUT ⎕TID
+     ⊢⎕TPUT ⎕TID
+     ⍝ ⎕TPUT ⎕TID
  }

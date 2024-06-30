@@ -1,0 +1,122 @@
+# [An Abacus Application](/posts/an-abacus-application)
+
+## June 30, 2024
+
+To figure out and demonstrate how to write an application in Abacus, we need a useful test application.
+At this point, we don't even know what we need to know, we don't know the tools we need, how the tools
+should be structured and fit together. We need a test app to help us find out.   
+The app must be simple enough to easily understand, but complex enough to explore all the major
+functionality of the framework. A CSV file viewer and editor will fit the bill. This will require
+a high-performance, editable datagrid, menus, progress bars, message boxes, confirmation boxes,
+dialog boxes for properties and settings and more. Furthermore, we want to be be able to run the
+application locally, as a desktop app, or remotely as a single page web app (SPA).
+Let's imaginatively name it the "Abacus CSV Editor". It might even be a useful app!
+
+What follows is a first pass at structuring a framework for building apps in Abacus.
+
+We will need a [namepace](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/CSVEditor) to encapsulate the code for the app.
+This will be a relatively simple app, so a single namespace will hold all the code.
+A complex app will generally require splitting things up into more namespaces.
+This namespace (let's call it the **application namespace**) will contain
+a **build function** that builds an APL DOM for the app. Here is the build function
+for the CSV Editor:
+
+~~~
+Build←{
+     d←A.NewDocument''
+     b←A.GetBody d
+     a←b A.AutoComplete.New''
+     d.AutoCompleteElement←a
+     h←b A.New'header'
+     h1←h A.New'h1' 'filename'
+     mb←b BuildMenu''
+     m←b A.New'main'
+     g←m A.DataGrid.New''
+     f←b A.New'footer'
+     h2←f A.New'h2' 'x rows by n columns'
+     d.Theme←##.Themes.Dark 0
+     d.Layout←##.Layouts.Doric d.Theme
+     d.Style←CSS d.Theme
+     d
+ }  
+~~~
+
+The build function creates and returns a document. It will generally have calls to the 
+main Abacus API (`A`), and of course it can call custom sub functions (like `BuildMenu` above)
+to keep things manageable. This is the heart of the app. It defines the UI, and all the callbacks
+to events on the UI. For a single user desktop app, the function will be run once. For a multi-user
+web app, this function will be run everytime a user logs in, returning the rendered document to their
+browser. All state is managed in the document in APL. For a multi-user app, the document
+is a **session**.
+
+The application workspace will also have a something like this `CreateApplication` function:  
+
+~~~
+CreateApplication←{
+     a←A.NewApplication 0
+     a.Name←'Abacus CSV Editor'
+     a.BuildFunction←'#.Abacus.CSVEditor.Build'
+     a
+ }
+~~~
+
+This formally creates and returns an Abacus application object. At a minimum it will specify the name
+of the application and the build function. Let's take a look at the internals of `NewApplication`: 
+
+~~~
+NewApplication←{
+     a←⎕NS''
+     s←#.Rumba.Core.NewServer 0
+     s.Trap←0
+     s.UseCongaHTTP←1
+     s.Context←⎕THIS
+     s.OnRequest←'OnRequestRumba'
+     s.OnWebSocketUpgrade←'OnWSUpgradeRumba'
+     s.OnWebSocketReceive←'OnWSReceiveRumba'
+     s.Application←a
+     a.Name←'[Application]'
+     a.Server←s
+     a.Sessions←⍬
+     a.BuildFunction←''
+     a
+ }
+~~~
+
+The first thing it does is create a Rumba server. The server is not needed if the app is to be run
+as a desktop app, but it costs nothing to create, so we throw it in regardless.
+The server knows the application, and the application knows the server. The application
+requires a name and a build function. The application will track sessions (an array of documents) if
+it is run as a multi-user web app. 
+
+So, we have created an Abacus application object and provided it our build function.
+With the application object in hand, we can start up a web app using the Abacus API function
+`StartWebApplication`: 
+
+~~~
+StartWebApplication←{
+     s←⍺.Server
+     s #.Rumba.Core.Start 0
+ }
+~~~
+
+The Rumba server is now listening for new connections, will run the build function and deliver
+a document to the client, establish a websocket, and respond to user actions on the client.
+
+Alternatively, we can start up a desktop app with the API function `StartDesktopApplication`:
+
+~~~
+StartDesktopApplication←{
+     d←(⍎⍺.BuildFunction)0
+     d.Style←CollectCSS d
+     d.Caption←⍺.Name
+     NewForm d
+ }
+~~~
+
+This runs the build function to create the document, then, in `NewForm`, creates an HTMLRenderer
+object and returns it.   
+
+In a future post we will look at styles, themes and layouts, which we are still trying
+to figure out, and bring some order to the chaos.
+ 
+

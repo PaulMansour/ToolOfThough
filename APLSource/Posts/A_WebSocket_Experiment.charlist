@@ -1,0 +1,51 @@
+# [A WebSocket Experiment](/posts/a-websocket-experiment)
+
+## July 1, 2024
+
+First, grab a coffee and spend 32 entertaining minutes
+with [Theo](https://www.youtube.com/watch?v=5jIwILYjXrU).
+
+Ok, now that you have enjoyed his sartorial stylings, lets talk
+about WebSockets and avoiding JavaScript. 
+
+We have been experimenting with WebSockets and the HTMLRenderer.
+The goal is to see if it is possible to build a highly interactive desktop app
+with almost no JavaScript, where every UI interaction is handled by APL.
+This appears to work, and be a viable approach. We have implemented a datagrid
+which is probably the most intensive user interaction case for a business app.
+
+With the Abacus DataGrid, every single keystroke event is sent to the browser
+over a websocket. On each press of the down-cursor key, for examle, the event is
+sent to APL, which must determine if the grid should scroll, extract and prepare
+the data to display, render the HTML, send it back over the websocket to the client,
+which must then replace the innerHMTL of the table element. You can press and hold the
+cursor key and the datagrid will scroll as smooth and fast as an Excel user would expect.
+No latency. Awesome. 
+
+But we are on one machine. What would happen if we tried to run the datagrid in a web app?
+Over the internet. From a client in Rome to a server in Los Angeles? At the Carlisle Group
+2024 Italy Moot, we tried just that. Amazingly there hardly appeared to be any difference.
+Scrolling appeared to be just as smooth and fast. I assume it had to be a little slower,
+we just couldn't really notice it. It was not a scientific test, we just just scrolled around
+and observed how the performance felt.
+
+Next, we tried 3 connections/users in Rome to the same server in LA. What would happen if all
+3 users tried to scroll around? Here we assumed the performance would degrade significantly.
+Asking a single APL server to handle a flood of keystroke events from multiple clients,
+where each requires not trivial processing, would be asking too much. We were not wrong, the
+performance degraded profoundly.
+
+It remains to be seen what architectural options there are for heavily interactive single-user 
+web apps in this model that require a lot of server power for each user.
+Maybe a different Docker container for each user, each with its own APL instance is viable,
+for a relatively small number users. Not sure how this would work, or even if it could, for a multi-user app if the users
+have their own APL instance.   
+
+For multiuser apps that do not require that much server power per user, the Abacus model of the 
+client passing every event to APL via a WebSocket may turn out to be quite viable.
+
+We'll see.
+
+
+
+

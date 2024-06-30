@@ -2,7 +2,7 @@
      p←⎕NS''
      p.Title←'Tool of Thought'
      p.Subtitle←'APL for the Practical Man'
-     p.Quote←'"You don''t know how bad your code is until you write about it."'
+     p.Quote←'"You don''t know how bad your design is until you write about it."'
      p.Menu←{
          m←⊂'Home' '/'
          m,←⊂'Posts' '/posts'

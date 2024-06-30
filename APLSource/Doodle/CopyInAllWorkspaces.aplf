@@ -1,0 +1,12 @@
+ CopyInAllWorkspaces←{
+     ⍝ ⍺ ←→ Folder
+     ⎕IO←0
+     ⎕ML←1
+     ⍺←'C:\Program Files\Dyalog\Dyalog APL-64 18.2 Unicode\ws'
+     d←⍺                    ⍝ Folder
+     f←(⎕NINFO⍠1)d,'\*.dws' ⍝ All workspaces
+     n←1⊃¨⎕NPARTS↑f         ⍝ Short file name
+     s←⍎¨n ⎕NS¨⊂''          ⍝ Create namespaces
+     _←s.⎕CY¨f              ⍝ Copy in code
+     0
+ }

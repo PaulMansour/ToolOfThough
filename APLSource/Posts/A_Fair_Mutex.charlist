@@ -1,0 +1,91 @@
+# [A Fair Mutex](/posts/a-fair-mutex)
+
+## June 24, 2024
+
+A mutex may be *fair* or *unfair*. A fair mutex lets threads into the 
+critical section in the order in which they request the lock. That is, FIFO; the thread
+waiting the longest, will be serviced first. That certainly seems fair.
+
+An unfair mutex provides no such guarantee. This means that a thread can be starved - it may 
+never be allowed to proceed into the critical section. That certainly seems unfair.
+
+In Dyalog:
+
+~~~
+:Hold TokenString
+    ...
+    critical section
+    ...
+:EndHold
+~~~
+
+implements an unfair mutex. And it **will** starve threads. A newly created thread that hits
+the `:Hold` will be serviced before any existing threads that may be waiting. The same is
+true for:
+
+~~~
+⎕TGET TokenInt
+...
+critical section
+...
+⎕TPUT TokenInt
+~~~
+
+No doubt the interpreter uses the same algorithm for servicing waiting threads in both cases.
+Unfair mutex implementations are the norm in the industry, for reasons I don't fully understand.
+A cursory glance at the literature indicates that unfair mutexes are more efficient in some way. 
+Presumably if it matters not in what order waiting threads are serviced, the interpreter
+has less to keep track of. One example often given is when a thread releases a
+mutex and then tries to reaquire it (not a good pattern I think anyway), a fair mutex will put it at the end of the line, whereas 
+an unfair mutex can put it at the head the line, and avoid some thread switching. It is not
+clear to me if these efficiency arguments hold for the type of threads
+that the Dyalog interpreter implements.     
+
+Anyway, the question arises, can we implement a fair mutex in Dyalog? Let's look at a very simple
+implementation. Using the token pool we can create a new mutex object:
+
+~~~
+NewMutex←{
+     m←⎕NS''
+     m.Key←{}&0
+     m⊣⎕TPUT m.Key
+ }
+~~~
+
+The mutex has a key, which must be aquired to gain access. At the same time,
+the key must be changed for the next thread.
+Any unique key value per thread could be used. We use the thread ID for convenience.
+
+To initialize the mutex, we burn a thread and then put the key into the token pool.                                                       
+
+To enter the critical section, a thread has to wait for the current mutex key, and then
+create a new key using the `Lock` function, which takes the mutex as the right argument:                                                      
+
+~~~
+Lock←{
+     k←⍵.Key
+     ⍵.Key←⎕TID
+     ⎕TGET k
+ }
+~~~
+
+When it exits the critical section, the thread has to unlock the mutex by putting the key
+into the token pool:                                                      
+
+~~~
+Unlock←{
+     ⊢⎕TPUT ⎕TID
+}
+~~~
+
+> the `⊢` is needed only because I think there is a bug in the intepreter. In test code,
+> I use `⎕TSYNC ⎕TNUMS~0`  to know when all the threads have completed. Without the `⊢`, 
+> the `⎕TSYNC` fails because "VALUE ERROR: No result was provided when the context expected one."
+> This does not seem right. Must have something to do with the fact the result of `⎕TPUT` is shy.
+
+The `Unlock` function does not really need to know about the particular mutex instance, as the key
+is simply the thread id.
+
+I don't think it is as simple to implement a fair mutex using `:Hold`, as it is not natural construct
+for waiting on one token and then releasing a different token.
+
