@@ -1,0 +1,45 @@
+# [Styles, Themes, and Layouts](/posts/styles-themes-and-layouts)
+
+## July 2, 2024
+
+For an Abacus application, we need a way to organize our CSS, apply themes, provide some
+default application layout and styling,
+and also let the programmer override everything.
+
+An Abacus document (and any element) has a `Style` property which is a vector of CSS rules.
+For static documents, this property is generally set directly by the programmer.
+When a document represents an SPA built on Abacus components, we need to be able
+to assemble additional rules, and provide a way for the programmer to organize them.
+Two additional properties are provided to specify CSS rules:
+`LayoutStyle` and `ApplicationStyle`. 
+
+The `LayoutStyle` property contains CSS rules for top level layout. This might be something
+like the header, main and footer elements of the app.   
+
+For an SPA, the `Style` property of the root `<html>` element should not be set (it will
+be overridden if it is set). Abacus will automatically set this property,
+constructing it from the 'LayoutStyle` and `ApplicationStyle` properties, as well as
+the component library styles.  
+
+The order in which styles are applied is as follows:
+
+1. LayoutStyle (user provided, though Abacus should have a library of useful ones)  
+2. Abacus Styles (provided by Abacus, including built-in component ) 
+3. ApplicationStyle (user provided)  
+
+In other words, the programmer can provide styles to be applied before and after
+the built in styles provided by Abacus. These groups of CSS rules are, in the end, arbitrary.
+I'm not even sure the programmer needs to be able specify rules before the Abacus rules,
+but certainly after. However I do think it is useful to split apart, for example, a rule
+that says the button radius should be 5px, from a rule that says the <body> element
+of the document should flex.
+
+It should be possible to create an attractive application by simply specifying a layout
+provided by Abacus.
+
+Abacus uses APL functions to construct CSS. We call these CSS functions. A CSS function
+takes a **theme** as its right argument. A theme is simply a namespace of names and values,
+defining colors, font names and size, and other parameters. It performs the same function as
+CSS custom properties.
+
+Much or all of this will probably change.

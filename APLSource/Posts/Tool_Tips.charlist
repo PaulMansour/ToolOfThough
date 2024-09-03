@@ -1,0 +1,130 @@
+# [Tool Tips](/posts/tool-tips)
+
+## August 19, 2024
+
+Abacus now supports [tool tips](https://github.com/the-carlisle-group/Abacus/tree/master/APLSource/Main/ToolTip).
+The relatively new (Chrome 125) CSS [anchor positioning module](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_anchor_positioning) makes this almost easy.
+More about anchor positioning can be found [here.](https://developer.chrome.com/blog/anchor-positioning-api). However, both of these articles actually raise more
+questions than they answer. For example, it appears that anchor names should be unique. However, in many of the examples, an anchor name is defined for a class, not an id,
+which seem a bit odd. Thus we need to go to the [source](https://www.w3.org/TR/css-anchor-position-1/).
+Here we learn that anchor names do not in fact not need to be unique, and that they can be scoped. Unfortunately the `anchor-scope` property is not yet
+implemented in Chrome, let alone any other browser. Another, bigger problem is that anchors can currently only be defined in CSS. The spec allows for defining them 
+in HTML with the `anchor` attribute which points to an id, but this is not yet implemented. If every tool button needs a specific CSS rule to define it as an anchor for it's associated tool tip, 
+*and* vice versa, every tool-tip needs an id and CSS to point to the right anchor,
+that is annoying to say the least. While much of the API is not yet implemented, the important stuff for us is there: the browser will automatically display the tool tip just where
+we want it, moving it around as necessary if it would otherwise be off the screen. So for now, given what is currently supported in Chrome, here is our approach. 
+We can totally change our approach in the future as the anchor position API is further implemented.
+
+To use tool tips in Abacus, all we need to do is set the ToolTip property of an element in the APL DOM, there is no need to explicitly use the ToolTip component:
+
+~~~
+b←A.New 'button' 'OK'   
+b.ToolTip←'This is the OK button'
+~~~
+
+Abacus automatically adds a single tool tip element to the page behind the scenes with:
+
+~~~
+New←{
+     ⍝ ⍺ ←→ Parent (Body)
+     ⍺←0
+     t←⍺ A.New'div'
+     t.class←'tool-tip'
+     t.LastAnchor←0
+     t
+ }
+~~~
+
+(We could use an id here instead of a class, as there is only one tool tip element on a page.)
+This one element is used to display all tools tips. We will move it around the page to different locations
+by dynamically setting the associated tool button to be its anchor for the moment the tool tip appears. 
+
+Abacus then finds all elements on the page that have the ToolTip property and initializes them: 
+
+~~~
+Init←{
+     ⍝ ⍵ ←→ Element(s)
+     b←{0=⍵.⎕NC'ToolTip':0 ⋄ 1}¨⍵
+     e←b/⍵
+     0=≢e:0
+     e.Onmouseenter←⊂A.FQP'OnMouseEnter'
+     e.Onmouseleave←⊂A.FQP'OnMouseLeave'
+     e.Unqueued←⊂'mouseenter' 'mouseleave'
+     0
+ }
+~~~
+
+Now each tool button has events attached for `mouseenter` and `mouseleave`. On mouseenter, we start a timer:
+
+~~~
+OnMouseEnter←{
+     t←⍎'tmT'⎕WC'Timer' 200 1('FireOnce' 1)
+     t.onTimer←'OnMouseEnterTimer'⍵
+     0
+ }
+~~~
+
+And then when the timer fires, we set the text of the tool tip, and change the anchor from the previous element
+that displayed a tool tip, to the current element that should display a tool tip. We also set `opacity` to 
+get a nice transition from invisible to visible:
+
+~~~
+OnMouseEnterTimer←{
+     e←⍺.CurrentTarget
+     t←⍺.Document.ToolTip
+     _←t A.SetInnerHTML A.New'p'e.ToolTip
+     P←t.LastAnchor A.RemoveProperty'anchor-name'
+     t.LastAnchor←e
+     _←e A.SetAnchorName'--tool-tip'
+     _←t A.SetStyle'opacity' '1'
+     0
+ }
+~~~
+
+On mouse leave we kill the timer, and make the tooltip invisible:
+
+~~~
+OnMouseLeave←{
+     tmT.Active←0
+     t←⍵.Document.ToolTip
+     _←t A.SetStyle'opacity' '0'
+     0
+ }
+~~~
+
+Note that we do not clear the `anchor-name` property at this point, as this would affect the 
+fade-out opacity transition; the tool tip would change locations before fully fading out.
+
+
+The important CSS is:
+
+~~~
+CSS←{
+     Rule←##.NewRule
+     s←Rule'.tool-tip'
+     s.position←'absolute'
+     s.z_index←'99'
+     s.position_anchor←'--tool-tip'
+     s.inset_area←'bottom right'
+     s.position_try_options←'flip-block, flip-inline, flip-block flip-inline'
+     s.opacity←0
+     s.transition←'opacity .5s'
+     s
+ }
+~~~
+
+So, to recap, there is single tool tip element, that always points to a
+floating anchor named '--tool-tip'.
+As the mouse hovers over a tool button, we assign that button the anchor-name (clearing
+the name from the previous tool button), and make the tool-tip visible. 
+
+
+Some observations on this implementation:
+
+1. The tool tips are not in the HTML. This is probably not a good idea for accessibilty, but probably won't change until the API is fully implemented.
+1. We do not use the popover API for the tool tip, just the hack of setting `z-index`. The popover API does not currently support triggering the popover on mouseover, so JavaScript is required anyway.
+1. This is a very dynamic solution, which has pros and cons. It requires server side APL code (JavaScript!). It's possible that when both the popover API and the anchor positioning API are fully implemented in the browser, that this could be done declaratively in HTML and CSS only. Short of that, much more of the current solution could be moved into the HTML.
+ 
+
+
+

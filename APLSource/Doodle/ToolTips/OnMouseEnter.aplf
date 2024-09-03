@@ -1,0 +1,6 @@
+ OnMouseEnter←{
+     e←⍵.CurrentTarget
+     t←e A.GetElementByClass'tool-tip'
+     _←t A.SetStyle'opacity' '1'
+     0
+ }

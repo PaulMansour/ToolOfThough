@@ -1,0 +1,65 @@
+# [Rumba Threading Model](/posts/rumba-threading-model)
+
+## July 28, 2024
+
+In this post we  
+review the current [Rumba](https://github.com/the-carlisle-group/Rumba) threading model,
+consider an alternative, and take a look at how [Jarvis](https://github.com/Dyalog/Jarvis) does it.
+
+Currently in Rumba, the threading model is as follows.
+The *server event loop*, calling `DRC.Wait`, handles all events on the server and all sockets.
+If the event is a `Connect` event, a new connection space is established and
+a thread is spawned. This new *connection thread* is immediately waiting, in a *connection event loop*,
+using `⎕TGET`, for events passed to it from the server event loop using `⎕TPUT`. 
+All other events are either handled immediately in
+the server event loop, or passed off for handling to the appropriate connection thread. For example, the `Error` event is handled immediately
+in the main thread, but an `HTTPChunk` event is passed to the appropriate connection thread.
+
+When a connection thread has a complete message, it will service it in the same connection thread
+(not spawning a new thread). Thus it will respond to multiple messages from the same client, 
+in proper order, with no additional thread coordination. 
+
+Alternatively, we can use the `ConnectionOnly` property of Conga, and have the server event
+loop only handle `Connect` events. As above, a new connection space is established and 
+connection thread is spawned. In this case, however, the connection event loop is
+wrapped around another call to `DRC.Wait`. There is no need for `⎕TGET` or `⎕TPUT`.
+The connection event loop is now tasked with directly handling events from Conga, via `DRC.Wait`,
+but only for the specific connection. We have delegated some logic to Conga itself. 
+
+Let's call the first technique SCW (Single Conga Wait) and the
+alternative MCW (Multiple Conga Wait) 
+
+What are the pros and cons of these two techniques? Here are a few:
+
+With SCW, we have the option of handling any event either in the main thread or in the
+appropriate connection thread. All events are received in the main thread, and we can process them
+there or chuck them to a waiting connection thread. With MCW the die is cast. All events other than `Connect`
+(and `Error`  and `Timeout`?) must be handled in connection threads.
+This may increase thread coordination problems. This might be a major advantage for SCW.
+
+With SCW, every time around the server event loop, we must retrieve the connection space
+(if it's not a `Connect` event) from the connection name as returned from `DRC.Wait`. With MCW, 
+we have the connection space in hand on the Connect event, and it is passed 
+to the connection event loop. So we never need to look it up or retrieve it. This is probably a minor
+advantage, if any, for MCW in speed, but maybe a major advantage in coding clarity.  
+
+With SCW we only receive `Timeout` events on the server as a whole. With MCW we can receive them
+on the server and on individual connections (I think. I don't know this for a fact.) Currently
+in Rumba with SCW we track the timestamp on the latest activity on a connection,
+so we can close idle connections. This could be handled with less fuss with MCW.
+
+It seems that MCW might lead to simpler APL code. Events are either server events or
+connection events, and MCW lets Conga sort that part out.    
+
+Jarvis, like Rumba currently, uses a single call to 
+`DRC.Wait`. However, instead of spawning a thread on each connection, it spawns a thread on each
+(HTTP) event. Then when the message is complete, it handles the request in
+whatever the current thread is.
+Thus a typical HTTP request takes 2 threads, one for the header, and one for the body which is then 
+used to handle the request and prepare the response. A chunked request requires a thread for every
+single chunk, so a request with 100 chunks will require 102 threads, the extra 2 for the header and trailer)
+These additional threads have very little to do, and will be very short-lived,
+so that's not a big downside. However, the additional threads require more thread coordination,
+including the use of both `:Hold` and `⎕TGET/⎕TPUT`. 
+
+It's not at all clear if there are any performance difference between these three models.

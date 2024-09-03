@@ -1,0 +1,5 @@
+ Run←{
+     a←A.NewApplication''
+     d←Build''
+     A.NewForm d
+ }

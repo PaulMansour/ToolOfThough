@@ -1,0 +1,32 @@
+ Build2←{
+     d←A.NewDocument''
+     d.Caption←'ToolTip Test'
+     d.LayoutStyle←⍬
+     d.AppStyle←CSS 0
+     d.Theme←#.Abacus.Themes.Dark 0
+
+     b←A.GetBody d
+
+     b1←b A.New'button' 'b1'
+     b1.id←'b1'
+     b1.class←'tool-button'
+     t1←b1 A.New'div' 'This is button b1'
+     t1.class←'tool-tip'
+
+     b2←b A.New'button' 'b2'
+     b2.id←'b2'
+     b2.class←'tool-button'
+     t2←b2 A.New'div' 'This is button b2'
+     t2.class←'tool-tip'
+
+     b3←b A.New'button' 'b3'
+     b3.id←'b3'
+     b3.class←'tool-button'
+     t3←b3 A.New'div' 'This is button b3'
+     t3.class←'tool-tip'
+
+     (b1 b2 b3).Onmouseenter←⊂A.FQP'OnMouseEnter'
+     (b1 b2 b3).Onmouseleave←⊂A.FQP'OnMouseLeave'
+
+     d
+ }

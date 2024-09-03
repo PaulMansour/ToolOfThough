@@ -1,0 +1,38 @@
+# [Revisiting Rumba](/posts/revisiting-rumba)
+
+## July 17, 2024
+
+[Rumba](https://github.com/the-carlisle-group/Rumba) has been around a long time. Mostly it was written as an exercise to understand HTTP,
+but is has also proved quite useful for testing sites and applications that
+may be served by other means in production.
+
+When Rumba was originally written, Dyalog's TCP toolkit [Conga](https://docs.dyalog.com/latest/Conga%20User%20Guide.pdf),
+on which Rumba is based, did not support
+HTTP directly. Much code in Rumba is devoted to parsing TCP messages to know where the header ends
+and the body starts, where chunks start and end, etc. Now Conga supports HTTP. Furthermore it supports WebSockets, which requires the new HTTP functionality.
+In addition Conga has made some improvements to the event handling that clean up some things.
+The need for Abacus to use WebSockets is the catalyst for updating Rumba to take advantage
+of all that Conga now has to offer.
+
+Rather than jettisoning the original code, we have a new Rumba server property `UseCongaHTTP` which 
+defaults to 0. Setting to `1` does the obvious, instructing Rumba to use Conga's HTTP mode.
+Being able run a Rumba server both ways is useful for testing.
+
+The new code is, for now in a [temporary branch](https://github.com/the-carlisle-group/Rumba/tree/feature/WebSockets),
+where it will probably remain for a few months.
+
+Conga also now has features to fully parse the header and trailer. These features are not taken advantage of yet in Rumba,
+as we don't want to introduce too many changes at once.
+    
+We are, however, taking advantage of the new Conga `EventMode` property to streamline code and get rid of some magic numbers
+that Conga used to produce.
+
+Because Rumba is heavily threaded and written largely in dfns,
+it has to use some tradfn workarounds to avoid a long-standing bug in the interpreter.
+This bug is now fixed in Dyalog version 19, so we can eliminate the workarounds.  
+
+Taking advantage of Conga's HTTP mode while not substantially rewriting Rumba required certain
+decisions about threading. The current threading model may not be the best. In a future post
+we will review the threading model for Rumba, see how it was adapted to use Conga's HTTP mode,
+compare it to what Dyalog's [Jarvis](https://github.com/Dyalog/Jarvis)
+does, and see if there are any better alternatives.

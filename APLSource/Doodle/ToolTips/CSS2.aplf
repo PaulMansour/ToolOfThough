@@ -1,0 +1,42 @@
+ CSS2←{
+     Rule←A.NewRule
+     s←Rule''
+     ⍝ Specific Button
+     r←s Rule'#b1'
+     r.anchor_name←'--b1'
+     r←s Rule'#b2'
+     r.anchor_name←'--b2'
+     r←s Rule'#b2'
+     r.anchor_name←'--b2'
+
+
+
+
+     ⍝ Tool Button
+     r←s Rule'.tool-button'
+     r.anchor_name←'--tool-tip'
+     r.font_size←'2rem'
+     r.padding←'.5rem'
+     r.border_radius←'5px'
+     r.background_color←'steelblue'
+     ⍝ Tool Tip
+     r←s Rule'.tool-tip'
+     r.position←'absolute'
+     r.z_index←'99'
+     r.background_color←'LemonChiffon'
+     r.color←'black'
+     r.font_size←'1.5rem'
+     r.padding←'10px'
+     r.border_radius←'5px'
+     r.position_anchor←'--tool-tip'
+     r.inset_area←'bottom right'
+     r.position_try_options←'flip-block, flip-inline, flip-block flip-inline'
+     r.opacity←0
+     r.transition←'opacity .5s'
+
+
+
+     s
+
+
+ }
