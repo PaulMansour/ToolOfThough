@@ -1,0 +1,437 @@
+# [HTML Templates](/posts/html-templates)
+
+## January 7, 2025
+
+Back in December on the htmx Discord 
+someone posted [the following:](https://discord.com/channels/725789699527933952/1156332623233302578/1321341662315937793) 
+
+> Honest question: whenever I see code snippets that generate HTML using some other language
+> (JavaScript, Python, whenever) I kind of cringe. My only real experience is using
+> Django Template Language, which is basically just writing actual HTML with the benefit
+> of variables and loops. But it very much just feels like writing actual HTML.
+>
+> What are the benefits of using another language to write HTML?
+> I must be missing something. Chaining together objects and methods named after HTML
+> elements and specifying HTML attributes via class properties just seems unnecessary
+> compared to just writing out HTML using something akin to Django Template Language.
+
+We have been pondering the exact opposite of this question:
+Whenever we see HTML templating code, we kind of cringe. Our only real experience is using
+APL, which is basically just writing array-based solutions without the detriment of loops.   
+*What are the benefits of using an HTML template language?* We must be missing something.
+Injecting variables and loops and if-statements into HTML
+just seems unnecessary compared to writing out HTML using APL.
+
+We will note that after a brief investigation into various projects
+that replace templating with HTML generation directly in the host language, we cringe too!
+
+First it should be noted that embedded in the original question is the admission of the usefulness
+of using a language other than HTML to write HTML. So the question really is:
+if you are going to use a language in addition to HTML to write HTML, should it be a
+template language or a real programming language? Should you put code in the HTML, or
+HTML in the code?  
+
+Why would one want to learn yet another language, just for templating HTML? 
+That is, a language in addition to HTML and your primary programming language? A language 
+sure to be obsolete soon enough? HTML will be around for 100 years. APL will be around
+for 1000 years. Your template language will be around for 6 months.
+
+One answer is that you might want to create a wide variety of text file formats, not just HTML.
+At some point learning a third generic text templating language might be worth the effort.
+If its just HTML, CSV and JSON, however, it's doubtful the benefits exceed the costs. All three
+of these formats are much better produced with a real programming language rather than templating.    
+
+It's not that HTML is a bad language or that we don't like it. We love HTML and we love and CSS.
+It's just that HTML is not primarily designed for humans to write. In fact, it is for precisely
+this reason that HTML template languages exist. If HTML was designed for humans to write
+effectively, we wouldn't need template languages.
+                         
+Other than as a learning experience, why would anyone possibly want to write HTML directly?
+Writing HTML by hand is a rote, boring, and error-prone task. Editing it is onerous.
+Consider this example of simple select element, adapted from
+the [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select): 
+
+~~~
+<select>
+  <option value="dog">Dog</option>
+  <option value="cat">Cat</option>
+  <option value="hamster">Hamster</option>
+  <option value="parrot">Parrot</option>
+  <option value="spider">Spider</option>
+  <option value="goldfish">Goldfish</option>
+</select>
+~~~
+
+The redundancy is overwhelming.
+
+Of course there are editors and IDEs that help with all the duplication.
+But that is itself a testament to the fact that HTML should not be written by hand.
+Editors that automatically add ending tags, or that allow multi-line editing and 
+multiple cursors are fixing problems that generally shouldn't exist. They are making up for
+deficiencies in language design, bad coding styles, or writing code in languages
+that should not be written by hand.
+
+Let's do this in a proper programming language. Here APL, but no doubt many other
+interpreted languages are just as good. First, define the values and the descriptions:
+
+~~~
+      v←'dog' 'cat' 'hampster' 'parrot' 'spider' 'goldfish'
+      d←'Dog' 'Cat' 'Hampster' 'Parrot' 'Spider' 'Goldfish'
+~~~
+
+Then define the elements and their content:
+
+~~~
+      s←New 'select' (New¨d{'option' ⍺ ⍵}¨{'value' ⍵}¨v)
+~~~
+
+Ok, that's a bit ridiculous-- way too complicated.
+We would not write it that way in production, but would break it up like so:
+
+~~~
+      o←New¨{'option' ⍵}¨d
+      o.value←v
+      s←New 'select' o
+~~~
+
+And create the HTML using the `Render` function:
+
+~~~
+      Render s
+<select>                                    
+  <option value="dog">Dog</option>          
+  <option value="cat">Cat</option>          
+  <option value="hampster">Hampster</option>
+  <option value="parrot">Parrot</option>    
+  <option value="spider">Spider</option>    
+  <option value="goldfish">Goldfish</option>
+</select>                                   
+~~~
+
+There is virtually no duplication or boilerplate in the code.
+Let's break this down. The `New` function creates any arbitrary element:
+
+~~~
+      Render New 'option'
+<option></option>
+~~~
+
+`New` accepts an optional second argument, which may be simple text:
+
+~~~
+      Render New 'option' 'Dog'
+<option>Dog</option>
+~~~
+
+Attributes may be specified as an optional third argument to `New`
+as we do in our one-liner above, or specified after an element is created
+by assignment:
+
+~~~
+      a←New 'option' 'Dog'
+      a.(value id)←'dog' 'Cleo'
+      Render a
+<option id="Cleo" value="dog">Dog</option>
+~~~
+
+We can create an array of option elements in one go using an annonymous function
+and the `each` (`¨`) operator:
+
+~~~
+      o←New¨{'option' ⍵}¨d
+~~~
+
+The variable `o` is a six-item array of option elements. We can inspect the content:
+
+~~~
+      o.Content
+┌─────┬─────┬──────────┬────────┬────────┬──────────┐
+│┌───┐│┌───┐│┌────────┐│┌──────┐│┌──────┐│┌────────┐│
+││Dog│││Cat│││Hampster│││Parrot│││Spider│││Goldfish││
+│└───┘│└───┘│└────────┘│└──────┘│└──────┘│└────────┘│
+└─────┴─────┴──────────┴────────┴────────┴──────────┘
+~~~
+
+and render the array of elements:
+
+~~~
+      Render o
+<option>Dog</option>     
+<option>Cat</option>     
+<option>Hampster</option>
+<option>Parrot</option>  
+<option>Spider</option>  
+<option>Goldfish</option>
+~~~
+
+Assuming a variable `p` containing a default selection we can specify the selected item: 
+
+~~~
+      p←'parrot'
+      i←v⍳⊂p
+      (i⊃o).selected←'selected'
+~~~
+
+and render:
+
+~~~
+      Render o
+<option>Dog</option>                       
+<option>Cat</option>                       
+<option>Hampster</option>                  
+<option selected="selected">Parrot</option>
+<option>Spider</option>                    
+<option>Goldfish</option>    
+~~~
+
+The value attribute may be specified for all of the elements:
+
+~~~
+      o.value←v
+      Render o
+<option value="dog">Dog</option>                          
+<option value="cat">Cat</option>                          
+<option value="hampster">Hampster</option>                
+<option selected="selected" value="parrot">Parrot</option>
+<option value="spider">Spider</option>                    
+<option value="goldfish">Goldfish</option>                
+~~~
+
+Finally we can create the select element with the options as its content:
+
+~~~
+      s←New 'select' o
+~~~
+
+And render again:
+
+~~~
+      Render s
+<select>                                                    
+  <option value="dog">Dog</option>                          
+  <option value="cat">Cat</option>                          
+  <option value="hampster">Hampster</option>                
+  <option selected="selected" value="parrot">Parrot</option>
+  <option value="spider">Spider</option>                    
+  <option value="goldfish">Goldfish</option>
+</select>
+~~~
+
+A templating language can help remove much of the duplication when 
+iterating, for example, through the content of list, select, and table elements,
+but removing duplication is not the most important aspect of writing HTML using a
+real programming language. HTML, and any templating language based on it, is not executable.
+It's a text representation suitable for sending over the wire,
+but you can't do anything with it in your programming environment. 
+
+A line of HTML by itself does not do anything. In fact HTML does not even have
+lines; it is broken into lines above just for clarity. The entire file must be processed
+before it can be made sense of. The APL code on the other hand is executable.
+Each line does something. We can run the code, stopping after each line to see what it does.
+We can write:
+
+~~~
+      p←New 'p' 'Hello world!'
+~~~
+
+And see that `p` is:
+
+~~~
+      p
+#.Abacus.Main.[Namespace]
+~~~
+
+...a plain APL namespace. And then set a variable in `p`:
+
+~~~
+      p.class←'some-class'
+~~~
+
+And apply a function to `p`:
+
+~~~
+      Render p
+<p class="some-class">Hello world!</p>
+~~~
+
+This is one reason the browser parses the HTML into a tree of elements;
+JavaScript can then be used to manipulate the DOM.
+There is no reason the same power, or much more power really with an array language like APL,
+should not be available in the programming language of your choice. 
+
+We have looked at only two functions so far, `New`, which creates a new element, and `Render`
+which renders an element or a vector of elements. Another useful function is `Elements` which 
+takes an element and returns a vector of the element itself and all of its descendants, 
+in depth-first order.
+To show what we can do with `Elements`, let's introduce one more function,
+`NewTable`, a simple cover of `New`, to create tables:
+
+~~~
+      t←NewTable (⍕¨4 3 ⍴⍳10) ('Col1' 'Col2' 'Col3')
+      Render t
+<table>            
+  <thead>          
+    <tr>           
+      <th>Col1</th>
+      <th>Col2</th>
+      <th>Col3</th>
+    </tr>          
+  </thead>         
+  <tbody>          
+    <tr>           
+      <td>0</td>   
+      <td>1</td>   
+      <td>2</td>   
+    </tr>          
+    ...
+    <tr>           
+      <td>9</td>   
+      <td>10</td>   
+      <td>11</td>   
+    </tr>          
+  </tbody>         
+</table>         
+~~~
+
+Working with tables highlights the benefits of using a real programming language to
+create and manipulate HTML. The elements of table `t`:
+
+~~~
+      e←Elements t
+~~~
+
+How many are there:
+
+~~~
+      ≢e
+23
+~~~
+
+What are all the tags? What are the unique tags?
+
+~~~
+      e.Tag
+ table  thead  tr  th  th  th  tbody  tr  td  td  td  tr  td  td  td  tr  td  td  td  tr  td  td  td 
+      ∪e.Tag
+ table  thead  tr  th  tbody  td 
+~~~
+
+Flag the row elements; how many are there?
+
+~~~
+      e.Tag∊⊂'tr'
+0 0 1 0 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0
+      +/e.Tag∊⊂'tr'
+5
+~~~
+
+Extract the rows just in the body:
+
+~~~
+      b←⊃e/⍨e.Tag∊⊂'tbody'
+      be←Elements b
+      r←be/⍨be.Tag∊⊂'tr'
+~~~
+
+How many are there? Assign a class to them:
+
+~~~
+      nr←≢r
+      nr
+4
+      r.class←⊂'body-row'
+~~~
+
+And render:
+
+~~~
+      Render t
+<table>                  
+  <thead>                
+    <tr>                 
+      <th>Col1</th>      
+      <th>Col2</th>      
+      <th>Col3</th>      
+    </tr>                
+  </thead>               
+  <tbody>                
+    <tr class="body-row">
+      <td>0</td>         
+      <td>1</td>         
+      <td>2</td>         
+    </tr>                
+    ...
+    <tr class="body-row">
+      <td>9</td>         
+      <td>10</td>        
+      <td>11</td>        
+    </tr>                
+  </tbody>               
+</table>                 
+~~~
+
+Extract the cell elements from the table; how many columns are in the table?
+
+~~~
+      c←be/⍨be.Tag∊⊂'td'
+      nc←nr÷⍨≢c
+      nc
+3
+~~~
+
+Make a matrix out of the cells:
+
+~~~
+      m←c⍴⍨nr,nc      
+~~~
+
+Inspect the content:
+
+~~~
+      m.Content
+  0    1     2   
+  3    4     5   
+  6    7     8   
+  9    10    11
+~~~
+
+Pick out the bottom right cell and assign it a class:
+
+~~~
+      (⊃⌽,m).class←'current-cell'
+~~~
+
+And render
+
+~~~
+      Render t
+<table>                               
+  <thead>                             
+    <tr>                              
+      <th>Col1</th>                   
+      <th>Col2</th>                   
+      <th>Col3</th>                   
+    </tr>                             
+  </thead>                            
+  <tbody>                             
+    <tr class="body-row">             
+      <td>0</td>                      
+      <td>1</td>                      
+      <td>2</td>                      
+    </tr>                             
+    ...               
+    <tr class="body-row">             
+      <td>9</td>                      
+      <td>10</td>                     
+      <td class="current-cell">11</td>
+    </tr>                             
+  </tbody>                            
+</table>                        
+~~~
+
+Once we have a DOM in our programming language, we can write [functions
+that create elements](/posts/html-tables-again) and use functions to manipulate
+an entire document or document fragment. We can create a document or fragment from
+the outside in or from the inside out. Most importantly we can apply hard-earned
+and long-accumulated knowledge of code organization,
+data manipulation, algorithms, and idioms in our chosen language to do it.

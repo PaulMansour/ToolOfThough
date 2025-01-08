@@ -1,0 +1,118 @@
+DRAFT
+
+# [A Brief Survey of HTML Generation Techniques](/posts/a-brief-survey-of-html-generation-techniques)
+
+## January 15, 2025
+
+Let's look at an example from [Django](https://docs.djangoproject.com/en/5.1/ref/templates/language/),
+a templating language for Python:
+
+~~~
+{% extends "base_generic.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block content %}
+<h1>{{ section.title }}</h1>
+
+{% for story in story_list %}
+<h2>
+  <a href="{{ story.get_absolute_url }}">
+    {{ story.headline|upper }}
+  </a>
+</h2>
+<p>{{ story.tease|truncatewords:"100" }}</p>
+{% endfor %}
+{% endblock %}
+~~~
+
+This is a text file that must be passed to the templating engine along with some data
+to produce an HTML file.
+Like HTML itself, it is not executable code. It still has lots of duplication. The Django
+documentation points out that the code embedded in the template is not Python code.
+
+A different approach is taken by templ, a [templating language for Go](https://templ.guide/).
+Here is simple templ file from their documentation:   
+
+~~~
+package main
+
+templ headerTemplate(name string) {
+  <header data-testid="headerTemplate">
+    <h1>{ name }</h1>
+  </header>
+}
+~~~
+
+While this looks suspiciously like the definition of a function named `headerTemplate`, it's
+actually a template for a function. It must be run through a template engine
+that generates an eponymously named actual Go function. This function
+takes a string as its argument and returns a temple `Component` object.
+A Go function can then call this generated function:
+
+~~~
+func main() {
+\tcomponent := headerTemplate("Hello World!")
+\tcomponent.Render(context.Background(), os.Stdout)
+}
+~~~
+
+The component object has a Render method that returns the HTML:
+
+~~~
+<header data-testid="headerTemplate">
+  <h1>Hello World!</h1>
+</header>
+~~~
+
+The temple approach combines templating with a DOM. It is not clear to us
+why one wouldn't just write Go code directly and dispense with templating
+as we do in APL above. Perhaps it is because Go is compiled and not interpreted.  
+Regardless, the templating again has lots of duplication and is not executable.
+
+Yet another approach is taken by the python library [pytp](https://htpy.dev/),
+where this:
+
+~~~
+from htpy import body, h1, head, html, li, title, ul
+
+menu = ["egg+bacon", "bacon+spam", "eggs+spam"]
+
+print(
+    html[
+        head[title["Today's menu"]],
+        body[
+            h1["Menu"],
+            ul(".menu")[(li[item] for item in menu)],
+        ],
+    ]
+)
+~~~
+
+produces this: 
+
+~~~
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Today's menu</title>
+  </head>
+  <body>
+    <h1>Menu</h1>
+    <ul class="menu">
+      <li>egg+bacon</li>
+      <li>bacon+spam</li>
+      <li>eggs+spam</li>
+    </ul>
+  </body>
+</html>
+~~~
+
+Here the libary implements every element as some sort of function,
+eliminating the need for opening and closing tags.... 
+
+
+And yet another approach is taken by [FastHTML](https://fastht.ml/)...
+
+
+

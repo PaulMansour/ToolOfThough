@@ -1,0 +1,100 @@
+# [Find and Replace with Interval Index](/posts/find-and-replace-with-interval-index)
+
+## November 7, 2024
+
+We recently had to revamp find and replace functionality, similar to Excel, in a grid.
+The original implementation predated
+[interval index](https://help.dyalog.com/latest/Content/Language/Primitive%20Functions/Interval%20Index.htm)
+so it was time for a fresh look.
+ 
+Consider a Boolean matrix representing the cells in a grid where a string or substring is found:
+
+~~~
+      b←.9<?10 7⍴0
+      b
+0 0 0 0 0 0 0
+1 0 0 0 0 0 0
+0 0 0 0 1 0 0
+0 0 0 0 0 0 0
+0 1 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 1 0 0 0 0
+1 0 0 0 0 0 0
+0 0 1 1 0 0 0
+~~~
+
+Given any location in the grid, we want to be able to find the location of the next `1`.
+The meaning of "next" will depend on whether searching by row or by column. 
+
+The location of ths `1`'s is given, not coincidentally, using the same glyph as interval index,
+but in its monadic form [where](https://help.dyalog.com/latest/Content/Language/Primitive%20Functions/Where.htm):
+
+~~~
+      i←⍸b
+      i
+┌───┬───┬───┬───┬───┬───┬───┐
+│1 0│2 4│4 1│7 2│8 0│9 2│9 3│
+└───┴───┴───┴───┴───┴───┴───┘
+~~~
+
+Given a current location of say, row 7 and column 0: 
+
+~~~
+k←7 0
+~~~
+
+then the next `1`, when searching by rows, is located at:
+
+~~~
+    (1+i⍸⊂k)⊃i
+7 2
+~~~
+
+When searching by column we can transpose the Boolean matrix and find the `1`'s:
+
+~~~
+      j←⍸⍉b
+      j
+┌───┬───┬───┬───┬───┬───┬───┐
+│0 1│0 8│1 4│2 7│2 9│3 9│4 2│
+└───┴───┴───┴───┴───┴───┴───┘
+~~~
+
+then the next `1` is given by:
+
+~~~
+      ⌽(1+j⍸⊂⌽k)⊃j
+8 0
+~~~
+
+Note that `j` may be computed directly from `i` by rotating and sorting:
+
+~~~
+       {⍵[⍋⍵]}⌽¨i
+┌───┬───┬───┬───┬───┬───┬───┐
+│0 1│0 8│1 4│2 7│2 9│3 9│4 2│
+└───┴───┴───┴───┴───┴───┴───┘
+~~~
+
+Note further that interval index is happy to trade depth for rank:
+
+~~~
+      m←↑i
+      m
+1 0
+2 4
+4 1
+7 2
+8 0
+9 2
+9 3
+      m⍸k
+2
+      m[1+m⍸k;]
+7 2
+~~~
+
+Which is quite nice. Thank you Roger!
+
+For finding the previous `1`, simply elide the `1+`, but an adjustment will need to be made if the current location contains a `1`.

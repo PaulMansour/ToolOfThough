@@ -1,0 +1,10 @@
+ Run←{
+     ⎕THIS.A←#.Abacus.Main
+     d←A.NewDocument''
+     d.Caption←'XHTML Example'
+     b←A.GetBody d
+     h←'<div/>Hello<br>world!<hr>Rock and roll!<div class=notquoted></div>'
+     f←A.NewForm d
+     _←b A.SetProperty'innerHTML'h
+     f
+ }

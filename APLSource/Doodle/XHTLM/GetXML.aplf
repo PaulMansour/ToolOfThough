@@ -1,0 +1,10 @@
+ GetXML←{
+     d←⍵.Document
+     b←A.GetBody d
+     h←b A.ExecuteOnElementSync'outerHTML'
+     x←d A.GetXML b.id
+     ⎕←h
+     ⎕←x
+     ⎕←⎕XML x
+     0
+ }

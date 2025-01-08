@@ -1,0 +1,45 @@
+# [Converting HTML to XHTML](/posts/converting-html-to-xhtml)
+
+## September 14, 2024
+
+Consider:
+
+~~~
+      ⎕XML'<p class=myclass>hello world</p>'
+DOMAIN ERROR: Quote expected at start of attribute value at character 10 (line 1, column 10)
+~~~
+
+or:      
+
+~~~
+      ⎕XML'<div>hello<br>world</div>'
+DOMAIN ERROR: Tag mismatch at end of text; expected </br>
+~~~
+
+or even:
+
+~~~
+      ⎕XML'<div /><p>hello world</p>'
+0  div                     1
+0  p    hello world        5
+~~~
+
+This last one
+is a [trick question](https://jakearchibald.com/2023/against-self-closing-tags-in-html/).
+
+And consider a million other things the browser will handle, but `⎕XML` won't handle or will
+handle differently.
+
+What to do?
+
+Once we are committed to carting around the 200 megabyte HTMLRenderer, we can just hand off
+converting HTML to XHTML to the browser, yielding a suitable argument to `⎕XML`:
+
+~~~
+GetXML←{
+     j←'new XMLSerializer().serializeToString(document.getElementById(''',⍵,'''))'
+     ⍺ ExecuteJavaScriptSync j
+ }
+~~~
+
+The browser is a mighty thing, and it's now as integral to the APL interpreter as anything.
