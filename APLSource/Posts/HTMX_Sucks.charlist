@@ -2,7 +2,7 @@
 
 ## January 8, 2025
 
-![Very Sucky](/images/verysucky.jpg)
+![Very Sucky](/images/VerySucky.jpg)
 
 > We don't often add a new tool to our development stack, but when we do it's htmx.
 
@@ -12,7 +12,8 @@ and would probably never, implement PUT and DELETE. There were some reasonable a
 the time as to why this should be so, and perhaps they are still reasonable. Anyway, we took the 
 not uncommon path of putting hidden values our html
 forms for the real method we wanted the server to process. Then one day, around the summer of 2020, 
-we ran into this mild-mannered, unassuming professor in Bozeman who mentioned he was the developer of a JavaScript project called htmx,
+we ran into this mild-mannered, unassuming professor in Bozeman who mentioned he was the developer of a
+JavaScript project called [htmx](https://htmx.org/)
 that, what do you know, provided a way for the browser to do PUTs and DELETEs. What are the odds! 
 We immediately investigated htmx and made a branch in our project to start playing around with it. More
 pressing work soon got in the way, and the effort was abandoned for five years. Now however we are back
