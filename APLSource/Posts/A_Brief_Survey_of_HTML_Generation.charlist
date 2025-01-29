@@ -4,35 +4,20 @@ DRAFT
 
 ## January 15, 2025
 
-Let's look at an example from [Django](https://docs.djangoproject.com/en/5.1/ref/templates/language/),
-a templating language for Python:
+David Ford, in a [2017 post](https://codeburst.io/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22),
+sums up the various ways of generating HTML. Ford identifies 4 techniques:
+string building, imperative tree building, template languages, and internal DSLs,
+settling on the last as the best way to do it. We agree; we have dismissed
+[string building](/posts/a-document-object-model-in-apl) and [templates](/posts/html-templates).
+As for tree building, as Ford notes, internal DSLs are
+not fundamentally different, just better syntax. The result is the same: 
+a tree of elements in the host language that mimics the DOM in the browser.
 
-~~~
-{% extends "base_generic.html" %}
+Let's take a look at few different DSL implementations in Go, Python, and Scala and see how they compare
+to Abacus in APL. 
 
-{% block title %}{{ section.title }}{% endblock %}
-
-{% block content %}
-<h1>{{ section.title }}</h1>
-
-{% for story in story_list %}
-<h2>
-  <a href="{{ story.get_absolute_url }}">
-    {{ story.headline|upper }}
-  </a>
-</h2>
-<p>{{ story.tease|truncatewords:"100" }}</p>
-{% endfor %}
-{% endblock %}
-~~~
-
-This is a text file that must be passed to the templating engine along with some data
-to produce an HTML file.
-Like HTML itself, it is not executable code. It still has lots of duplication. The Django
-documentation points out that the code embedded in the template is not Python code.
-
-A different approach is taken by templ, a [templating language for Go](https://templ.guide/).
-Here is simple templ file from their documentation:   
+First up is templ, a [templating language for Go](https://templ.guide/).
+Here is a simple templ file from their documentation:   
 
 ~~~
 package main
@@ -66,12 +51,26 @@ The component object has a Render method that returns the HTML:
 ~~~
 
 The temple approach combines templating with a DOM. It is not clear to us
-why one wouldn't just write Go code directly and dispense with templating
-as we do in APL above. Perhaps it is because Go is compiled and not interpreted.  
-Regardless, the templating again has lots of duplication and is not executable.
+why one wouldn't just write Go code directly and dispense with templating.
+And indeed, up next is the Go library [htmgo](https://htmgo.dev), which does just that:
 
-Yet another approach is taken by the python library [pytp](https://htpy.dev/),
-where this:
+~~~
+func IndexPage(ctx *h.RequestContext) *h.Page {
+  now := time.Now()
+  return h.NewPage(
+    h.Div(
+      h.Class("flex gap-2"),
+      h.TextF("the current time is %s", now.String())
+    )
+  )
+}
+~~~
+
+Go functions are used directly to create HTML elements, no ending tags needed.
+All of the following frameworks or packages follow this pattern: using
+functions in the host language to create HTML element objects of some sort.   
+
+Next is the python library [pytp](https://htpy.dev/), where this:
 
 ~~~
 from htpy import body, h1, head, html, li, title, ul
@@ -108,11 +107,59 @@ produces this:
 </html>
 ~~~
 
-Here the libary implements every element as some sort of function,
-eliminating the need for opening and closing tags.... 
+Another Python approach is taken by [FastHTML](https://fastht.ml/). FastHTML uses
+something called FTs or "FastTag" components. An FT is simply a node in a Python DOM,
+though they don't discuss it that way. Interestingly, an FT is not
+encapsulted as an object with properties and methods, but is a three-element array where the first element
+is the tag, the second element the content, and the third element are the attributes. In FastHTML, this:
 
+~~~
+from fasthtml.common import *
+page = Html(
+    Head(Title('Some page')),
+    Body(Div('Some text, ', A('A link', href='https://example.com'), Img(src="https://placehold.co/200"), cls='myclass')))
+print(to_xml(page))
+~~~
 
-And yet another approach is taken by [FastHTML](https://fastht.ml/)...
+produces this:
+
+~~~
+<!doctype html></!doctype>
+<html>
+  <head>
+    <title>Some page</title>
+  </head>
+  <body>
+    <div class="myclass">
+Some text, 
+      <a href="https://example.com">A link</a>
+      <img src="https://placehold.co/200">
+    </div>
+  </body>
+</html>
+~~~
+
+[ScalaTags](https://com-lihaoyi.github.io/scalatags/) is an HTML construction library for Scala
+that looks like this:  
+
+~~~
+html(
+  head(
+    script("some script")
+  ),
+  body(
+    h1("This is my title"),
+    div(
+      p("This is my first paragraph"),
+      p("This is my second paragraph")
+    )
+  )
+)
+~~~
+
+All of these appoaches are very similar. With minor differences,
+the code looks more or less the same. The construction technique
+is not that different from handwriting HTML; nesting   
 
 
 

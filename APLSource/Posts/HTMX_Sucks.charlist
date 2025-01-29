@@ -26,18 +26,20 @@ and options that we are going to use.
 
 There is this distinction between in-band and out-of-band swaps, which we find not particulary useful.
 More useful is the distinction between **request-driven** and **response-driven** swaps.
-The attributes `hx-swap`, `hx-target`, and `hx-target-oob` are all request-driven.
+The attributes [hx-swap](https://htmx.org/attributes/hx-swap/), [hx-target](https://htmx.org/attributes/hx-target/),
+[hx-select](https://htmx.org/attributes/hx-select/), 
+and [hx-select-oob](https://htmx.org/attributes/hx-select-oob/) are all request-driven.
 These sit in the HTML in the DOM in the browser along side `hx-post` and its companions.
 They are known to the browser before the request is fired off, 
 and instruct htmx how to handle the response.
 
-On the other hand, `hx-swap-oob` is a response-driven attribute.
+On the other hand, [hx-swap-oob](https://htmx.org/attributes/hx-swap-oob/) is a response-driven attribute.
 It has no purpose before the request. This attribute is received in the response body in the HTML,
 processed by htmx, stripped out of the HTML, and then thrown away never to be seen again.
 In this sense it functions like a response header. In fact it could easily be implemented
 as a response header that contained a list of ids.                                                   
 
-Then there are actual htmx response headers that convert a request-driven swap to a
+Then there are actual htmx [response headers](https://htmx.org/reference/#request_headers) that convert a request-driven swap to a
 response-driven swap. `HX-Reswap`, `HX-Retarget` and `HX-Reselect` let the server 
 overide the values of `hx-swap`, `hx-target`, and `hx-select` respectively. 
 
@@ -63,15 +65,15 @@ the headers in the response, and the content of the response.
 All of these directives scattered about can interact and conflict. There are even
 configuration settings to tweak the default behavior.
 
-It is possible to use `hx-target-oob` to somewhat mimic the flexibility of `hx-swap-oob`.
+It is possible to use `hx-select-oob` to somewhat mimic the flexibility of `hx-swap-oob`.
 We can specifiy multiple ids, and the server can respond with zero of more fragments with those ids.
 In this case the client must know ahead of time the set of ids that might be swapped, but the server is
 free to respond with none, some, or all. 
 
 Now let's say we want to take it up a notch and add a little JavaScript. On the client side 
-we could use `hx-on*` to fire off a JavaScript snippet after the request.
-Or, on the server side, we can use one of the response headers `HX-Trigger`,
-`HX-Trigger-After-Settle`, or `HX-Trigger-After-Swap` to fire an event when response is received.  
+we could use [hx-on*](https://htmx.org/attributes/hx-on/) to fire off a JavaScript snippet after the request.
+Or, on the server side, we can use one of the [trigger response headers](https://htmx.org/headers/hx-trigger/),
+`HX-Trigger`, `HX-Trigger-After-Settle`, or `HX-Trigger-After-Swap` to fire an event when response is received.  
 Alternatively, we can just include a script element in the response.
 
 In other words, `hx-swap-oob` can replace using all of:
@@ -80,7 +82,7 @@ In other words, `hx-swap-oob` can replace using all of:
 hx-swap
 hx-target
 hx-select    
-hx-target-oob
+hx-select-oob
 HX-Reswap
 HX-Retarget
 HX-Reselect
@@ -115,12 +117,12 @@ There is only one target element, and the entire body
 of the response is swapped in to this target. The target must be known and specified
 before the request is sent off. 
 
-Multiple elements may be swapped in to different locations by using `hx-target-oob`:
+Multiple elements may be swapped in to different locations by using `hx-select-oob`:
 
 ~~~
 b←New 'button'
 b.hx_post←'/SomeURL'
-b.hx_target_oob←'#MyId1,#MyId2,#MyId3'
+b.hx_select_oob←'#MyId1,#MyId2,#MyId3'
 ~~~
 
 Let the response body be:
@@ -134,13 +136,13 @@ Let the response body be:
 These are called out-of-band swaps.
 The request is again driving the swap. It specifies a list of ids that **may** be swapped.
 In order to swap an element, the response must have an element with a corresponding id.
-The response does not need to contain all or indeed any of the ids specified in `hx-target-oob`
+The response does not need to contain all or indeed any of the ids specified in `hx-select-oob`
 If there is no corresponding id in the response, it's a no-op.
 This allows for a little bit of response-driven swapping. The server decides what it wants
 to swap, but within the universe of ids explicitly specified by the request. 
 
 A basic in-band swap may be combined with an array of out-of-band swaps, using `hx-target`
-and `hx-target-oob` together. 
+and `hx-select-oob` together. 
 
 We can move the explicit list of ids for out-of-band swaps from the client to the server
 by using `hx-swap-oob` in the response:
@@ -161,9 +163,10 @@ Let the response body be:
 Now the server has complete control over what gets swapped.
 The server can send any set of ids in the response. 
                                                             
-We can combine `hx-target` and `hx-target-oob` on the client side, with `hx-swap-oob` in the
+We can combine `hx-target` and `hx-select-oob` on the client side, with `hx-swap-oob` in the
 response to... confuse ourselves.
 
 So for now, our strategy is to exclusively use `hx-swap-oob`, use script tags to execute
 a little JavaScript if necessary, and to configure htmx to
 swap on any and all response codes.   
+
