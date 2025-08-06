@@ -96,4 +96,149 @@ a[i]←a[i],1  //will it work, length error?
 
 r[x⍳k],←v
 ~~~
+
+More Recently from B. Wilson on the Orchard:
+
+"Really nice TIL: y[g] f←y, where g groups or classifies elements of y,
+will effectively perform a groupwise reduction, 
+i.e. y[∪g]←∊f⌿¨g⊢∘⊂⌸y. In particular, we can do a groupwise version of 
+@Adám's ∨⌿ above with y[g]∨←y."
+ 
+
+
+GROK:
+
+ Code Analysis
+Here’s the provided APL code, broken down:
+Line 1: K V ← ↓⍉↑Y
+↑Y: Takes the nested vector Y and converts it into a matrix by “mixing” the nested pairs into a 2-column matrix, where the first column contains the strings and the second contains the numbers.
+Y is [['one', 1], ['one', 2], ['three', 1], ['four', 2], ['four', 3]].
+
+↑Y creates:
+
+one   1
+one   2
+three 1
+four  2
+four  3
+
+⍉↑Y: Transposes the matrix, swapping rows and columns, resulting in a 2-row matrix:
+
+one one three four four
+1   2   1     2    3
+
+↓⍉↑Y: Splits the transposed matrix into a vector of two vectors (the rows of the transposed matrix).
+K gets the first row: one one three four four (the strings).
+
+V gets the second row: 1 2 1 2 3 (the numbers).
+
+Result:
+K ← 'one' 'one' 'three' 'four' 'four'
+
+V ← 1 2 1 2 3
+
+Line 2: R ← ⍬⍨¨X
+⍬: Represents an empty numeric vector ([]).
+
+⍬⍨¨X: Applies the constant function ⍬⍨ to each element of X, creating a vector of empty vectors, one for each string in X.
+X has 4 elements ('one', 'two', 'three', 'four'), so R becomes a vector of 4 empty vectors.
+
+Result:
+R ← (⍬) (⍬) (⍬) (⍬)
+
+This initializes R as a “result” vector where each position corresponds to an element of X, starting with empty vectors to accumulate numbers.
+
+Line 3: R[X⍳K],←V
+X⍳K: Finds the indices of K’s elements in X. For each string in K ('one' 'one' 'three' 'four' 'four'), it returns the position (1-based index) of that string in X ('one' 'two' 'three' 'four').
+K = 'one' 'one' 'three' 'four' 'four':
+'one' is at index 1 in X.
+
+'one' is at index 1 in X.
+
+'three' is at index 3 in X.
+
+'four' is at index 4 in X.
+
+'four' is at index 4 in X.
+
+Result: X⍳K yields 1 1 3 4 4.
+
+R[X⍳K]: Selects elements of R at indices 1 1 3 4 4. Since R is (⍬) (⍬) (⍬) (⍬), this corresponds to:
+Index 1: R[1] (for first 'one')
+
+Index 1: R[1] (for second 'one')
+
+Index 3: R[3] (for 'three')
+
+Index 4: R[4] (for first 'four')
+
+Index 4: R[4] (for second 'four').
+
+,←V: Appends the elements of V (1 2 1 2 3) to the corresponding vectors in R at those indices.
+V is 1 2 1 2 3, so:
+R[1] appends 1 (from first 'one').
+
+R[1] appends 2 (from second 'one').
+
+R[3] appends 1 (from 'three').
+
+R[4] appends 2 (from first 'four').
+
+R[4] appends 3 (from second 'four').
+
+Effect on R:
+R[1]: ⍬ becomes 1 2 (numbers for 'one').
+
+R[2]: ⍬ remains ⍬ (no matches for 'two').
+
+R[3]: ⍬ becomes 1 (number for 'three').
+
+R[4]: ⍬ becomes 2 3 (numbers for 'four').
+
+Final Result
+After executing the code, R contains:
+apl
+
+R ← (1 2) (⍬) (1) (2 3)
+
+This corresponds to:
+'one': 1 2 (from ('one' 1) and ('one' 2)).
+
+'two': ⍬ (empty, as 'two' doesn’t appear in Y).
+
+'three': 1 (from ('three' 1)).
+
+'four': 2 3 (from ('four' 2) and ('four' 3)).
+
+Formatted Output
+To make the result clearer, you could display R alongside X:
+apl
+
+X,⍪R
+
+Output:
+
+one   1 2
+two   
+three 1
+four  2 3
+
+Verification
+The code correctly groups the numbers from Y by the strings in X, accumulating all corresponding numbers for each string. This matches the expected behavior for such a task in APL, where:
+Each string in X is associated with a vector of numbers from Y where the string matches.
+
+Strings in X with no matches in Y (like 'two') result in an empty vector.
+
+The solution is concise and idiomatic for APL, leveraging array operations and indexing.
+
+Notes
+Dialect: The code uses Dyalog APL syntax (e.g., ↓, ⍉, ⍳, ,←). If you’re using another dialect (e.g., APL2, GNU APL), let me know, as some symbols or behaviors might differ.
+
+Efficiency: The use of ⍳ and ,← is efficient for small to medium datasets. For very large arrays, a hash-based approach (if available in your APL implementation) might be faster.
+
+No External Tools: The query is self-contained, so no web search or X post analysis was needed.
+
+Empty Vectors: The empty vector ⍬ for 'two' is appropriate, as it indicates no matches.
+
+
  

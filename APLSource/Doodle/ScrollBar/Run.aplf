@@ -1,0 +1,15 @@
+ Run←{
+     ⎕THIS.A←#.Abacus.Main
+     d←A.NewDocument''
+     d.Caption←'Test'
+     b←A.GetBody d
+     i←b A.New'input'
+     i.type←'range'
+     i.min←0
+     i.max←100000 ⍝ Actual or relative?
+     ⍝ i.style←'width:100%'
+     ⍝ i.style←'height:100%;writing-mode:bt-lr;'
+     i.style←'transform: rotate(270deg);width:100%'
+     i.Oninput←A.FQP'OnInput'
+     A.NewForm d
+ }

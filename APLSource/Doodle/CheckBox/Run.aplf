@@ -1,0 +1,25 @@
+ Run←{
+
+    ⍝ Alternative is just a div
+    ⍝ class = checkbox  component
+    ⍝ class = checked
+    ⍝ Onclick←swap the state
+    ⍝ Set a class,
+    ⍝
+    ⍝ Hmm. the <td> are just text, input created on demand
+    ⍝ No need for <input> really, if you click, swap state
+    ⍝ If scrolling around and you space bar, swap state.
+    ⍝ What should content of the td be? Just a centered check from
+    ⍝ a font. No component or anything needed
+     ⎕THIS.A←#.Abacus.Main
+     d←A.NewDocument''
+     d.Caption←'Checkbox Test'
+     b←A.GetBody d
+     l←b A.New'label' 'Check it out'
+     l.style←'background-color:red;font-size:50px'
+
+     i←l A.New'input'
+     i.type←'checkbox'
+     i.style←'background-color:red'
+     A.NewForm d
+ }

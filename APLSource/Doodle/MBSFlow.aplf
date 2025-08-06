@@ -1,0 +1,22 @@
+ MBSFlow←{
+
+     r←3.429            ⍝ Scalar (but same for every period
+     b←4908505          ⍝ Starting balance
+
+  ⍝ Only vector input
+     m←463692 457076.49 450543.47 444091.96 437720.98 ⍝ Monthly payment
+
+     i←b×r÷1200         ⍝ First period interest
+     p←m[0]-i           ⍝ First period princ
+     e←b-p              ⍝ Ending balance
+
+     b2←e               ⍝ Next beginning balance
+     i2←b2×r÷1200
+     p2←nlc[1]-i2
+     e2←b2-p2
+
+     b3←e2
+
+      ⍝ and so on.
+
+ }

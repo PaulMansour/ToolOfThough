@@ -1,0 +1,10 @@
+ futureBalance2←{
+     i b←⍺
+     m←⍵
+     r←i÷1200  ⍝ Periodic Rate
+     p←(-b),m  ⍝ Neg Origbal, positive payments
+
+     +/(↑,\-p)×7 7⍴(1+r)*⍳≢p
+
+     ⍝ (1+r)⊥(-⌽⍳≢p)⌽↑,\-p  ⍝ Balances
+ }

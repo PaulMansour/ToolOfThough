@@ -1,0 +1,31 @@
+ HtmlTableRenderTest←{
+     d←50 25
+     v←d⍴⍕¨⍳×/d
+     h←v[0;]
+     t1←#.Abacus.Main.NewTable v h
+     bc←#.Abacus.Main.BodyCells t1
+     bc.id←'id'∘,¨v
+     bc.class←⊂'class1'
+
+     hc←#.Abacus.Main.HeaderCells t1
+     hc.id←⊂'idx'
+     hc.class←⊂'class1'
+     hc.style←⊂'asdf'
+
+     t2←#.Abacus.Main.NewOptiTable v h
+     t2.Body.Cells.class←'class1'
+     t2.Body.Cells.id←'id'∘,¨v
+     t2.Header.Cells.id←'idx'
+     t2.Header.Cells.class←'class1'
+     t2.Header.Cells.style←'asdf'
+
+
+     e1←'#.Abacus.Main.RenderOptiTable t2'
+     e2←'#.Abacus.Main.DataGrid.DOM2HTML hc bc'
+     e3←'#.Abacus.Main.DOM2HTML t1'
+
+
+     cmpx e1 e2
+
+
+ }

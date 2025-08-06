@@ -1,0 +1,15 @@
+ MBSFlowFoo←{
+     i←3.429            ⍝ Scalar (but same for every period
+     b←4908505          ⍝ Starting balance
+     m←463692 457076.49 450543.47 444091.96 437720.98 ⍝ Monthly payment
+     i b futureBalance m
+
+
+     r←i÷1200  ⍝ Periodic Rate
+     p←(-b),m  ⍝ Neg Origbal, positive payments
+
+     rb←(1+r)⊥(-⌽⍳≢p)⌽↑,\-p  ⍝ Balances
+⍝  P←2-/B ⍝ Principal applied
+     ip←rb×r ⍝ Interest
+     pp←p
+ }

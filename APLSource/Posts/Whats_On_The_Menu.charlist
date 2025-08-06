@@ -1,0 +1,136 @@
+# [What's on the Menu?](/posts/whats-on-the-menu)
+
+## June 21, 2025
+
+We find ourselves in need of a menu. Let's noodle around with a design.
+
+With `⎕WC`, we had a full-blown object model, and thus `MenuBar`, `Menu`, `MenuItem` and
+`Separator` objects with all of their attendant properties and methods. With Abacus components,
+we are working at a higher level than `⎕WC`, trying to make things simple and easy for our
+purposes. We used to write cover functions over `⎕WC` to help construct menus, here we are writing
+cover functions over HTML. Of course we have to accept the constraints and lack of generality these
+cover functions impose. We are also trying to get by on the cheap, and not implement a massive dynamic object model, with
+getters and setters and all that entails. 
+
+Our requirements include a classic menu bar, a hamburger menu,
+and a popup or context-sensitive menu. And sub-menus, checked menu items, and inactive menu items.
+Separators too.  
+ 
+Can we get by with just a `Menu` component and few functions? Maybe.
+Let's have a function that builds a menu component that we may then use in different circumstances:
+
+~~~
+BuildMenu←{
+     New←A.Menu.New
+     Add←A.Menu.Add
+     m←New''
+     s←m Add New'File'
+     i←s Add'Open' 'Ctrl+O' 'OnFileOpen'
+     i←s Add'Save' 'Ctrl+S' 'OnFileSave'
+     i←s Add'Save As...' 'Ctrl+A' 'OnFileSaveAs'
+     s←m Add New'Edit'
+     i←s Add'Cut' 'Ctrl+X' 'OnCut'
+     i←s Add'Copy' 'Ctrl+C' 'OnCopy'
+     i←s Add'Paste' 'Ctrl+V' 'OnPaste'
+     s←m Add New'View'
+     i←s Add'List' 'Ctrl+Q' 'OnViewList'
+     s2←s Add New'Icons'
+     i←s2 Add'Small' 'Ctrl+L' 'OnViewLarge'
+     i←s2 Add'Medium' 'Ctrl+M' 'OnViewMedium' 0 0 1
+     i←s2 Add'Large' 'Ctrl+S' 'OnViewSmall' 0 0   
+     m
+ }
+~~~
+
+The `New` function of the Menu component creates and returns a new `<menu>` element.
+It takes a simple string, the name or label, as its argument.
+
+The `Add` function adds a menu item or a sub-menu. A menu item is defined by
+up to 6 items in the argument to `Add`:
+
+|Item|Name|Description|
+|:=======|:===|:===========|
+|0|Label|The name or label of the menu item|
+|1|Shortcut|Purely decorative, must be implemented separately|
+|2|CallBack|The event handler function (a string)
+|3|Separator|Boolean; should a divider precede this menu item, default is 0|
+|4|Active|Boolean; active/inactive flag, default is 1|
+|5|Marker|Int; 0 for no marker (default), 1 for check, 2 for radio|
+
+Usually we eschew long lists of ordered parameters as arguments, but 
+we really want to keep the definition of a menu item on a single line.
+We can provide a namespace as well, but it will tend to add more clutter:
+
+~~~
+      m Menu.Add {⍵.Label←'Save as...' ⋄ Callback←'OnSaveAs' ⋄ Active:0 ⋄ ⍵}⎕NS '' 
+~~~
+
+even in v20 when we can do:
+
+~~~
+      m Menu.Add (Label:'Save as...' ⋄ Callback:'OnSaveAs' ⋄ Active:0)
+~~~
+
+When adding a menu item, the result is an `<li>` element, probably not needed most
+of the time. When adding a sub menu, the result is a `<menu>` element.  
+
+With these two functions, `New` and `Add`, we can construct
+an entire menu hierarchy.  
+
+Neither the `New` function, nor the user defined `Build` function adds the menu element and 
+its children to the DOM. This is handled later, on demand, by various functions in the `Menu`
+component.
+
+Now that we have a function that builds a menu, we can display it as a popup by
+attaching a handler to the Javascript `contextMenu` event. We simply build
+the menu on demand, and use the `Show` method to add it to the DOM and display it: 
+
+~~~
+OnContextMenu←{
+    m←BuildMenu ⍵
+    A.Show m
+}
+~~~
+
+A popup has no permanent visual presence, so this event handler is all we need.
+The entire menu hierarchy is constructed every time the context menu is called for,
+and then deleted when the menu is dismissed.
+
+We can take the exact same `Build` function and use it to implement a menu bar.
+Unlike a popup menu, a menu bar is permanently visible. We can use the `NewMenuBar`
+function to create the menu bar, adding to the DOM, and setting up its behavior, callbacks,
+etc:
+
+~~~
+      mb←Parent Menu.NewMenuBar 'Build'
+~~~
+
+The argument is the name (not the result) of the build function. `NewMenuBar`
+will execute this function once to extract the labels from the top level menus,
+and then will execute the function every time a top level menu item is clicked.
+
+In a similar we we can create a hamburger menu, again from the same source:
+
+~~~
+      hm←Parent Menu.NewHamburgerMenu 'Build'
+~~~
+
+If the menu stucture is limited to 2 levels, we can also display it as a sort of ribbon:
+
+~~~
+      r←Parent Menu.NewRibbon 'Build'
+~~~
+
+We could add new display types if they arise.
+
+Thus the `Menu` component provides us with a few functions to construct menus,
+and then display them in different ways.
+
+A menu only exists in the DOM if the top level is visible; menus are create and deleted
+on demand.
+
+
+
+
+
+

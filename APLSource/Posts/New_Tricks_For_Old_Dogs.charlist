@@ -1,12 +1,69 @@
-DRAFT
-
 # [New Tricks for Old Dogs](/posts/new-tricks-for-old-dogs)
 
-## January 18, 2025
+## January 29, 2025
 
-In our htmx configuration
+For our [htmx](https://htmx.org/) configuration we wrote the following in Dyalog version 18.2:
 
- 
+~~~
+ Config←{
+     c←⎕NS''
+     c.defaultSwapStyle←'none'
+     r←c.responseHandling←⎕NS''
+     r.(code swap)←'...'(⊂'true')
+     ⎕JSON c
+ }
+~~~
 
+Which produces:
 
+~~~
+      Config 0
+  {
+  "defaultSwapStyle": "none",
+  "responseHandling": {
+    "code": "...",
+    "swap": true
+  }
+}
+~~~
 
+It's not the nicest looking code. In version 20, we will be able to write it as follows:
+
+~~~
+ Config←{
+     ⎕JSON(
+         defaultSwapStyle:'none'
+         responseHandling:(
+             code:'...'
+             swap:⊂'true'
+         )
+     )
+ }
+~~~
+
+...almost identical to hardcoding it in JSON, which in this particular case
+with such a small object would be fine anyway. 
+
+We are not sure how we feel about this. It is nice that no variables
+are necessary. But it looks so... what's the word... conventional.
+It is so... indented. It is also currently not traceable line by line,
+though there appears to be no reason the tracer could not be enhanced,
+and it looks like Dyalog will indeed do that. Presumably after an
+opening parenthesis, and then going to a new line,
+you would find yourself in a new unnamed namespace
+just like after opening a brace you find yourself in a new dfn. 
+  
+We can still take advantage of some of the niceties of version 20 and yet retain
+a less nested and indented format:   
+
+~~~
+ Config←{
+     c←(defaultSwapStyle:'none')
+     c.responseHandling←(code:'...' ⋄ swap:⊂'true')
+     ⎕JSON c
+ }
+~~~
+
+We may find ourselves eschewing nested namespace
+definitions, like we avoid nested dfns, in favor of naming things, even if only for
+temporary purposes.

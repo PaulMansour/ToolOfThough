@@ -1,0 +1,73 @@
+# [Grok as APL Interpreter](/posts/grok-as-apl-interpreter)
+
+## June 4, 2025
+
+So far, AI has not been great at writing APL code.
+But Grok appears pretty good at reading and evaluating APL code.
+We asked Grok to evaluate this:
+
+~~~
+40 f 'Once upon a time in the west.'
+~~~
+
+given:
+
+~~~
+f←{ 
+     ⎕IO ⎕ML←0 1
+     segs←{¯1+⍵{(⍵,⍴⍺)-¯1,⍵}⍸⍵}
+     split←{((⍵|⍺)>⍳⍵)+⌊⍺÷1⌈⍵}
+     lf sp←(⎕UCS 13 32)=⊂⍵
+     sizes←segs lf
+     ⍺←⌈/sizes
+     blanks←segs~(lf∨sp)/sp
+     required←blanks+⍺-sizes
+     breps←required split¨blanks
+     last←1⌈¯1+⍴sizes
+     brep←∊(last↑breps),×last↓breps
+     ((~sp)+sp\\∊brep)\\⍵
+ }
+~~~
+
+Grok proceeded to analyze and simulate execution of the function line by line, in gory 
+detail and with voluminous output, explaining every step, all of which appeared to be correct.
+It got the right answer, and it knew and reported on the value of every variable along the way.
+It recognized the purpose of the function.
+
+Here is a very small extract of Grok's output:
+
+~~~
+apl
+
+sizes ← segs lf
+
+lf is all zeros (no line feeds).
+
+segs computes segment lengths:
+⍸lf is empty (no 1s).
+
+⍴⍺ = 29 (length of ⍵).
+
+(⍵,⍴⍺)-¯1,⍵ = (empty,29)-¯1,empty = 29-¯1 = 30.
+
+¯1+30 = 29.
+
+So, sizes = 29 (one segment of length 29).
+~~~
+
+Grok claims it only used its knowledge of APL primitives and syntax to evaluate the function, and that it
+did not look on the internet to find if this function existed somewhere and get information about it.
+I think I believe it.
+
+So then we asked Grok to evaluate the expression: 
+
+~~~
+      'MM-DD-YYYY' Text2Date '12-31-1999'  '02-29-2001' '01-01-2000'
+~~~
+
+given this [code base](https://github.com/the-carlisle-group/Text2Date).
+It got almost the right answer, getting hung up in the [Scale](https://github.com/the-carlisle-group/Text2Date/blob/master/APLSource/Main/Scale.aplf) function thinking 
+`⍺-6-⍺` was `(⍺-6)-⍺` rather than `⍺-(6-⍺)`, which is a rather odd error given everything else it got right.
+But that was its only error. Other than that one glitch, it worked
+though numerous functions and explicated everything in profuse detail.
+

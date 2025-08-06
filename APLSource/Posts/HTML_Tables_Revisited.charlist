@@ -1,0 +1,172 @@
+# [HTML Tables Revisited](/posts/html-tables-revisited)
+
+## February 16, 2025
+
+The [last time we looked at tables](/posts/html-tables-again)
+was way back in 2021. That's a cute little function, and it's useful
+for relatively small tables, but to put it kindly, it is not 
+particularly efficient.
+
+The Abacus DOM creates a namespace for every element. Tables have lots
+of elements. This is not good in space: 
+
+~~~
+      m←⍕¨{⍵⍴⍳×/⍵}1000 100
+      t←NewTable m
+      'CI12' ⎕FMT ⎕SIZE ,¨'mt' 
+   4,800,040
+ 242,324,696
+~~~
+
+Yikes! 
+
+And the time to create is excessive as well. Rendering is slow too.
+For the [Abacus DataGrid component](/posts/a-high-performance-data-grid-in-html)
+we had to write some special code to get around this as 
+we recreate and re-render the table on every key stroke when scrolling around.
+A general solution is called for. Rather than creating a namespace for every element,
+we can create just a few namespaces to hold content values and attribute values: 
+
+~~~
+NewOptiTable←{
+     t←⎕NS''
+     t.Tag←'optitable'
+     t.(Body Header Footer)←{
+         s←⎕NS''
+         s.Values←⍵⍴⍨¯2↑1,⍴⍵
+         s.Rows←⎕NS''
+         s.Cells←⎕NS''
+         s}¨3↑⍬ ⍬,⍨(⊂⍣(2=≡⍵))⍵
+     t
+ } 
+~~~
+
+This takes hardly any space:
+
+~~~
+      t2←NewOptiTable m
+      'CI12' ⎕FMT ⎕SIZE ,¨'m' 't' 't2' 
+   4,800,040
+ 242,324,696
+   4,821,416
+~~~
+
+And no time, as it doesn't really do anything:
+
+~~~
+      cmpx 'NewOptiTable m' 'NewTable m'
+  NewOptiTable m → 2.3E¯3 |      0%                                         
+* NewTable m     → 9.4E¯1 | +41822% ⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕     
+~~~
+
+(Results are of course different.)
+
+Rendering now requires special code:
+
+~~~
+RenderOptiTable←{
+     ⍝ ⍵ ←→ OptiTable
+     o←⊂'Whitespace' 'Preserve'
+     o,←⊂'UnknownEntity' 'Preserve'
+     xml←⎕XML⍠o
+     a←ComposeAttributes ⍵
+     xml 0 'table' ''a⍪⊃⍪/'thead' 'tbody' 'tfoot'{
+         r c←⍴⍵.Values
+         0∊r,c:0 4⍴0
+         n←r+r×c
+         m←n 2⍴1 c⌿2 2⍴2 'tr' 3((⍺≡'tbody')⊃'th' 'td')
+         m,←,(⊂''),⍵.Values
+         a←,⊃,/r(r c){
+             d←⍺
+             n←(⎕C ⎕A)⍵.⎕NL ¯2
+             0=≢n:d⍴⊂0 2⍴⊂''
+             v←⍵⍎¨n
+             n←'-'@('_'∘=)¨n
+             b←{80=⎕DR⊃⊃⍵}¨v
+             a←{
+                 0=∨/b:d⍴⊂0 2⍴⊂''
+                 k←↑{d⍴⊆⍵}¨b/v
+                 (r q)←0 ¯1+⍴⍴k
+                 ⊂[0 r](b/n),⍤0⍤0 q⊢k ⍝ Hat tip: AB
+             }0
+             a⊣(n/⍨~b){
+                 ' '=⊃⍺:0
+                 n i v←↓⍉(⊂⍺),↑⍵
+                 0⊣a[i]←a[i]⍪¨↓⍉↑n v
+             }¨v/⍨~b
+         }¨⍵.Rows ⍵.Cells
+         t←ComposeAttributes ⍵
+         1 ⍺''t⍪m,a
+     }¨⍵.(Header Body Footer)
+ }
+~~~
+
+But is much faster:
+
+~~~
+        cmpx 'RenderOptiTable t2'  'DOM2HTML t'
+  RenderOptiTable t2 → 2.7E¯2 |     0% ⎕                                       
+  DOM2HTML t         → 1.5E0  | +5441% ⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕⎕
+~~~
+
+The argument to `NewOptiTable` is identical to `NewTable`, but
+specifying attributes is done differently: 
+
+~~~
+      t←NewOptiTable (⍕¨3 2⍴⍳6) ('One' 'Two')
+      t.class←'table-class'
+      t.Header.class←'header-class'
+      t.Header.Cells.class←'col1' 'col2'
+      t.Body.Rows.id←'rowid1' 'rowid2' 'rowid3'
+      t.Body.Cells.class←'cell-class'
+      t.Body.Cells.id←'id'∘,¨⍕¨3 2⍴⍳6
+      t.Body.Cells.onclick←((0 0) 'foo1') ((2 1) 'foo2')
+~~~
+
+Attributes are specified by assignment in the root for the `table` element,
+and in the `Header`, `Body`, and `Footer`
+subspaces for the `thead`, `tbody`, and `tfoot` elements respectively. Each of these
+3 subspaces contain a `Rows` and `Cells` subspace for attributes for `tr` and
+either `td` or `th` elements as appropriate. The only purpose of the `Rows` and `Cells`
+subspaces is to have place to specify attributes.
+
+Attributes are enclosed if simple, and reshaped to match the target elements
+in question, providing something analagous to scalar extension. (For example,
+to specfiy a class per column in the above example simply do `t.Body.Cells.class←'c1' 'c2'`.)     
+Alternatively, attributes may be specified by explicit index.
+So the above produces:  
+
+~~~
+       RenderOptiTable t
+<table class="table-class">                                
+  <thead class="header-class">                             
+    <tr>                                                   
+      <th class="col1">One</th>                            
+      <th class="col2">Two</th>                            
+    </tr>                                                  
+  </thead>                                                 
+  <tbody>                                                  
+    <tr id="rowid1">                                       
+      <td class="cell-class" id="id0" onclick="foo1">0</td>
+      <td class="cell-class" id="id1">1</td>               
+    </tr>                                                  
+    <tr id="rowid2">                                       
+      <td class="cell-class" id="id2">2</td>               
+      <td class="cell-class" id="id3">3</td>               
+    </tr>                                                  
+    <tr id="rowid3">                                       
+      <td class="cell-class" id="id4">4</td>               
+      <td class="cell-class" id="id5" onclick="foo2">5</td>
+    </tr>                                                  
+  </tbody>                                                 
+</table>
+~~~
+
+An `optitable` element cannot be added to the DOM like a regular element.
+It must be rendered first and then double enclosed. So to add as a child
+to some element `e`: 
+
+~~~
+         e.Content←⊂⊂RenderOptiTable t
+~~~
+

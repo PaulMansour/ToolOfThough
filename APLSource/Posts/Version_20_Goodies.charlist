@@ -1,0 +1,190 @@
+# [Version 20 Goodies](/posts/version-20-goodies)
+
+## January 31, 2025
+
+A pre-release edition of version 20 has found its way to our machine
+and it introduces the long-awaited `⎕VGET` and `⎕VSET`. Documentation
+does not seem to be at hand yet, so let's just play around and see how they work.
+
+First, we can create a new namespace now with `()` rather than `⎕NS ''`:
+
+~~~
+      s←()
+      s
+#.[Namespace]
+      s.One←1
+      s.One
+1
+~~~
+
+Nice. Ok, lets set a variable: 
+
+~~~
+      s←()
+      s ⎕VSET 'One' 1
+DOMAIN ERROR
+      s ⎕VSET'One' 1
+        ∧
+~~~
+
+Probably wants it nested:
+
+~~~
+      s←()⎕VSET ⊂'One' 1
+      s.One
+1
+      s←()⎕VSET ('One' 1) ('Two' 2)
+      s.(One Two)
+1 2
+~~~
+
+Yes indeed. Why? It seems there could be a way to disambiguate a two item vector argument
+as `Name Value` vs `(Name Value) (Name Value)` given the level of nesting of the first item.
+
+How about a matrix of names and values:
+
+~~~
+      s←()⎕VSET ↑('One' 1) ('Two' 2)
+RANK ERROR: Invalid right argument
+      s←()⎕VSET↑('One' 1)('Two' 2)
+~~~
+
+Doesn't like it. Often we have a list of names and a list of values in separate arrays:
+
+~~~
+      n←'one' 'two' 'three'
+      v←1 2 3
+      s←() ⎕VSET n v
+DOMAIN ERROR
+~~~
+
+Does not like that either. This is because if allowed, then: 
+
+~~~
+      () ⎕VSET ('One' 'Two') ('Three' 'Four')
+~~~
+
+would be ambiguous. However we can do:
+
+~~~
+      s←()⎕VSET (↑n) v
+~~~
+
+...providing a matrix of names. Not really happy with this but no alternative seems to
+present itself.
+
+Let's extract values:
+
+~~~
+      s ⎕VGET 'One'
+1
+      s ⎕VGET 'One' 'Two'
+1 2
+      s ⎕VGET ↑'One' 'Two'
+1 2
+~~~
+
+Getting is more flexible than setting. How about with default values:
+
+~~~
+      s ⎕VGET'One' 'Two'('Three' 'three')
+1 2  three 
+      s ⎕VGET ('One' 'one') ('Two' 'two') ('Three' 'three')
+1 2  three 
+      s ⎕VGET ↑('One' 'one') ('Two' 'two') ('Three' 'three')
+RANK ERROR: Invalid right argument
+      s ⎕VGET↑('One' 'one')('Two' 'two')('Three' 'three')
+        ∧
+~~~
+
+Does not like a matrix of names values. Here though we see a problem with a two-item argument of Name and Value:
+
+~~~
+      s ⎕VGET 'One' 'one'
+VALUE ERROR: Undefined name: one
+      s ⎕VGET'One' 'one'
+        ∧
+      s ⎕VGET ⊂'One' 'one'
+1
+~~~
+
+Are we trying to get the value of two names, or one name with a default value? So if `⎕VGET` requires
+a single name/value pair to be enclosed, maybe `⎕VSET` should as well, even though maybe not strictly necessary. 
+
+And with names and values in separate arrays:
+
+~~~
+       s←()⎕VSET↓⍉↑n v
+       s ⎕VGET n
+1 2 3
+       s ⎕VGET n v
+DOMAIN ERROR
+~~~
+
+If `⎕VSET` would take `n` and `v` as is, and that last expresssion worked, this would be nice and symetrical.
+
+How about an array of spaces as the left argument:
+
+~~~
+      a←()()() ⎕VSET ('One' 1) ('Two' 2) ('Three' 3)
+      a.One
+1 1 1
+      a.(One Two Three)
+┌─────┬─────┬─────┐
+│1 2 3│1 2 3│1 2 3│
+└─────┴─────┴─────┘
+~~~
+
+Oooooh. Very nice. Every name on the right is injected into every space on the left.
+Same as `a.Var←5`  injects `Var` into every namespace in `a`. How far can we go?
+How about a matrix:
+
+~~~
+      m←2 3⍴()()()()()()
+      m ⎕VSET ('One' 1) ('Two' 2) ('Three' 3)
+DOMAIN ERROR: Invalid left argument
+~~~
+
+Doh! But as namespaces are refs we can do:
+
+~~~
+      (,m) ⎕VSET ('One' 1) ('Two' 2) ('Three' 3)
+      m.One
+1 1 1
+1 1 1
+~~~
+
+Not bad, but it would be nicer if it just worked, just as `m.Var←5` works.
+It's not so nice going the other way, as we actual need to use the result of the function:
+
+~~~
+      m ⎕VGET 'One'
+DOMAIN ERROR: Invalid left argument
+      m ⎕VGET'One'
+        ∧
+      (,m) ⎕VGET 'One'
+1 1 1 1 1 1
+~~~
+
+Where we need something like:
+
+~~~
+     m (⍴⍤⊣⍴,⍛⎕VGET) 'One'
+1 1 1
+1 1 1
+~~~
+
+as a workaround suggested, perhaps humorously but functional none the less,
+over on [the Orchard](https://chat.stackexchange.com/rooms/52405/the-apl-orchard/).
+
+Other notes. If no left argument is provided, it defaults to the current space or `⎕THIS`:
+
+~~~
+      ⎕VSET ⊂'Hello' 'World'
+      Hello
+World 
+      ⎕VGET 'Hello'
+World
+~~~
+
+This is all great stuff and is going to replace a lot of hokey code.  

@@ -1,0 +1,143 @@
+# [Input Components](/posts/input-components)
+
+## August 6, 2025
+
+(Or, How Did We Live Before `⎕VSET` and `⎕VGET`?)
+
+We need some functions to wrap the HTML `<input>` element.
+We need inputs for text, numbers, dates check boxes, and pick lists,
+and thus define the following components:
+
+- `TextInput`
+- `NumberInput`
+- `DateInput`
+- `CheckBox`
+- `DropList`
+
+Let's look at `TextInput.New`, as a representative pattern: 
+
+~~~
+New←{
+     d←(⍺ A.New'div')⎕NS(
+         'Name' ''
+         'Label' ''
+         'Value' ''
+         'AutocompleteItems' ''
+         'OnChange' ''
+     )A.InitProps ⍵
+     d.class←'TextInput'
+     l←d A.New'label'd.Label
+     l.for←d.Name
+     i←d A.New'input'
+     i.value←d.Value
+     i.id←d.Name
+     d.Onchange←A.FQP'OnChange'
+     d
+ }
+~~~
+
+Here we have taken advantage of V20's new array notation.
+This allows us to easily see and modify the supported properties and their default values,
+across multiple lines, without repeated catenation, enclosing, etc.
+The argument to `New` may be a namespace, or an array where each 
+item is either a name/value pair, or just a value. If only a value is provided,
+then its property name is inferred from its position (like `⎕WC`). For example, the following two expressions
+are equivalent:
+
+~~~
+      TextEdit.New (Label:'First name:' ⋄ Name:'FirstName' ⋄ Value:'Paul')
+      TextEdit.New 'FirstName' ('Value' 'Paul') ('Label' 'FirstName)
+~~~
+
+The `InitProps` function processes the argument:
+
+~~~
+InitProps←{
+     ⍝ ⍺ ←→ Default name/value pairs
+     ⍝ ⍵ ←→ Given argument
+     ⍝ ← ←→ A new space with ⍺ overiddden by ⍵
+     d←()⎕VSET ⍺
+     9=⎕NC'⍵':d ⎕NS ⍵
+     n←⊃¨⍺
+     m←n↑⍨≢⍵
+     p←m{2∧.=(≢⍵),|≡⍵:⍵ ⋄ ⍺ ⍵}¨⍵
+     +d ⎕NS()⎕VSET p/⍨n∊⍨⊃¨p
+ }
+~~~
+
+Once we have a namespace with all the user set properties and default properties,
+all of the property names and values are injected into the root 
+element of the component. This means that property names
+must begin with an uppercase letter, to avoid conflict with element attributes
+like `class` or `onclick`, and that the names `Tag`, `Content`, and `Parent`
+are reserved.  
+
+If a property is not referenced in the `New` function, like `OnChange`,
+it may also be specified by assignment after the component is created. Setting other
+properties after the component has been created will generally 
+require a setter function. For example, to set the `Value`
+property requires a call to `TextInput.SetValue`.
+
+The component `<div>` contains a `<label>` element and an `<input>` element.
+They are tied together explicitly with the `for` attribute, rather than nesting,
+in order to provide more options for display purposes, specifically grid and flexbox.    
+
+## Events
+
+For now, each component accepts an `OnChange` callback function, to allow further
+action to be taken after Abacus handles the change.
+In the case of `TextInput`, Abacus simply updates the APL DOM to reflect the
+change in the browser, and then calls the `OnChange` callback,
+if specfied by the user:
+ 
+~~~
+OnChange←{
+     c←⍵.CurrentTarget
+     c.Value←⍵.Value
+     ⍵ A.Execute'OnChange'
+ }
+~~~
+
+## The GetValues and SetValues functions
+
+The main Abacus namespace contains the functions `GetValues` and `SetValues` for getting and setting multiple
+values, a typical task given a dialog box with a bunch of inputs. The `GetValues` function:
+
+~~~
+ GetValues←{
+     ⍝ ⍵ ←→ DOM node
+     ⍝ ← ←→ Namespace of Values from ⍵
+     e←⍵ GetElementsWith'Name'
+     0=≢e:()
+     +()⎕VSET(↑e.Name)e.Value
+ }
+~~~
+
+...takes an APL DOM node as its argument and returns a namespace containing the values
+for each input component found within.  The DOM node is searched for elements that have a `Name`
+property, and we assume a corresponding `Value` property. This search technique could be tightened
+up if necessary, but for now it's adequate.  
+
+The `SetValues` function:
+
+~~~
+ SetValues←{
+     ⍝ ⍺ ←→ Namespace of values
+     ⍝ ⍵ ←→ DOM node
+     e←⍵ GetElementsWith'Name'
+     0=≢e:0
+     m←e.Name
+     n v←↓⍉↑⍵ ⎕VGET ¯2
+     i j←m n⍳¨⊂m∩n
+     0=≢i:0
+     c←⎕VGET e[i].class
+     0⊣e[i]c.SetValue v[j]
+ }
+~~~
+
+...similarly takes a DOM node as its right argument,
+but also a namespace of values as its left argment, and populates the inputs in the DOM
+with the values. `SetValues` is happy to accept more or fewer values than would be indicated by the DOM,
+and only set values that have correpsonding inputs. We must use the 
+individual `SetValue` function
+in each component to set the values.

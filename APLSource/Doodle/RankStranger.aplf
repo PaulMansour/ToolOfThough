@@ -1,0 +1,36 @@
+ RankStranger←{
+
+     ⍝ d←5 4 3
+     ⍝   k←d⍴⍳×/d
+     ⍝   j←'abcde'
+     ⍝       ⊂[1 0](d⍴(×/1↓d)/j),[¯.5]k       ⍝ Paul
+     ⍝       ⍉⊂⍤2⊢j,⍤0⍤1⍉k                    ⍝ Adam
+     ⍝       ⊂[0 3]j,⍤0⍤0 2⊢k                 ⍝ or
+     ⍝       (↑j,¨⊢)¨,⌿k
+
+     e1←'⊂[1 0](d⍴(×/1↓d)/j),[¯.5]↑v'       ⍝ Paul
+     e2←'⍉⊂⍤2⊢j,⍤0⍤1⍉↑v'                    ⍝ Adam
+     e3←'⊂[0 3]j,⍤0⍤0 2⊢↑v'                 ⍝ or
+     e4←'(↑(⊂¨j),¨⊢)¨,⌿⊂¨⊂¨↑v'
+     e5←'(r c)⍴⊂[0 2]↑j{(⊂⍺),⍪,⍵}¨v'
+     e6←'⍉↑¨↓⍉↑j{⍺∘{⍺ ⍵}¨⍵}¨v'
+
+      ⍝   #.Abacus.Main.RenderOptiTable_Doodle
+
+     d←5 1000 100   ⍝ Four attributes, 10000 rows, 100 columns
+     p r c←d
+     v←p⍴⊂r c⍴⊂'blah'
+     ⍝ ↑v
+     k←d⍴⊂'blah'
+     j←'id' 'class' 'style' 'onclick' 'onmousedown'
+
+
+
+
+
+
+
+
+
+
+ }

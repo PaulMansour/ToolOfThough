@@ -27,9 +27,9 @@
      _←(⎕C on)write¨BuildStaticPage¨##.OtherPages⍎¨on
 
      ⍝ Copy images
-     _←d ⎕NCOPY ##.AcreConfig.ProjectFolder,'images'
-
 
      ⎕←'#.ToolOfThought.Main.Run 0'
      ']open ',d
+     _←d ⎕NCOPY ##.AcreConfig.ProjectFolder,'images'
+
  }

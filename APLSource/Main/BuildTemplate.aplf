@@ -3,6 +3,7 @@
      p.Title←'Tool of Thought'
      p.Subtitle←'APL for the Practical Man'
      p.Quote←'"You don''t know how bad your design is until you write about it."'
+     p.Quote←'"Vibe coding since 1987"'
      p.Menu←{
          m←⊂'Home' '/'
          m,←⊂'Posts' '/posts'

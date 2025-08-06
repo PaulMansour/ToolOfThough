@@ -1,0 +1,4 @@
+ OnInput←{
+     ⎕←'Input event: value=',⍕⍵.Value
+     0
+ }

@@ -1,0 +1,109 @@
+# [Rethinking ⎕VSET and ⎕VGET](/posts/rethinking-vset-and-vget)
+
+## February 5, 2025
+
+In the previous post we played around with the new system functions
+`⎕VSET` and `⎕VGET`, and noted a couple of unfortunate, though
+perhaps unavoidable, design decisions.
+First is having to enclose when setting or getting a single name,
+and second is having to provide a matrix of names when the argument
+is two separate arrays of names and values, rather than name and value
+pairs.  
+
+What if we simplify (and sacrifice some) things by insisting the argument is always two items, 
+a list of names and a list of values, defining `⎕VSET` as:
+
+~~~
+VSET←{
+   ⍺←⎕THIS
+   n v←⍵
+   2=|≡n:⍺ ⎕VSET(↑n)v
+   2=⍴⍴n:⍺ ⎕VSET n v
+   ⍺ ⎕VSET ⊂n v
+}
+~~~
+
+And `⎕VGET` as:
+
+~~~
+VGET←{
+   ⍺←⎕THIS
+   1=≢⊆⍵:⍺ ⎕VGET⊃⊆⍵
+   n v←⍵
+   (1=⍴⍴n)∧2>|≡n:⍺ ⎕VGET ⊂⍵  
+   ⍺ ⎕VGET (↑n) v
+}
+~~~
+
+These functions do not allow name and value pairs,
+and as a corrollary do not allow the provision of only some
+default values for `⎕VGET`. It's all or nothing with respect to default values.
+
+However, we can do:
+
+~~~
+      s←()VSET 'One' 1
+      s.One
+1
+~~~
+
+And:
+
+~~~
+      n←'One' 'two' 'Three'
+      v←1 2 3
+      s←()VSET n v
+~~~
+
+or:
+
+~~~
+      s←()VSET (↑n) v
+~~~
+
+Similarly for getting values, we can avoid an enclose:
+
+~~~
+      s VGET 'One'
+1
+      s VGET 'Four' 4
+4
+~~~
+
+But for multiple names only we need to enclose:
+
+~~~
+      s VGET ⊂'One' 'Two'
+1 2
+      s VGET ⊂n
+1 2 3
+~~~
+
+And if providing default values, we must provide them all:
+
+~~~
+     s VGET ('One' 'Five') (1 5)
+1 5
+~~~
+
+One nice thing about this design is the simplicity of documenting it.
+We simply say the right argument is composed of two items, names and values.
+We don't need to explain that if there are two elements, and the first
+element is a matrix, then things are interpreted one way, but if the first element
+is a vector then it means somehthing else. This kind of design always
+makes us feel a bit uneasy.
+
+The loss of being able to default only some values and not all
+for a given set of names is not much to give up. The structure:
+
+~~~
+
+      (Name Value) Name (Name Value)...
+
+~~~
+
+does not arise very naturally in code, though it may as a literal structure.
+
+Regardless of all of this, it is easy enough to cover `⎕VGET` and `⎕VSET` as
+we do above to get the behavior we want, if indeed that is what we want,
+and arguably the reverse would not be true.

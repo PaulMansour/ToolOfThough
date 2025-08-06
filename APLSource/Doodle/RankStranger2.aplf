@@ -1,0 +1,9 @@
+ RankStranger2←{
+
+     m←4 3⍴⍳12
+
+     'inc' 'dec' ''(RankFoo⍤1)m
+
+
+
+ }
